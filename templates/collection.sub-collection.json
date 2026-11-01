@@ -1,0 +1,39 @@
+{
+  "sections": {
+    "banner": {
+      "type": "main-collection-banner",
+      "settings": {
+        "make_full_width": false,
+        "def_image": "",
+        "show_collection_image": false,
+        "show_collection_description": true,
+        "hero_layout": "overlay",
+        "coll_bgcolor": "#000000",
+        "coll_color": "#ffffff",
+        "coll_overlay": 1
+      }
+    },
+    "product-grid": {
+      "type": "main-collection-product-grid",
+      "settings": {
+        "products_per_page": 12,
+        "columns_desktop": 3,
+        "enable_filtering": true,
+        "filter_type": "vertical",
+        "vertical_filter_bg_color": "#ffffff",
+        "enable_filter_bg": false,
+        "enable_sticky": false,
+        "enable_sorting": true,
+        "pagination_type": "paged",
+        "enable_listdesc": true,
+        "columns_mobile": "2",
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    }
+  },
+  "order": [
+    "banner",
+    "product-grid"
+  ]
+}

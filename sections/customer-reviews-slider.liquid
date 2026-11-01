@@ -1,0 +1,496 @@
+{%- comment -%}
+  Customer Reviews Slider (That Gal style)
+  - 2 rows auto-scroll (row 1 left, row 2 right), hover pe ruk jaata hai
+  - Photo ya Video, Shop the look button, hover zoom
+  - 3 card designs: Tape card / Arch cream / Arch maroon (section se switch, ya har card pe alag)
+  Arch images: Assets me rv-arch-cream.png aur rv-arch-maroon.png upload karo
+  (ya neeche settings me image picker se choose karo)
+{%- endcomment -%}
+
+{%- liquid
+  assign arch_cream = section.settings.arch_cream_img
+  assign arch_maroon = section.settings.arch_maroon_img
+  if arch_cream != blank
+    assign arch_cream_url = arch_cream | image_url: width: 700
+  else
+    assign arch_cream_url = 'rv-arch-cream.png' | asset_url
+  endif
+  if arch_maroon != blank
+    assign arch_maroon_url = arch_maroon | image_url: width: 700
+  else
+    assign arch_maroon_url = 'rv-arch-maroon.png' | asset_url
+  endif
+-%}
+
+<section
+  class="rv-sec{% if section.settings.zoom %} rv-zoom{% endif %}{% if section.settings.pause_on_hover %} rv-pausable{% endif %}{% if section.settings.fade_edges %} rv-fade{% endif %}"
+  id="rv-{{ section.id }}"
+  data-speed="{{ section.settings.speed }}"
+  style="
+    --rv-bg:{{ section.settings.bg | default: '#f6f1ea' }};
+    --rv-heading:{{ section.settings.heading_color | default: '#2b2320' }};
+    --rv-text:{{ section.settings.text_color | default: '#3d3430' }};
+    --rv-tagline:{{ section.settings.tagline_color | default: '#7c8a2a' }};
+    --rv-star:{{ section.settings.star_color | default: '#e1306c' }};
+    --rv-verified:{{ section.settings.verified_color | default: '#1d9bf0' }};
+    --rv-tape1:{{ section.settings.tape_1 | default: '#f6c9d3' }};
+    --rv-tape2:{{ section.settings.tape_2 | default: '#d6e29a' }};
+    --rv-tape3:{{ section.settings.tape_3 | default: '#f3c99a' }};
+    --rv-w:{{ section.settings.card_width }}px;
+    --rv-wm:{{ section.settings.card_width_mobile }}px;
+    --rv-gap:{{ section.settings.card_gap }}px;
+    --rv-ratio:{{ section.settings.media_ratio }};
+    --rv-pt:{{ section.settings.pad_top }}px;
+    --rv-pb:{{ section.settings.pad_bottom }}px;
+    --rv-arch-cream:url('{{ arch_cream_url }}');
+    --rv-arch-maroon:url('{{ arch_maroon_url }}');
+  "
+>
+  {%- if section.settings.heading != blank or section.settings.subheading != blank -%}
+    <header class="rv-head" style="text-align:{{ section.settings.text_align }}">
+      {%- if section.settings.heading != blank -%}
+        <h2 class="rv-title">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="rv-sub">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+    </header>
+  {%- endif -%}
+
+  {%- for r in (1..2) -%}
+    {%- assign want = r | append: '' -%}
+    {%- assign row_count = 0 -%}
+    {%- for block in section.blocks -%}
+      {%- if block.settings.row == want -%}{%- assign row_count = row_count | plus: 1 -%}{%- endif -%}
+    {%- endfor -%}
+
+    {%- if row_count > 0 -%}
+      <div class="rv-row rv-row--{{ r }}">
+        <div class="rv-track">
+          <div class="rv-set">
+            {%- assign idx = 0 -%}
+            {%- for block in section.blocks -%}
+              {%- if block.settings.row == want -%}
+                {%- assign idx = idx | plus: 1 -%}
+                {%- liquid
+                  assign st = block.settings.style
+                  if st == 'default'
+                    assign st = section.settings.card_style
+                  endif
+                  assign has_video = false
+                  if block.settings.video_url != blank
+                    assign has_video = true
+                  endif
+                  assign tape_n = idx | modulo: 3 | plus: 1
+                -%}
+                <article class="rv-card rv-card--{{ st }}" data-tape="{{ tape_n }}" {{ block.shopify_attributes }}>
+                  {%- if st == 'tape' -%}<span class="rv-tape" aria-hidden="true"></span>{%- endif -%}
+
+                  <div class="rv-media" style="aspect-ratio:var(--rv-ratio)">
+                    {%- if block.settings.image != blank -%}
+                      {{ block.settings.image | image_url: width: 700 | image_tag: loading: 'lazy', widths: '300, 450, 600, 700', sizes: '(min-width: 750px) 260px, 45vw', class: 'rv-img', alt: block.settings.name }}
+                    {%- else -%}
+                      {{ 'lifestyle-1' | placeholder_svg_tag: 'rv-img rv-ph' }}
+                    {%- endif -%}
+
+                    {%- if has_video -%}
+                      <video class="rv-video" muted loop playsinline preload="none" data-src="{{ block.settings.video_url | escape }}"{% if block.settings.image != blank %} poster="{{ block.settings.image | image_url: width: 600 }}"{% endif %}></video>
+                      <span class="rv-playicon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+                    {%- endif -%}
+
+                    {%- if block.settings.link != blank -%}
+                      <a class="rv-shop" href="{{ block.settings.link }}">{{ section.settings.shop_text | escape }}</a>
+                    {%- endif -%}
+                  </div>
+
+                  <div class="rv-body">
+                    <p class="rv-name">
+                      <span>{{ block.settings.name | escape }}</span>
+                      {%- if block.settings.verified -%}
+                        <svg class="rv-vb" viewBox="0 0 24 24" aria-label="Verified"><path fill="currentColor" d="M12 1.5l2.6 1.9 3.2-.1 1 3 2.6 1.9-1 3 1 3-2.6 1.9-1 3-3.2-.1L12 22.5l-2.6-1.9-3.2.1-1-3L2.6 15.8l1-3-1-3 2.6-1.9 1-3 3.2.1z"/><path fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M8 12.3l2.6 2.6L16 9.5"/></svg>
+                      {%- endif -%}
+                    </p>
+
+                    {%- if block.settings.tagline != blank -%}
+                      <p class="rv-tagline">{{ block.settings.tagline | escape }} <i aria-hidden="true">✦</i></p>
+                    {%- endif -%}
+
+                    {%- if block.settings.review != blank -%}
+                      <p class="rv-text">{{ block.settings.review | escape }}</p>
+                    {%- endif -%}
+
+                    <div class="rv-meta">
+                      <span class="rv-verified-txt">
+                        {{ section.settings.verified_text | escape }}
+                        {%- if block.settings.date != blank %} · {{ block.settings.date | escape }}{% endif -%}
+                      </span>
+                      <button type="button" class="rv-more" data-more="{{ section.settings.more_text | escape }}" data-less="{{ section.settings.less_text | escape }}">{{ section.settings.more_text | escape }}</button>
+                    </div>
+                  </div>
+                </article>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- if section.blocks.size == 0 -%}
+    <p class="rv-empty">Theme editor me "Add review" se customer review add karo.</p>
+  {%- endif -%}
+</section>
+
+<style>
+  #rv-{{ section.id }}{background:var(--rv-bg);padding:var(--rv-pt) 0 var(--rv-pb);overflow:hidden;color:var(--rv-text)}
+  #rv-{{ section.id }} *{box-sizing:border-box}
+
+  /* ---------- heading ---------- */
+  #rv-{{ section.id }} .rv-head{max-width:760px;margin:0 auto 0;padding:0 20px}
+  #rv-{{ section.id }} .rv-title{margin:0;font-size:clamp(17px,2vw,22px);line-height:1.2;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--rv-heading)}
+  #rv-{{ section.id }} .rv-sub{margin:10px 0 0;font-size:15px;line-height:1.5;color:var(--rv-text);opacity:.8}
+  #rv-{{ section.id }} .rv-empty{text-align:center;padding:30px 20px;opacity:.7}
+
+  /* ---------- rows + marquee ---------- */
+  #rv-{{ section.id }} .rv-row{position:relative;overflow:hidden;padding:10px 0 20px}
+  #rv-{{ section.id }}.rv-fade .rv-row{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 7%,#000 93%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 7%,#000 93%,transparent 100%)}
+  #rv-{{ section.id }} .rv-track{display:flex;align-items:flex-start;width:max-content;animation:rvScroll var(--rv-dur,60s) linear infinite;will-change:transform}
+  #rv-{{ section.id }} .rv-row--2 .rv-track{animation-direction:reverse}
+  #rv-{{ section.id }} .rv-set{display:flex;align-items:flex-start;flex:none}
+  #rv-{{ section.id }} .rv-row.is-paused .rv-track{animation-play-state:paused}
+  @media (hover:hover){
+    #rv-{{ section.id }}.rv-pausable .rv-row:hover .rv-track{animation-play-state:paused}
+  }
+  @keyframes rvScroll{from{transform:translate3d(0,0,0)}to{transform:translate3d(calc(var(--rv-shift,0px) * -1),0,0)}}
+
+  /* ---------- card base ---------- */
+  #rv-{{ section.id }} .rv-card{position:relative;flex:0 0 var(--rv-w);width:var(--rv-w);margin-right:var(--rv-gap);transition:transform .35s ease;transform:rotate(var(--rv-r,0deg))}
+  #rv-{{ section.id }} .rv-set .rv-card:nth-child(odd){--rv-r:-1deg}
+  #rv-{{ section.id }} .rv-set .rv-card:nth-child(even){--rv-r:1deg}
+  #rv-{{ section.id }} .rv-card:hover{transform:rotate(0deg) translateY(-4px)}
+
+  #rv-{{ section.id }} .rv-media{position:relative;overflow:hidden;background:#ece5de;border-radius:10px}
+  #rv-{{ section.id }} .rv-img,#rv-{{ section.id }} .rv-ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;display:block;transition:transform .7s ease}
+  #rv-{{ section.id }} .rv-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .3s ease,transform .7s ease;background:transparent}
+  #rv-{{ section.id }} .rv-video.is-playing{opacity:1}
+  @media (hover:hover){
+    #rv-{{ section.id }}.rv-zoom .rv-card:hover .rv-img,
+    #rv-{{ section.id }}.rv-zoom .rv-card:hover .rv-video{transform:scale(.80)}
+  }
+
+  #rv-{{ section.id }} .rv-playicon{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;pointer-events:none;transition:opacity .25s ease}
+  #rv-{{ section.id }} .rv-playicon svg{width:14px;height:14px;fill:#fff}
+  #rv-{{ section.id }} .rv-card:hover .rv-playicon{opacity:0}
+
+  #rv-{{ section.id }} .rv-shop{position:absolute;left:50%;bottom:12px;z-index:2;transform:translate(-50%,8px);opacity:0;white-space:nowrap;padding:10px 20px;border-radius:999px;background:#fff;color:#1f1a17;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;box-shadow:0 6px 18px rgba(0,0,0,.22);transition:opacity .25s ease,transform .25s ease,background-color .2s ease,color .2s ease}
+  #rv-{{ section.id }} .rv-card:hover .rv-shop,
+  #rv-{{ section.id }} .rv-shop:focus-visible{opacity:1;transform:translate(-50%,0)}
+  #rv-{{ section.id }} .rv-shop:hover{background:#1f1a17;color:#fff}
+
+  #rv-{{ section.id }} .rv-body{padding:12px 4px 0}
+  #rv-{{ section.id }} .rv-name{margin:0;display:flex;align-items:center;gap:6px;font-size:15px;font-weight:700;color:var(--rv-heading)}
+  #rv-{{ section.id }} .rv-vb{flex:none;width:16px;height:16px;color:var(--rv-verified)}
+  #rv-{{ section.id }} .rv-tagline{margin:5px 0 0;font-size:14px;font-style:italic;color:var(--rv-tagline)}
+  #rv-{{ section.id }} .rv-tagline i{font-style:normal;font-size:10px;color:var(--rv-star)}
+  #rv-{{ section.id }} .rv-text{margin:6px 0 0;font-size:13.5px;line-height:1.45;color:var(--rv-text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  #rv-{{ section.id }} .rv-card.is-open .rv-text{-webkit-line-clamp:unset;display:block;overflow:visible}
+  #rv-{{ section.id }} .rv-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;min-height:24px}
+  #rv-{{ section.id }} .rv-verified-txt{font-size:11.5px;opacity:.55}
+  #rv-{{ section.id }} .rv-more{display:none;align-items:center;padding:4px 12px;border:0;border-radius:999px;background:#e1ebb0;color:#2b2320;font:inherit;font-size:11px;font-weight:700;cursor:pointer}
+  #rv-{{ section.id }} .rv-card.has-more .rv-more{display:inline-flex}
+
+  /* ---------- design 1: clean card (Koskii style) ---------- */
+  #rv-{{ section.id }} .rv-tape{display:none}
+  #rv-{{ section.id }} .rv-card--tape{display:flex;flex-direction:column;align-self:stretch;background:#fff;border:1px solid #e8e2dc;border-radius:6px;padding:6px 6px 14px;box-shadow:none}
+  #rv-{{ section.id }} .rv-set .rv-card--tape:nth-child(n){--rv-r:0deg}
+  #rv-{{ section.id }} .rv-card--tape:hover{transform:none;box-shadow:0 8px 22px rgba(60,40,30,.10)}
+  #rv-{{ section.id }} .rv-card--tape .rv-media{border-radius:3px}
+  #rv-{{ section.id }} .rv-card--tape .rv-body{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:12px 8px 0}
+  #rv-{{ section.id }} .rv-card--tape .rv-text{order:1;width:100%;margin:0;font-size:12.5px;line-height:1.4;color:#6b625c;-webkit-line-clamp:4}
+  #rv-{{ section.id }} .rv-card--tape .rv-name{order:2;justify-content:center;margin-top:8px;font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+  #rv-{{ section.id }} .rv-card--tape .rv-tagline{order:3;margin-top:4px;font-size:12px}
+  #rv-{{ section.id }} .rv-card--tape .rv-meta{order:4;justify-content:center;margin-top:6px;min-height:0}
+  #rv-{{ section.id }} .rv-card--tape .rv-verified-txt{display:none}
+
+  /* ---------- design 2 + 3: arch cards ---------- */
+  #rv-{{ section.id }} .rv-card--arch_cream,
+  #rv-{{ section.id }} .rv-card--arch_maroon{padding:30% 10% 13%;isolation:isolate}
+  #rv-{{ section.id }} .rv-card--arch_cream::before,
+  #rv-{{ section.id }} .rv-card--arch_maroon::before{content:"";position:absolute;inset:0;z-index:-1;background-size:100% 100%;background-repeat:no-repeat;filter:drop-shadow(0 10px 18px rgba(40,20,10,.22))}
+  #rv-{{ section.id }} .rv-card--arch_cream::before{background-image:var(--rv-arch-cream)}
+  #rv-{{ section.id }} .rv-card--arch_maroon::before{background-image:var(--rv-arch-maroon)}
+  #rv-{{ section.id }} .rv-card--arch_cream .rv-media,
+  #rv-{{ section.id }} .rv-card--arch_maroon .rv-media{border-radius:50% 50% 12px 12px / 36% 36% 12px 12px}
+  #rv-{{ section.id }} .rv-card--arch_cream .rv-body,
+  #rv-{{ section.id }} .rv-card--arch_maroon .rv-body{padding:12px 0 0}
+  #rv-{{ section.id }} .rv-card--arch_maroon .rv-name,
+  #rv-{{ section.id }} .rv-card--arch_maroon .rv-text,
+  #rv-{{ section.id }} .rv-card--arch_maroon .rv-verified-txt{color:#fbeedd}
+  #rv-{{ section.id }} .rv-card--arch_maroon .rv-tagline{color:#f1d9a8}
+  #rv-{{ section.id }} .rv-card--arch_maroon .rv-verified-txt{opacity:.7}
+  #rv-{{ section.id }} .rv-card--arch_maroon .rv-more{background:#fbeedd}
+  #rv-{{ section.id }} .rv-card--arch_cream .rv-more{background:#e8d9c4}
+
+  /* ---------- touch devices ---------- */
+  @media (hover:none){
+    #rv-{{ section.id }} .rv-shop{opacity:1;transform:translate(-50%,0);padding:8px 14px;font-size:10px}
+  }
+
+  /* ---------- mobile ---------- */
+  @media (max-width:749px){
+    #rv-{{ section.id }} .rv-card{flex-basis:var(--rv-wm);width:var(--rv-wm)}
+    #rv-{{ section.id }} .rv-name{font-size:13px}
+    #rv-{{ section.id }} .rv-text{font-size:12px}
+    #rv-{{ section.id }} .rv-tagline{font-size:12.5px}
+    #rv-{{ section.id }} .rv-shop{bottom:8px;padding:7px 12px;font-size:9px}
+    #rv-{{ section.id }} .rv-row{padding:18px 0 14px}
+  }
+
+  /* ---------- reduced motion: manual swipe ---------- */
+  @media (prefers-reduced-motion:reduce){
+    #rv-{{ section.id }} .rv-row{overflow-x:auto}
+    #rv-{{ section.id }} .rv-track{animation:none}
+  }
+</style>
+
+<script>
+(function () {
+  var w = window;
+  if (!w.__rvBoot) {
+    var debounce = function (fn, ms) {
+      var t;
+      return function () { clearTimeout(t); t = setTimeout(fn, ms); };
+    };
+
+    var wireVideo = function (media) {
+      var v = media.querySelector('.rv-video');
+      if (!v || v.__rv) return;
+      v.__rv = 1;
+      var load = function () {
+        if (!v.src && v.dataset.src) { v.src = v.dataset.src; }
+      };
+      var play = function () {
+        load();
+        var p = v.play();
+        if (p && p.then) { p.then(function () { v.classList.add('is-playing'); }).catch(function () {}); }
+        else { v.classList.add('is-playing'); }
+      };
+      var stop = function () { v.pause(); v.classList.remove('is-playing'); };
+
+      if (w.matchMedia('(hover:none)').matches && 'IntersectionObserver' in w) {
+        new IntersectionObserver(function (es) {
+          es.forEach(function (e) { e.isIntersecting ? play() : stop(); });
+        }, { threshold: 0.6 }).observe(media);
+      } else {
+        media.addEventListener('mouseenter', play);
+        media.addEventListener('mouseleave', stop);
+      }
+    };
+
+    var checkMore = function (root) {
+      root.querySelectorAll('.rv-card').forEach(function (card) {
+        var t = card.querySelector('.rv-text');
+        if (!t || card.classList.contains('is-open')) return;
+        card.classList.toggle('has-more', t.scrollHeight > t.clientHeight + 1);
+      });
+    };
+
+    var build = function (root) {
+      var speed = parseFloat(root.dataset.speed) || 6;
+      root.querySelectorAll('.rv-row').forEach(function (row) {
+        var track = row.querySelector('.rv-track');
+        var set = track.querySelector('.rv-set:not(.rv-set--clone)');
+        if (!set || !set.children.length) return;
+
+        track.querySelectorAll('.rv-set--clone').forEach(function (c) { c.remove(); });
+
+        var setW = set.getBoundingClientRect().width;
+        if (!setW) return;
+        var copies = Math.ceil(row.clientWidth / setW) + 1;
+        for (var i = 0; i < copies; i++) {
+          var c = set.cloneNode(true);
+          c.classList.add('rv-set--clone');
+          c.setAttribute('aria-hidden', 'true');
+          c.querySelectorAll('a,button').forEach(function (x) { x.tabIndex = -1; });
+          c.querySelectorAll('[data-block-id]').forEach(function (x) { x.removeAttribute('data-block-id'); });
+          track.appendChild(c);
+        }
+        track.style.setProperty('--rv-shift', setW + 'px');
+        track.style.setProperty('--rv-dur', (set.children.length * speed) + 's');
+
+        track.querySelectorAll('.rv-media').forEach(wireVideo);
+      });
+      checkMore(root);
+    };
+
+    var init = function (root) {
+      if (root.dataset.rvInit) return;
+      root.dataset.rvInit = '1';
+
+      root.addEventListener('click', function (e) {
+        var btn = e.target.closest('.rv-more');
+        if (!btn) return;
+        var card = btn.closest('.rv-card');
+        var row = btn.closest('.rv-row');
+        var open = card.classList.toggle('is-open');
+        btn.textContent = open ? btn.dataset.less : btn.dataset.more;
+        row.classList.toggle('is-paused', !!row.querySelector('.rv-card.is-open'));
+        if (!open) checkMore(row);
+      });
+
+      root.querySelectorAll('.rv-row').forEach(function (row) {
+        var t;
+        var hold = function () {
+          clearTimeout(t);
+          row.classList.add('is-paused');
+        };
+        var release = function () {
+          clearTimeout(t);
+          t = setTimeout(function () {
+            if (!row.querySelector('.rv-card.is-open')) row.classList.remove('is-paused');
+          }, 1000);
+        };
+        row.addEventListener('touchstart', hold, { passive: true });
+        row.addEventListener('touchend', release, { passive: true });
+        row.addEventListener('touchcancel', release, { passive: true });
+      });
+      build(root);
+      w.addEventListener('resize', debounce(function () { build(root); }, 250));
+      w.addEventListener('load', function () { build(root); });
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { checkMore(root); });
+    };
+
+    w.__rvBoot = function () {
+      document.querySelectorAll('.rv-sec').forEach(init);
+    };
+    document.addEventListener('shopify:section:load', function (e) {
+      var r = e.target.querySelector('.rv-sec');
+      if (r) { r.removeAttribute('data-rv-init'); delete r.dataset.rvInit; init(r); }
+    });
+  }
+  w.__rvBoot();
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Customer Reviews Slider",
+  "tag": "div",
+  "class": "section",
+  "max_blocks": 30,
+  "settings": [
+    { "type": "header", "content": "Title" },
+    { "type": "text", "id": "heading", "label": "Section title", "default": "Spotted in Shreedhya" },
+    { "type": "text", "id": "subheading", "label": "Sub title", "default": "Real customers, real photos" },
+    {
+      "type": "select", "id": "text_align", "label": "Title alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "center"
+    },
+
+    { "type": "header", "content": "Card design" },
+    {
+      "type": "select", "id": "card_style", "label": "Card background (saare cards ke liye)",
+      "options": [
+        { "value": "tape", "label": "1. Tape card (That Gal style)" },
+        { "value": "arch_cream", "label": "2. Arch cream" },
+        { "value": "arch_maroon", "label": "3. Arch maroon" }
+      ],
+      "default": "tape"
+    },
+    { "type": "image_picker", "id": "arch_cream_img", "label": "Arch cream image (optional)", "info": "Khali chhodo to Assets ki rv-arch-cream.png use hogi" },
+    { "type": "image_picker", "id": "arch_maroon_img", "label": "Arch maroon image (optional)", "info": "Khali chhodo to Assets ki rv-arch-maroon.png use hogi" },
+    { "type": "range", "id": "card_width", "label": "Card width (desktop)", "min": 180, "max": 340, "step": 5, "unit": "px", "default": 250 },
+    { "type": "range", "id": "card_width_mobile", "label": "Card width (mobile)", "min": 130, "max": 240, "step": 5, "unit": "px", "default": 170 },
+    { "type": "range", "id": "card_gap", "label": "Cards ke beech gap", "min": 8, "max": 48, "step": 2, "unit": "px", "default": 22 },
+    {
+      "type": "select", "id": "media_ratio", "label": "Photo shape",
+      "options": [
+        { "value": "4 / 5", "label": "Portrait 4:5" },
+        { "value": "3 / 4", "label": "Portrait 3:4" },
+        { "value": "1 / 1", "label": "Square" }
+      ],
+      "default": "4 / 5"
+    },
+
+    { "type": "header", "content": "Slider behaviour" },
+    { "type": "range", "id": "speed", "label": "Speed (kam = tez)", "min": 2, "max": 20, "step": 1, "unit": "s", "info": "Har card ko nikalne me kitne second lagenge", "default": 7 },
+    { "type": "checkbox", "id": "pause_on_hover", "label": "Hover karne pe row ruk jaye", "default": true },
+    { "type": "checkbox", "id": "zoom", "label": "Hover pe photo zoom", "default": true },
+    { "type": "checkbox", "id": "fade_edges", "label": "Left/right edge pe fade", "default": true },
+
+    { "type": "header", "content": "Text labels" },
+    { "type": "text", "id": "shop_text", "label": "Hover button text", "default": "Shop the look →" },
+    { "type": "text", "id": "verified_text", "label": "Verified text", "default": "Verified purchase" },
+    { "type": "text", "id": "more_text", "label": "'More' button text", "default": "more" },
+    { "type": "text", "id": "less_text", "label": "'Less' button text", "default": "less" },
+
+    { "type": "header", "content": "Colors" },
+    { "type": "color", "id": "bg", "label": "Section background", "default": "#f6f1ea" },
+    { "type": "color", "id": "heading_color", "label": "Title / name color", "default": "#2b2320" },
+    { "type": "color", "id": "text_color", "label": "Review text color", "default": "#3d3430" },
+    { "type": "color", "id": "tagline_color", "label": "Tagline color", "default": "#7c8a2a" },
+    { "type": "color", "id": "star_color", "label": "Tagline star color", "default": "#e1306c" },
+    { "type": "color", "id": "verified_color", "label": "Verified tick color", "default": "#1d9bf0" },
+    { "type": "color", "id": "tape_1", "label": "Tape color 1", "default": "#f6c9d3" },
+    { "type": "color", "id": "tape_2", "label": "Tape color 2", "default": "#d6e29a" },
+    { "type": "color", "id": "tape_3", "label": "Tape color 3", "default": "#f3c99a" },
+
+    { "type": "header", "content": "Spacing" },
+    { "type": "range", "id": "pad_top", "label": "Top padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48 },
+    { "type": "range", "id": "pad_bottom", "label": "Bottom padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48 }
+  ],
+  "blocks": [
+    {
+      "type": "review",
+      "name": "Review",
+      "settings": [
+        {
+          "type": "select", "id": "row", "label": "Kaun si row me dikhana hai",
+          "options": [
+            { "value": "1", "label": "Row 1 (left ko chalti hai)" },
+            { "value": "2", "label": "Row 2 (right ko chalti hai)" }
+          ],
+          "default": "1"
+        },
+        {
+          "type": "select", "id": "style", "label": "Is card ka design",
+          "options": [
+            { "value": "default", "label": "Section wala use karo" },
+            { "value": "tape", "label": "Tape card" },
+            { "value": "arch_cream", "label": "Arch cream" },
+            { "value": "arch_maroon", "label": "Arch maroon" }
+          ],
+          "default": "default"
+        },
+        { "type": "image_picker", "id": "image", "label": "Customer photo (ya video ka poster)", "info": "Best size: 800 x 1000 px" },
+        { "type": "text", "id": "video_url", "label": "Video link (optional)", "info": "Shopify Content > Files me video upload karo, uska link yahan paste karo (.mp4). Hover pe video chalega." },
+        { "type": "text", "id": "name", "label": "Customer name", "default": "Customer name" },
+        { "type": "checkbox", "id": "verified", "label": "Verified blue tick dikhao", "default": true },
+        { "type": "text", "id": "tagline", "label": "Tagline (optional)", "info": "Jaise: Twirl-ready, Be iconic" },
+        { "type": "textarea", "id": "review", "label": "Review text (optional)" },
+        { "type": "text", "id": "date", "label": "Date (optional)", "info": "Jaise: Nov 6, 2025" },
+        { "type": "url", "id": "link", "label": "Product link (Shop the look button)", "info": "Is customer ne jo product liya uska link. Khali = button nahi dikhega" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Customer Reviews Slider",
+      "blocks": [
+        { "type": "review", "settings": { "row": "1" } },
+        { "type": "review", "settings": { "row": "1" } },
+        { "type": "review", "settings": { "row": "1" } },
+        { "type": "review", "settings": { "row": "1" } },
+        { "type": "review", "settings": { "row": "2" } },
+        { "type": "review", "settings": { "row": "2" } },
+        { "type": "review", "settings": { "row": "2" } },
+        { "type": "review", "settings": { "row": "2" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

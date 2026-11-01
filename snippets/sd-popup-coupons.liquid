@@ -1,0 +1,56 @@
+{%- assign sd_coupons = shop.metaobjects.popup_coupon.values -%}
+{%- if sd_coupons.size > 0 -%}
+<template id="sd-offers-tpl">
+  <div class="sd-offers">
+    <div class="sd-offers__head">
+      <div class="sd-offers__ttl">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v9H5v-9M7.5 8a2.5 2.5 0 010-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 010 5"/></svg>
+        <span>OFFERS FOR YOU</span>
+        <em class="sd-offers__count">{{ sd_coupons.size }}</em>
+      </div>
+      <div class="sd-offers__nav">
+        <button type="button" class="sd-offers__arrow" data-dir="-1" aria-label="Previous offer">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+        </button>
+        <button type="button" class="sd-offers__arrow" data-dir="1" aria-label="Next offer">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="sd-offers__track">
+      {%- for c in sd_coupons -%}
+        {%- assign st = c.style.value | default: 'light' | escape -%}
+        <div class="sd-offer sd-offer--{{ st }}">
+          <div class="sd-offer__stub{% if c.image.value %} has-img{% endif %}"
+            {% if c.image.value %}style="background-image:url('{{ c.image.value | image_url: width: 300 }}')"{% endif %}>
+            <div class="sd-offer__stub-in">
+              <b>{{ c.big_text.value | escape }}</b>
+              <small>{{ c.small_text.value | escape }}</small>
+            </div>
+          </div>
+          <div class="sd-offer__body">
+            <h4>{{ c.title.value | escape }}</h4>
+            {%- if c.subtitle.value != blank -%}<p>{{ c.subtitle.value | escape }}</p>{%- endif -%}
+            <div class="sd-offer__row">
+              {%- if c.code.value != blank -%}
+                <button type="button" class="sd-offer__code" data-code="{{ c.code.value | escape }}">
+                  <span>{{ c.code.value | escape }}</span>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 012-2h9"/></svg>
+                </button>
+              {%- else -%}
+                <span class="sd-offer__nocode">✓ No code needed</span>
+              {%- endif -%}
+              {%- if c.save_text.value != blank -%}
+                <span class="sd-offer__save"><i>✦</i> {{ c.save_text.value | escape }}</span>
+              {%- endif -%}
+            </div>
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+
+    <div class="sd-offers__dots"></div>
+  </div>
+</template>
+{%- endif -%}

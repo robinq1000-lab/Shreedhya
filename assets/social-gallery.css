@@ -1,0 +1,312 @@
+.social_gallery .post_img {
+	height: 100%;
+	width: 100%;
+	object-fit: cover;
+}
+.social_gallery .svg,
+.personal_info svg {
+	height: 16px;
+	width: 16px;
+	fill: rgb(var(--color-button-text));
+	-webkit-transition: all var(--duration-long) ease-in-out;
+	-moz-transition: all var(--duration-long) ease-in-out;
+	transition: all var(--duration-long) ease-in-out;
+}
+.social_gallery .button .icon-instagram{
+	margin-right: 5px;
+}
+.social_icon_wrap {
+	width: 60px;
+	height: 60px;
+	background-color: rgba(var(--color-button));
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.personal_info {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+	margin-top: 1.5rem;
+}
+.post_content__wrapper {
+	display: flex;
+	align-items: center;
+	gap: 40px;
+}
+.post_content__wrapper .post_gallery {
+	max-width: 75%;
+	width: 100%;
+}
+.overlay__wrapper {
+	position: relative;
+	border: none;
+}
+.overlay__wrapper .content-overlay {
+	background: rgba(var(--color-background));
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	margin: auto;
+	opacity: 0;
+    visibility: hidden;
+    width: 100%;
+    height: 100%;
+	border-radius: calc(var(--media-radius));
+	-webkit-transition: all var(--duration-long) ease-in-out;
+	-moz-transition: all var(--duration-long) ease-in-out;
+	transition: all var(--duration-long) ease-in-out;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	padding: 8px;
+    text-align: center;
+	word-break: break-word;
+} 
+.content-details {
+	position: absolute;
+	text-align: center;
+	top: 20px;
+    bottom: auto;
+    left: auto;
+    right: 20px;
+    height: 32px;
+    width: 32px;
+    margin: auto;
+	opacity: 0;
+	-webkit-transition: all var(--duration-long) ease-in-out;
+	-moz-transition: all var(--duration-long) ease-in-out;
+	transition: all var(--duration-long) ease-in-out;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: rgba(var(--color-background));
+	border-radius: var(--buttons-radius);
+}
+.content-details svg{
+	height: 16px;
+    width: 16px;
+	fill: rgb(var(--color-foreground));
+}
+.fadeIn-bottom.bg-color {
+    background-color: rgba(var(--color-background));
+    height: 32px;
+    min-height: 32px;
+    width: 32px;
+    line-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+	border-radius: calc(var(--media-radius) - var(--border-width));
+}
+.fadeIn-bottom.bg-color svg{
+	fill: rgb(var(--color-foreground));
+}
+.overlay__wrapper:hover .content-details {
+	opacity: 1;
+}
+.insta_image .content-overlay {
+    border-radius: calc(var(--media-radius) - var(--border-width));
+}
+.content-overlay svg{
+	height: 18px;
+    width: 18px;
+	fill: rgb(var(--color-foreground));
+}
+.content-details.bg-transparent{
+	background-color: transparent;
+}
+.overlay__wrapper:hover .content-overlay {
+	opacity: 1;
+	visibility: visible;
+    z-index: 1;
+}
+.social_gallery .social_user_name{
+	margin: 0;
+}
+.social_gallery .top_content__wrapper{
+	gap: 25px;
+	display: flex;
+    flex-direction: column;
+}
+.social_gallery.section--full-width .global-media-settings img{
+	border-radius: calc(var(--media-radius))
+}
+.content-overlay .link{
+	letter-spacing: normal;
+}
+.content-overlay .user_heading,.content-overlay .user-tag{
+	margin-bottom: 8px;
+	letter-spacing: normal;
+}
+.content-overlay .user-tag.subtitle{
+	font-size: calc(var(--font-body-scale) * 3rem);
+	color: var(--color-foreground);
+}
+.content-overlay .user-tag.body{
+	font-size: calc(var(--font-body-scale) * 1.6rem);
+}
+.insta_product .card {
+    display: flex;
+    flex-direction: row!important;
+    column-gap: 15px;
+	border: 1px solid rgb(var(--color-foreground),0.1);
+	border-radius: var(--media-radius);
+	padding: 15px;
+	gap: 15px;
+	margin-top: 20px;
+}
+.insta_product .card-wrapper .card .card__inner {
+    max-width: 30%;
+}
+.insta_product .card-wrapper .card .card__inner .media {
+	display: flex;
+	align-items: center;
+}
+.insta_product .card-wrapper .card .card__inner img{
+	width: 90px;
+	height: auto;
+	position: relative;
+	margin: 0;
+}
+.insta_product .card:hover .product__media-item:not(:first-child){
+	display: none;
+}
+.insta_product .card:hover .media.media--hover-effect>img:first-child:only-child{
+	transform: unset;
+}
+.insta_product .card-wrapper .card__content{
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 15px;
+	padding: 0;
+	max-width: 70%;
+}
+.insta_product .card-wrapper .card__content .wbcompinner{
+	width: 70%;
+}
+.insta_product .add-to-cart__submit span{
+	display: none;
+} 
+.insta_product .button.loading.add-to-cart__submit svg, .insta_product .button.loading.add-to-cart__submit svg path {
+    fill: none;
+}
+.insta_product .wbproduct-container product-form{
+	margin: 0;
+}
+.insta_product .add-to-cart__submit>svg.icon{
+	display: block!important;
+}
+.insta_product .card__heading a{
+	font-size: calc(var(--font-heading-scale) * 16px);
+}
+.insta_product .wbproduct-container .add-to-cart__submit {
+	min-width: 34px;
+    min-height: 34px;
+    padding: 0;
+}
+.insta_product .card-wrapper .card .card__inner:not(:has(.card__media)) {
+    display: none;
+}
+.insta_product .wbproductdes .price {
+	line-height: calc(1 + 0.3 / var(--font-body-scale));
+	padding-top: 5px;
+}
+@media (max-width: 1560px){
+	.insta_product .card-wrapper .card__content .wbcompinner{
+		width: 100%;
+	}
+}
+@media (max-width: 1299px) {
+	.insta_product .card__heading a{
+		font-size: calc(var(--font-heading-scale) * 14px);
+		margin-bottom: 8px;
+	}
+	.insta_product .wbproductdes .price {
+		font-size: calc(var(--font-body-scale) * 16px);
+		padding-top: 0;
+	}
+}
+@media (max-width: 1199px){
+	.post_content__wrapper{
+		gap: 25px;
+	}
+	.overlay__wrapper .content-overlay{
+		padding: 6px;
+	}
+	.content-overlay .user-tag.subtitle{
+		font-size: calc(var(--font-body-scale) * 2rem);
+	}
+	.content-overlay .user_heading{
+		font-size: calc(var(--font-heading-scale) * 13px);
+	}
+	.content-overlay .link{
+		font-size: calc(var(--font-body-scale) * 13px);
+	}
+	.insta_product .wbproduct-container .add-to-cart__submit {
+		min-width: 30px;
+		min-height: 30px;
+	}
+	.insta_product .wbproduct-container .add-to-cart__submit svg {
+		height: 15px;
+		width: 14px;
+	}
+	.insta_product .card-wrapper .card__content{
+		gap: 10px;
+	}
+	.insta_product .card {
+		padding: 8px;
+		gap: 8px;
+		margin-top: 12px;
+	}
+}
+@media (min-width: 992px) and (max-width: 1199px){
+	.content-overlay .user-tag{
+		line-height: calc(1 + .1/max(1,var(--font-body-scale)));
+		margin-bottom: 5px;
+	}
+	.content-overlay .user_heading{
+		line-height: calc(1 + .3/max(1,var(--font-heading-scale)));
+		margin-bottom: 5px;
+	}
+	.product_detail a.full-unstyled-link {
+		font-size: calc(var(--font-heading-scale) * 1.4rem);
+	}
+	.insta_product .card{
+		flex-wrap: wrap;
+	}
+	.insta_product .card-wrapper .card__content{
+		max-width: 100%;
+	}
+}
+@media (max-width: 991px){
+	.post_content__wrapper{
+		flex-wrap: wrap;
+	}
+	.post_content__wrapper .post_gallery{
+		max-width: 100%;
+	}
+}
+@media (min-width: 320px) and (max-width: 575px){
+	.content-overlay .user-tag{
+		line-height: calc(1 + .1/max(1,var(--font-body-scale)));
+		margin-bottom: 5px;
+	}
+	.content-overlay .user_heading{
+		line-height: calc(1 + .3/max(1,var(--font-heading-scale)));
+		margin-bottom: 5px;
+	}
+	.product_detail a.full-unstyled-link {
+		font-size: calc(var(--font-heading-scale) * 1.4rem);
+	}
+	.insta_product .card-wrapper .card__content{
+		max-width: 100%;
+	}
+	.insta_product .card{
+		flex-wrap: wrap;
+	}
+} 

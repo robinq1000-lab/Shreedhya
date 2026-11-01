@@ -1,0 +1,151 @@
+.email-signup-banner .newsletter-form,
+.email-signup-banner .newsletter-form__field-wrapper {
+  display: inline-block;
+}
+.email-signup-banner__box .email-signup-banner__heading {
+  margin-bottom: 0;
+}
+.email-signup-banner__box > * + .newsletter__subheading {
+  margin-top: 2rem;
+}
+.email-signup-banner__box .newsletter__subheading p {
+  margin: 0;
+}
+.email-signup-banner {
+  justify-content: space-between;
+}
+.email-signup-banner .banner__media {
+  overflow: hidden;
+  width: 50%;
+}
+.email-signup-banner .banner__content {
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.email-signup-banner .banner__content:only-child {
+  width: 100%;
+}
+.email-signup-banner .media>*:not(.zoom):not(.deferred-media__poster-button), .email-signup-banner .media model-viewer{
+  width: 50%;
+}
+.email-signup-banner.banner:after{
+  content: unset;
+}
+.email-signup-banner .banner__media:after {
+  content: "";
+  position: absolute;
+  top: 0;
+  opacity: 0;
+  background: rgb(var(--color-foreground));
+  z-index: 1;
+  width: 50%;
+  height: 100%;
+  border-radius: var(--media-radius);
+}
+.email-signup-banner .newsletter-form__button{
+  background: transparent;
+  height: 44px;
+}
+.email-signup-banner .newsletter-form__button svg path{
+  fill: rgb(var(--color-foreground));
+}
+svg.email-signup-banner-background {
+  border-radius: var(--media-radius);
+}
+@media only screen and (min-width: 768px) {
+  .banner--desktop-transparent .email-signup-banner__box--no-image * {
+    color: rgb(var(--color-base-text));
+  }
+  .banner--desktop-transparent .email-signup-banner__box .field__input {
+    background-color: transparent;
+  }
+  .banner--desktop-transparent .email-signup-banner__box--no-image .field__input {
+    box-shadow: 0 0 0 0.1rem rgba(var(--color-base-text), 0.55);
+  }
+  .banner--desktop-transparent .email-signup-banner__box--no-image .field__input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(var(--color-base-text), 0.75);
+  }
+  .banner--desktop-transparent .email-signup-banner__box--no-image .field__button:focus-visible {
+    outline: 0.2rem solid rgba(var(--color-base-text), 0.5);
+    box-shadow: 0 0 0 0.3rem rgb(var(--color-background)),
+      0 0 0.5rem 0.4rem rgba(var(--color-base-text), 0.3);
+  }
+  svg.email-signup-banner-background-mobile {
+    display: none !important;
+  }
+  .email-signup-banner:not(.banner--desktop-transparent) .email-signup-banner__box {
+    width: 100%;
+  }
+  .email-signup-banner .banner__media{
+    position: unset;
+  }
+  .email-signup-banner.banner--content-align-center .list-social,
+  .banner--content-align-center .newsletter-form__message{
+    justify-content: center;
+  }
+  .email-signup-banner.banner--content-align-left .list-social,
+  .banner--content-align-left .newsletter-form__message{
+    justify-content: flex-start;
+  }
+  .email-signup-banner.banner--content-align-right .list-social,
+  .banner--content-align-right .newsletter-form__message{
+    justify-content: flex-end;
+  }
+  .email-signup-banner .newsletter__wrapper.banner__box{
+    min-width: 35rem;
+    padding-right: 1rem;
+    padding-left: 1rem;
+  }
+  .email-signup-banner.banner--adapt .banner__content, .email-signup-banner.banner--adapt{
+    height: calc(100vh - 71px);
+  }
+}
+
+@media only screen and (max-width: 767px) {
+  .email-signup-banner-background:not(.email-signup-banner-background-mobile) {
+    display: none !important;
+  }
+  .email-signup-banner.banner--content-align-mobile-center .list-social,
+  .banner--content-align-mobile-center .newsletter-form__message{
+    justify-content: center;
+  }
+  .email-signup-banner.banner--content-align-mobile-left .list-social,
+  .banner--content-align-mobile-left .newsletter-form__message{
+    justify-content: flex-start;
+  }
+  .email-signup-banner.banner--content-align-mobile-right .list-social,
+  .banner--content-align-mobile-right .newsletter-form__message{
+    justify-content: flex-end;
+  }
+  .email-signup-banner .banner__media {
+    width: 100%;
+  }
+  .email-signup-banner .banner__content {
+    width: 100%;
+    height: 100%;
+  }
+  .email-signup-banner.banner--mobile-bottom .banner__content{
+    position: unset;
+    height: fit-content;
+  }
+  .email-signup-banner:not(.banner--mobile-bottom) .banner__content {
+    background-color: transparent;
+    --color-foreground: 255, 255, 255;
+    --color-button: 255, 255, 255;
+    --color-button-text: 0, 0, 0;
+  }
+  .email-signup-banner:not(.banner--mobile-bottom).bg-content .banner__content{
+    background-color: var(--gradient-background);
+  }
+  .email-signup-banner .banner__content:only-child, .email-signup-banner .banner__media:after, .email-signup-banner .media>*:not(.zoom):not(.deferred-media__poster-button), .media model-viewer{
+    width: 100%;
+  }
+  .email-signup-banner.banner--adapt:not(.banner--mobile-bottom) .banner__content, .email-signup-banner.banner--adapt:not(.banner--mobile-bottom){
+    height: calc(100vh - 95px);
+  }
+  .email-signup-banner.banner--adapt.banner--mobile-bottom {
+    height: calc(100vh - 443px);
+  }
+}

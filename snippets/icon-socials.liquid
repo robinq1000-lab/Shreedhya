@@ -1,0 +1,20 @@
+{%- liquid
+if icon != 'none'
+    case icon
+    when 'instagram'
+    render 'icon-instagram'
+    when 'facebook'
+        render 'icon-facebook'
+    when 'twitter'
+        render 'icon-twitter'
+    when 'tiktok'
+        render 'icon-tiktok'
+    when 'vimeo'
+        render 'icon-vimeo'
+    when 'youtube'
+        render 'icon-youtube'
+    when 'pinterest'
+        render 'icon-pinterest'
+    endcase
+endif
+-%} 

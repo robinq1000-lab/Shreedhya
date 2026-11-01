@@ -1,0 +1,274 @@
+<link rel="preload" as="style" href="{{ 'component-card.css' | asset_url }}">
+{{ 'component-card.css' | asset_url | stylesheet_tag }}
+<link rel="preload" as="style" href="{{ 'section-collection-list.css' | asset_url }}">
+{{ 'section-collection-list.css' | asset_url | stylesheet_tag }}
+<link rel="preload" as="style" href="{{ 'section-image-banner.css' | asset_url }}">
+{{ 'section-image-banner.css' | asset_url | stylesheet_tag }}
+
+{%- capture link_quick_search -%}
+  {{ routes.search_url }}?type=product&q=
+{%- endcapture -%}
+
+{%- if menu_links != blank -%}
+  <div class="predictive-search__result-group seachbar-left">
+    <ul>
+      {%- assign search_menu = menu_links.links -%}
+      {%- for link in search_menu -%}
+        <li>
+          <a href="{{ link.url }}" {% if link.active %}aria-current="page"{% endif %} class="predictive-search__heading">{{ link.title }}</a>
+          {%- if link.links != blank -%}
+            <ul>
+              {%- for child_link in link.links -%}
+                <li>
+                  <a href="{{ child_link.url }}" {% if child_link.active %}aria-current="page"{% endif %} class="search_subheading">{{ child_link.title }}</a>
+
+                  {%- if child_link.links != blank -%}
+                    <ul>
+                      {%- for grandchild_link in child_link.links -%}
+                        <li>
+                          <a href="{{ grandchild_link.url }}" {% if grandchild_link.active %}aria-current="page"{% endif %} class="search_subheading">{{ grandchild_link.title }}</a>
+                        </li>
+                      {%- endfor -%}
+                    </ul>
+                  {%- endif -%}
+                </li>
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+{% endif %}
+
+
+
+<div class="wbsrightpart searchbar-right">
+{%- unless coll_products == blank -%}
+  <div class="predictive-search__result-group pseach-prod">
+    <div class="heading-wrapper">
+      <div class="default-content-heading">{{- 'wbcustomlabel.wballtext.popular_products' | t -}}</div>
+      <a href="{{ routes.all_products_collection_url }}" class="default-heading-link">{{- 'wbcustomlabel.wballtext.all_products' | t -}}</a>
+    </div>
+    <ul class="grid contains-card contains-card--product {% if select_collection != blank or select_article != blank or select_article.articles.size > 0 %} grid--1-col-desktop {% else %} grid--2-col-desktop {% endif %}{% if settings.card_style == 'standard' %} contains-card--standard{% endif %}">
+      {%- assign collection = collections[coll_products] -%}
+      {%- for product in collection.products limit: 7 -%}
+        <li class="product__col_wrapper grid__item">
+          {%- if product and product != empty -%}
+          {%- liquid
+          assign ratio = 1
+          if product.featured_media and settings.simage_ratio == 'portrait'
+            assign ratio = 0.8
+          elsif product.featured_media and settings.simage_ratio == 'adapt'
+            assign ratio = product.featured_media.aspect_ratio
+          endif
+          if ratio == 0 or ratio == null
+            assign ratio = 1
+          endif
+        -%}
+          <div class="card-wrapper wbproduct-container product-card-wrapper">
+            <div class="card card--{{ settings.card_style }}
+                {% if product.featured_media %} card--media{% else %} card--text{% endif %}
+                {% if settings.card_style == 'card' %} color-{{ settings.card_color_scheme }} gradient{% endif %}" style="--ratio-percent: {{ 1 | divided_by: ratio | times: 100 }}%;">
+              <div class="
+                {%- if product.featured_media == blank -%} blank__image {% endif %}card__inner wbimgblock{% if settings.card_style == 'standard' %} color-{{ settings.card_color_scheme }} gradient{% endif %}{% if product.featured_media or settings.card_style == 'standard' %} ratio{% endif %}" style="--ratio-percent: {{ 1 | divided_by: ratio | times: 100 }}%;">
+                {%- if product.featured_media -%}
+                  <div id="webipro-{{ section.id }}-{{ product.id }}" class="card__media">
+                      {%- assign media = product.selected_or_first_available_variant.featured_media -%}
+                    <div class="product__media-item" data-media-id="{{ section.id }}-{{ product.id }}-{{ media.id }}">
+                      <a href="{{ product.url | append: '?variant=' | append: product.selected_or_first_available_variant.id | default: '#' }}"
+                        title="{{ product.title | escape }}"
+                        class="media media--transparent media--{{ media_size }} media--hover-effect">
+                        <img srcset="{%- if product.featured_media.width >= 165 -%}{{ product.featured_media | image_url: width: 165 }} 165w,{%- endif -%}
+                        {%- if product.featured_media.width >= 360 -%}{{ product.featured_media | image_url: width: 360 }} 360w,{%- endif -%}
+                        {%- if product.featured_media.width >= 533 -%}{{ product.featured_media | image_url: width: 533 }} 533w,{%- endif -%}
+                        {%- if product.featured_media.width >= 720 -%}{{ product.featured_media | image_url: width: 720 }} 720w,{%- endif -%}
+                        {%- if product.featured_media.width >= 940 -%}{{ product.featured_media | image_url: width: 940 }} 940w,{%- endif -%}
+                        {%- if product.featured_media.width >= 1066 -%}{{ product.featured_media | image_url: width: 1066 }} 1066w,{%- endif -%}
+                        {{ product.featured_media | image_url }} {{ product.featured_media.width }}w "
+                          src="{{ product.featured_media | image_url: width: 533 }}"
+                          sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 992px) calc((100vw - 130px) / 4), (min-width: 768px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
+                          alt="{{ product.featured_media.alt | escape }}"
+                          class="motion-reduce"
+                          {% unless lazy_load == false %} loading="lazy"{% endunless %}
+                          width="{{ product.featured_media.width }}"
+                          height="{{ product.featured_media.height }}">
+                          {%- if product.media[1] != nil -%}
+                            <img srcset="{%- if product.media[1].width >= 165 -%}{{ product.media[1] | image_url: width: 165 }} 165w,{%- endif -%}
+                            {%- if product.media[1].width >= 360 -%}{{ product.media[1] | image_url: width: 360 }} 360w,{%- endif -%}
+                            {% if product.media[1].width >= 493 %}{{ product.media[1] | image_url: width: 493 }} 493w,{% endif %}
+                            {% if product.media[1].width >= 600 %}{{ product.media[1] | image_url: width: 600 }} 600w,{% endif %}
+                            {% if product.media[1].width >= 713 %}{{ product.media[1] | image_url: width: 713 }} 713w,{% endif %}
+                            {% if product.media[1].width >= 823 %}{{ product.media[1] | image_url: width: 823 }} 823w,{% endif %}
+                            {% if product.media[1].width >= 992 %}{{ product.media[1] | image_url: width: 992 }} 992w,{% endif %}
+                            {{ product.media[1] | image_url }} {{ product.media[1].width }}w"
+                            src="{{ product.media[1] | image_url: width: 370 }}"
+                            alt="{{ product.media[1].alt | escape }}"
+                            sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 992px) calc((100vw - 130px) / 4), (min-width: 768px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
+                            class="motion-reduce img-fluid mx-auto lazyload"
+                            loading="lazy"
+                            width="{{ product.media[1].width }}"
+                            height="{{ product.media[1].height }}">
+                          {%- endif -%}
+                      </a>
+                    </div>
+                   
+                  </div>
+                {%- endif -%}
+                {%- liquid
+                  assign target = product.selected_or_first_available_variant
+                  assign compare_at_price = target.compare_at_price
+                  assign price = target.price | default: 40300
+                  assign available = target.available | default: false
+                  assign money_price = price | money
+                  if settings.currency_code_enabled
+                  assign money_price = price | money_with_currency
+                  endif
+
+                  if target == product and product.price_varies
+                  assign money_price = 'products.product.price.from_price_html' | t: price: money_price
+                  endif
+                -%}
+                <div class="price
+                  {%- if price_class %} {{ price_class }}{% endif -%}
+                  {%- if available == false %} price--sold-out {% endif -%}
+                  {%- if compare_at_price > price and product.quantity_price_breaks_configured? != true %} price--on-sale{% endif -%}
+                  {%- if compare_at_price > price and product.quantity_price_breaks_configured? %} volume-pricing--sale-badge{% endif -%}
+                  {%- if product.price_varies == false and product.compare_at_price_varies %} price--no-compare{% endif -%}
+                  {%- if show_badges %} price--show-badge{% endif -%}">
+                  {%- if product.price -%}
+                    <div class="wbvariantbadges"> 
+                        <span class="badge price__badge-sale">
+                        {{ 'products.product.on_sale' | t }}
+                        </span>
+                        <span class="badge price__badge-sold-out">
+                        {{ 'products.product.sold_out' | t }}
+                        </span>
+                    </div>
+                  {%- endif -%}
+                </div>
+              </div>
+              <div class="wbproductdes card__content">
+                  <div class="card__information">
+                    {%- if settings.predictive_search_show_vendor == true -%}
+                      <div class="product__vendor">
+                        {{ product.vendor }}
+                      </div>
+                    {%- endif -%}
+                    <h3 class="card__heading{% if product.featured_media or settings.card_style == 'standard' %} h5{% endif %}" {% if product.featured_media or settings.card_style == 'card' %} id="title-{{ section_id }}-{{ product.id }}" {% endif %}>
+                      <a href="{{ product.url | default: '#' }}" id="CardLink-{{ section_id }}-{{ product.id }}" class="full-unstyled-link" aria-labelledby="CardLink-{{ section_id }}-{{ product.id }} Badge-{{ section_id }}-{{ product.id }}" >
+                        {{ product.title | escape }}
+                      </a>
+                    </h3>
+                    {% if settings.predictive_search_show_price == true %}
+                      <div class="card-information">
+                        <div class="no-js-hidden wbhprice" id="price-{{ section.id }}-{{ product.id }}" {{ block.shopify_attributes }}>
+                          {%- render 'price', product: product, use_variant: false, show_badges: false -%}
+                        </div>
+                      </div>
+                    {% endif %}
+                  </div>
+              </div>
+            </div>
+          </div>
+          {%- endif -%}
+        </li>
+      {% endfor %}
+    </ul> 
+  </div> 
+{%- endunless -%}
+{%- if select_collection != blank or select_article != blank or select_article.articles.size > 0 -%}
+  <div class="collection-and-articles">
+    {% if select_collection != blank %}
+      <div class="predictive-search__result-group">
+        <div class="heading-wrapper">
+          <div class="default-content-heading">{{- 'wbcustomlabel.wballtext.popular_categories' | t -}}</div>
+          <a href="{{ routes.collections_url }}" class="default-heading-link">{{- 'wbcustomlabel.wballtext.all_categories' | t -}}</a>
+        </div>
+            <div class="collection-list-wrapper flex-direction--column collection-card-info ">
+              <ul class="collection-list grid grid--4-col-desktop grid--3-col-tablet-down">
+                {% assign collection__list = select_collection %}
+                {%- for collection in collection__list -%}
+                  <li class="collection-list__item grid__item">
+                    {% render 'card-collection',
+                    card_collection: collection,
+                    show_collection_title: settings.show_collection_title,
+                    show_item_count: settings.show_item_count,
+                    enable_collection_img_full: settings.enable_collection_img_full
+                    columns: 3
+                    %}
+                  </li>
+                {%- endfor -%}
+              </ul>
+            </div>
+      </div>
+    {% endif %}
+    {%- unless select_article == blank or select_article.articles.size == 0 -%}
+      <div class="predictive-search__result-group">
+        <div class="heading-wrapper">
+          <div class="default-content-heading">{{- 'wbcustomlabel.wballtext.popular_blogs' | t -}}</div>
+          <a href="{{ select_article.url }}" class="default-heading-link">{{- 'wbcustomlabel.wballtext.all_blogs' | t -}}</a>
+        </div>
+        <div class="search_blog-wrapper">
+          <ul class="grid--1-col-desktop grid--1-col-tablet blog__posts articles-wrapper contains-card contains-card--article grid product-grid contains-card{% if settings.blog_card_style == 'standard' %} contains-card--standard{% endif %}">
+            {%- for article in select_article.articles limit: 7 -%}
+              {%- liquid
+              assign ratio = 1
+              if ratio == 0 or ratio == null
+                assign ratio = 1
+              endif
+            -%} 
+              <li class="blog_col_wrapper grid__item">
+                <div class="article-card-wrapper card-wrapper">
+                  <div class="card article-card card--{{ settings.blog_card_style }} flex_direction--row article-card__image--square{% if article.image %} card--media{% else %} card--text{% endif %}{% if settings.blog_card_style == 'card' %} color-{{ settings.blog_card_color_scheme }} gradient{% endif %}{% if template contains 'search' %} color-{{ settings.card_color_scheme }} gradient card--{{ settings.card_style }}{% endif %}">
+                    {%- if article.image -%}
+                      <div class="card__inner{% if settings.blog_card_style == 'standard' %} color-{{ settings.blog_card_color_scheme }} gradient{% endif %}{% if article.image or settings.blog_card_style == 'standard' %} ratio{% endif %}" style="--ratio-percent: {{ 1 | divided_by: ratio | times: 100 }}%;">
+                        <div class="article-card__image-wrapper card__media">
+                          <a class="" href="{{ article.url }}">
+                            <div class="article-card__image media media--hover-effect">
+                              <img srcset="
+                              {%- if article.image.src.width >= 165 -%}
+                                {{ article.image.src | image_url: width: 165 }} 165w,{%- endif -%}
+                              {%- if article.image.src.width >= 360 -%}
+                                {{ article.image.src | image_url: width: 360 }} 360w,{%- endif -%}
+                              {%- if article.image.src.width >= 533 -%}
+                                {{ article.image.src | image_url: width: 533 }} 533w,{%- endif -%}
+                              {%- if article.image.src.width >= 720 -%}
+                                {{ article.image.src | image_url: width: 720 }} 720w,{%- endif -%}
+                              {%- if article.image.src.width >= 1000 -%}
+                                {{ article.image.src | image_url: width: 1000 }} 1000w,{%- endif -%}
+                              {%- if article.image.src.width >= 1500 -%}
+                                {{ article.image.src | image_url: width: 1500 }} 1500w,{%- endif -%}
+                              {{ article.image.src | image_url }} {{ article.image.src.width }}w"
+                              src="{{ article.image.src | image_url: width: 533 }}"
+                              sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 100 | divided_by: 2 }}px, (min-width: 768px) calc((100vw - 130px) / 2), calc((100vw - 50px) / 2)"
+                              alt="{{ article.image.src.alt | escape }}"
+                              class="motion-reduce"
+                              {% unless lazy_load == false %}
+                              loading="lazy"
+                              {% endunless %}
+                              width="{{ article.image.width }}"
+                              height="{{ article.image.height }}">
+                            </div>
+                          </a>
+                        </div>
+                      </div>
+                    {%- endif -%}
+                    <div class="card__content">
+                      <h2 class="card__heading">
+                        <a href="{{ article.url }}" class="full-unstyled-link">
+                          {{ article.title }}
+                        </a>
+                      </h2>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </div>
+      </div>
+    {% endunless %}
+  </div>
+{%- endif -%}
+</div>

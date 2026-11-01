@@ -1,0 +1,41 @@
+{% comment %}
+    Renders cart notification
+
+    Accepts:
+    - color_scheme: {String} sets the color scheme of the notification (optional)
+
+    Usage:
+    {% render 'cart-notification' %}
+{% endcomment %}
+
+<cart-notification>
+  <div class="cart-notification-wrapper page-width{% if color_scheme %} color-{{ color_scheme }} gradient{% endif %}">
+    <div id="cart-notification" class="cart-notification focus-inset" aria-modal="true" aria-label="{{ 'general.cart.item_added' | t }}" role="dialog" tabindex="-1">
+      <div class="cart-notification-inner color-{{ settings.drawer_color_scheme }} gradiant">
+        <div class="cart-notification__header">
+          <span>{% render 'icon-check' %} {{- 'wbcustomlabel.wballtext.success_cart' | t -}}</span>
+          <button type="button" class="cart-notification__close modal__close-button link link--text focus-inset" aria-label="{{ 'accessibility.close' | t }}"><svg class="icon icon-close" aria-hidden="true" focusable="false"><use href="#icon-close"/></svg>
+          </button>
+        </div>
+        <div class="wb_popnot">
+          <div id="cart-notification-product" class="cart-notification-product"></div>
+          <div class="cart-notification__links">
+
+            <div id="cart-notification-price" class="cart-notification-product"></div>
+
+            <a href="{{ routes.cart_url }}" id="cart-notification-button" class="button button--primary"></a>
+            <form action="{{ routes.cart_url }}" method="post" id="cart-notification-form">
+              <button class="button button--primary button--full-width" name="checkout">{{ 'sections.cart.checkout' | t }}</button>
+            </form>
+            <button type="button" class="link button-label focus-inset">{{ 'general.continue_shopping' | t }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</cart-notification>
+{% style %}
+  .cart-notification {
+     display: none;
+  }
+{% endstyle %}

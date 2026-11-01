@@ -1,0 +1,93 @@
+  <main class="gift-card__wrapper">
+    <div class="gift-card__logo_wrapper">
+        {%- if settings.logo != blank -%}
+            {%- assign logo_alt = settings.logo.alt | default: shop.name | escape -%}
+            {{ settings.logo | image_url: width: 100 | image_tag: class: 'gift-card__image', alt: logo_alt }}
+        {%- else %}
+            <h2>{{ shop.name }}</h2>
+        {%- endif %}
+    </div>
+    <div class="gift_card_top">
+    <div class="gift-card__image-wrapper">
+        <img
+          class="gift-card__image"
+          src="{{ 'gift-card/card.svg' | shopify_asset_url }}"
+          alt=""
+          height="{{ 570 | divided_by: 1.5 }}"
+          width="570"
+          loading="lazy">
+    </div>
+
+    <h2>{{ 'wbcustomlabel.wballtext.scan_qr_head' | t }}</h2>
+
+    <div class="gift-card__price">
+      <h1>
+        {% if settings.currency_code_enabled %}
+          {{ gift_card.balance | money_with_currency }}
+        {% else %}
+          {{ gift_card.balance | money }}
+        {% endif %}
+      </h1>
+      {%- if gift_card.enabled == false or gift_card.expired -%}
+        <p class="badge badge--expired">{{ 'gift_cards.issued.expired' | t }}</p>
+      {%- endif -%}
+    </div>
+    {% if gift_card.expires_on %}
+      {%- assign gift_card_expiration_date = gift_card.expires_on | date: '%B %e, %Y' -%}
+      <p class="gift-card__text">
+        {{ 'gift_cards.issued.expiration_date' | t: expires_on: gift_card_expiration_date }}
+      </p>
+    {% endif %}
+
+    <div class="gift-card__text-wrapper">
+      <p class="gift-card__text">{{ 'gift_cards.issued.how_to_use_gift_card' | t }}</p>
+    </div>
+    <div class="code__wrapper">
+        <p id="gift-card-code" class="gift-card__number">{{ gift_card.code | format_code }}</p>
+        <button
+        class="button button--secondary"
+        onclick="window.print();"
+      >
+        {{ 'Print' }}
+      </button>
+    </div>
+</div>
+    <div class="qr-code_wrapper">
+        <h3>{{ 'wbcustomlabel.wballtext.scan_qr' | t }}</h3>
+        <div class="gift-card__qr-code" data-identifier="{{ gift_card.qr_identifier }}"></div>
+    </div>
+    {%- if gift_card.pass_url -%}
+      <a href="{{ gift_card.pass_url }}" class="gift_card__apple-wallet no-print">
+        <img
+          src="{{ 'gift-card/add-to-apple-wallet.svg' | shopify_asset_url }}"
+          width="120"
+          height="40"
+          alt="{{ 'gift_cards.issued.add_to_apple_wallet' | t }}"
+          loading="lazy"
+        >
+      </a>
+    {%- endif -%}
+    <div class="gift-card__buttons no-print">
+      <span class="gift-card__copy-success form__message" role="status"></span>
+      <template>
+        {%- render 'icon-success' -%}
+        {{ 'gift_cards.issued.copy_code_success' | t }}
+      </template>
+      <div class="button__combo">
+        <button class="button gift-card__copy-button">{{ 'gift_cards.issued.copy_code' | t }}</button>
+        <a
+          href="{{ shop.url }}"
+          class="button button--secondary"
+          target="_blank"
+          rel="noopener"
+          aria-describedby="a11y-new-window-message"
+        >
+          {{ 'gift_cards.issued.shop_link' | t }}
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <div hidden>
+    <span id="a11y-new-window-message">{{ 'accessibility.link_messages.new_window' | t }}</span>
+  </div>

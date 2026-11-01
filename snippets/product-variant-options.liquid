@@ -1,0 +1,154 @@
+{% comment %}
+  Renders product variant options
+
+  Accepts:
+  - product: {Object} product object.
+  - option: {Object} current product_option object.
+  - block: {Object} block object.
+
+
+  Usage:
+  {% render 'product-variant-options',
+    product: product,
+    option: option,
+    block: block
+  %}
+{% endcomment %}
+
+{%- liquid
+  assign variants_available_arr = product.variants | map: 'available'
+  assign variants_option1_arr = product.variants | map: 'option1'
+  assign variants_option2_arr = product.variants | map: 'option2'
+  assign variants_option3_arr = product.variants | map: 'option3'
+
+  assign product_form_id = 'product-form-' | append: section.id
+-%}
+
+{%- for value in option.values -%}
+  {%- liquid
+    assign option_disabled = true
+    if value.available
+      assign option_disabled = false
+    endif
+
+    assign swatch_focal_point = null
+    if value.swatch.image
+      assign image_url = value.swatch.image | image_url: width: 50
+      assign swatch_value = 'url(' | append: image_url | append: ')'
+      assign swatch_focal_point = value.swatch.image.presentation.focal_point
+    elsif value.swatch.color
+      assign swatch_value = 'rgb(' | append: value.swatch.color.rgb | append: ')'
+    else
+      assign swatch_value = null
+    endif
+  -%}
+
+  {%- assign input_id = section.id | append: '-' | append: option.position | append: '-' | append: forloop.index0 -%}
+  {%- assign input_name = option.name | append: '-' | append: option.position -%}
+
+  {%- capture input_dataset -%}
+    data-product-url="{{ value.product_url }}"
+    data-option-value-id="{{ value.id }}"
+  {%- endcapture -%}
+
+  {%- capture label_unavailable -%}
+    <span class="visually-hidden label-unavailable">
+      {{- 'products.product.variant_sold_out_or_unavailable' | t -}}
+    </span>
+  {%- endcapture -%}
+
+  {%- if picker_type == 'swatch' -%}
+    {% liquid
+      assign checked = false
+      if option.selected_value == value
+        assign checked = true
+      endif
+    %}
+    {%- capture help_text -%}
+      <span class="visually-hidden">{{ value | escape }}</span>
+      {{ label_unavailable }}
+    {%- endcapture -%}
+    {%- assign escaped_value = value | escape -%}
+    {%
+      render 'swatch-input',
+      id: input_id,
+      name: option.name,
+      value: escaped_value,
+      swatch: value.swatch,
+      product_form_id: product_form_id,
+      checked: checked,
+      visually_disabled: option_disabled,
+      show_colorswatch: block.settings.show_colorswatch,
+      help_text: help_text,
+      additional_props: input_dataset
+    %}
+      
+    
+  {%- elsif picker_type == 'button' -%}
+    <input
+      type="radio"
+      id="{{ input_id }}"
+      name="{{ option.name }}"
+      value="{{ value | escape }}"
+      form="{{ product_form_id }}"
+      {% if option.selected_value == value %}
+        checked
+      {% endif %}   
+      {% if option_disabled %}
+        class="disabled {% if block.settings.hide_sold_variant == true %} hidesold{% endif %}"
+      {% endif %}
+      {{ input_dataset }}
+    >
+
+      {% if option.name == 'Color' %}
+
+        {% if block.settings.show_colorswatch == true %}
+          {%- liquid
+            assign color_file_name = value | handle | append: '.' | append: 'png'
+            assign swatchimage = color_file_name | file_img_url: '50x50' | prepend: 'https:' | split: '?' | first
+            assign colorswatchvalue = value | downcase | replace: ' ', ''
+        -%}
+
+          <label class="color-swatchimg color-swatch {% if option.selected_value == value %} active{% endif %}"
+            for="{{ input_id }}"
+            data-val="{{ value }}"
+            tabindex="0"
+            style="background-color: {{ colorswatchvalue }};{% if images[color_file_name] != blank %}  background-image: url({{ swatchimage | remove: " " }});{% endif %}">{{ value }}</label>
+      <span class="visually-hidden">{{ 'products.product.variant_sold_out_or_unavailable' | t }}</span>
+        {% else %}
+          <label for="{{ input_id }}" class="{% if block.settings.pills_style == 'fill' %}fillpill{% endif %} {% if option.selected_value == value %}active{% endif %}" {% if option.selected_value == value %} tabindex="0" {% endif %} data-value="{{ value }}">
+            {{ value -}}
+            <span class="visually-hidden">{{ 'products.product.variant_sold_out_or_unavailable' | t }}</span>
+          </label>
+        {% endif %}
+      {% else %}
+      <label for="{{ input_id }}" class="{% if block.settings.pills_style == 'fill' %}fillpill{% endif %}">
+        {{ value -}}
+        {{ label_unavailable }}
+      </label>
+    {% endif %}
+  {%- elsif picker_type == 'dropdown' or picker_type == 'swatch_dropdown' -%}
+    <option
+      {% if option_disabled %}
+        class="disabled {% if block.settings.hide_sold_variant == true %} hidesold{% endif %}"
+      {% endif %}
+      value="{{ value | escape }}"
+      {% if option.selected_value == value %}
+        selected="selected"
+      {% endif %}
+      {% if swatch_value and picker_type == 'swatch_dropdown' %}
+        data-option-swatch-value="{{ swatch_value }}"
+        {% if swatch_focal_point %}
+          data-option-swatch-focal-point="{{ swatch_focal_point }}"
+        {% endif %}
+      {% endif %}
+      {{ input_dataset }}
+    >
+      {% if option_disabled -%}
+        {{- 'products.product.value_unavailable' | t: option_value: value -}}
+      {%- else -%}
+        {{- value -}}
+      {%- endif %}
+    </option>
+  {%- endif -%}
+{%- endfor -%} 

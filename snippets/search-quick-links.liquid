@@ -1,0 +1,22 @@
+{%- capture link_quick_search -%}
+    {{ routes.search_url }}?type=product&q=
+  {%- endcapture -%}
+
+{%- if settings.search_quick_links != blank -%}
+    <div class="predictive-search__heading quick-search-tag-info">
+      <div class="quick-search-inner">
+        <p class="default-content-heading">{{- 'wbcustomlabel.wballtext.trendnow' | t -}}</p>
+        <ul>
+          {%- assign quick_search = settings.search_quick_links | replace: ' ,', ',' | replace: ', ', ',' | split: ',' -%}
+          {%- for qr in quick_search -%}
+            {%- assign quick_text = qr | strip -%}
+            {%- if quick_text -%}
+            <li>
+              <a class="quick-url link" href="{{ link_quick_search }}{{ quick_text | remove: ' ' }}">{{ quick_text }}</a>
+            </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      </div>
+    </div>
+{%- endif -%}

@@ -1,0 +1,90 @@
+.ppage-tab-item .nav-tabs{
+    margin: 0;
+    padding: 0;
+    margin-bottom: 30px;
+    display: block;
+    border-bottom: 1px solid rgba(var(--color-foreground), 0.1);
+    /* column-gap: 30px; */
+}
+.ppage-tab-item .tab-pane p:last-child {
+    margin-bottom: 0;
+}
+.ppage-tab-item .nav-tabs li{
+    display: inline-block;
+    font-size: calc(var(--font-body-scale) * 18px);
+    text-transform: uppercase;
+    color: rgba(var(--color-foreground),0.7);
+    position: relative;
+    cursor: pointer;
+    font-weight: var(--font-body-weight-semibold);
+    margin: 0 30px 0 0;
+}
+
+.ppage-tab-item .nav-tabs li::before {
+    content: "";
+    height: 2px;
+    margin: 0 auto;
+    position: absolute;
+    bottom: 0px;
+    transition: all .4s ease-out 0s;
+    width: 0;
+}
+.ppage-tab-item .nav-tabs li:only-child:before,
+.ppage-tab-item .nav-tabs li.active::before {
+    background-color: rgba(var(--color-foreground));
+    height: 2px;
+    width: 100%;
+}
+.ppage-tab-item .nav-tabs li:only-child,
+.ppage-tab-item .nav-tabs li.active{
+    color: rgba(var(--color-foreground));
+}
+.ppage-tab-item .tab-content{
+  position: relative;
+}
+.ppage-tab-item .tab-content > .tab-pane:not(.active) {
+  display: block;
+  height: 0;
+  overflow-y: hidden;
+}
+.ppage-tab-item .tab-content > .tab-pane {
+  display: none;
+}
+.ppage-tab-item .fade:not(.active) {
+  opacity: 0;
+}
+.ppage-tab-item .fade {
+  transition: opacity .15s linear;
+}
+.ppage-tab-item .tab-content > div.tab-pane:only-child{
+  display: block;
+  height: auto;
+  overflow: auto;
+  opacity: 1;
+}
+.ppage-tab-item .tab-content > .active {
+  display: block;
+}
+.ppage-tab-item .metafield-rich_text_field p strong {
+    min-width: 180px;
+    display: inline-block;
+}
+@media (min-width: 992px){
+  .content_image img,
+  .desc_wrapper{
+    position: sticky;
+    top: var(--header-height);
+  }
+}
+@media (max-width: 767px){
+    .ppage-tab-item .nav-tabs li{
+        font-size: calc(var(--font-body-scale) * 16px);
+        margin: 0 10px 0 0;
+        letter-spacing: 0;
+        min-width: fit-content;
+    }
+    .ppage-tab-item .nav-tabs{
+      display: flex;
+      overflow: auto;
+      gap: 10px;  }
+}

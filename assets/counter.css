@@ -1,0 +1,46 @@
+c-counter{
+    display: block;
+}
+#section_counter{
+    justify-content: center;
+    text-align: center;
+}
+.scroll_count{
+    border-radius: 10px;
+    font-size: calc(var(--font-body-scale) * 60px);
+    font-weight: var(--font-body-weight-medium);
+    padding: 10px;
+}
+.counter-item{
+    word-break: break-word;
+}
+.counter-item p{
+    margin: 0;
+    font-size: calc(var(--font-body-scale) * 18px);
+    font-weight: var(--font-body-weight-medium);
+    line-height: normal;
+    margin-top: 20px;
+}
+@media (min-width: 992px) and (max-width: 1199px){
+    .scroll_count{
+        font-size: calc(var(--font-body-scale) * 36px);
+    }
+}
+@media (min-width: 576px) and (max-width: 991px){
+    .scroll_count{
+        font-size: calc(var(--font-body-scale) * 26px);
+    }
+    .counter-item p {
+        margin: 14px 0 0;
+        font-size: calc(var(--font-body-scale) * 14px);
+    }
+}
+@media (max-width: 575px){
+    .scroll_count{
+        font-size: calc(var(--font-body-scale) * 18px);
+    }
+    .counter-item p {
+        margin: 10px 0 0;
+        font-size: calc(var(--font-body-scale) * 12px);
+    }
+}

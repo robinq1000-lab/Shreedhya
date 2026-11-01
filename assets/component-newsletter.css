@@ -1,0 +1,82 @@
+.newsletter-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  position: relative;
+}
+.newsletter-form__field-wrapper {
+  width: 100%;
+}
+.newsletter-form__field-wrapper .field__input {
+  padding-right: 5rem;
+}
+.newsletter-form__field-wrapper .field {
+  z-index: 0;
+}
+.newsletter-form__message {
+  justify-content: center;
+  margin-bottom: 0;
+}
+.newsletter-form__message--success {
+  margin-top: 2rem;
+}
+.full-width .newsletter.banner:after{
+  border-radius: 0;
+}
+.newsletter .newsletter-form, .newsletter .newsletter-form__field-wrapper {
+  display: inline-block;
+}
+.newsletter-form__button {
+  width: 4.4rem;
+  margin: 0;
+  right: var(--inputs-border-width);
+  top: var(--inputs-border-width);
+  height: 100%;
+}
+.email-signup-banner__box .newsletter-form__button{
+  z-index: 0;
+  top: var(--inputs-border-width);
+  height: 4.3rem;
+  border-radius: var(--inputs-radius);
+  background: transparent;
+}
+.banner:not(.banner--mobile-bottom) .email-signup-banner__box .newsletter-form__button{
+  height: 4.4rem;
+}
+.newsletter-form__button .icon {
+  width: 1.5rem;
+}
+.full-width .newsletter .banner__media,.full-width .newsletter .banner__media img {
+  border-radius: 0;
+}
+@media screen and (max-width: 767px) {
+  .newsletter .banner__box, .newsletter .banner__content {
+    padding: 10px;
+  }
+  .newsletter:not(.banner--mobile-bottom) .banner__box:not(.email-signup-banner__box--no-image){
+    background-color: transparent;
+  }
+  .section:not(.section-image-banner) .newsletter.banner:not(.banner--mobile-bottom):not(.email-signup-banner) .banner__box.content-box {
+    --color-foreground: unset;
+    --color-button: unset;
+    --color-button-text: unset;
+  }
+}
+@media screen and (min-width: 768px) {
+  .newsletter-form__message {
+    justify-content: flex-start;
+  }
+  .newsletter:not(.banner--desktop-transparent) .email-signup-banner__box {
+    width: 100%;
+  }
+  .newsletter-form {
+    align-items: flex-start;
+    margin: 0 auto;
+    max-width: 36rem;
+  }
+  .newsletter.banner--transparent .banner__box{
+    background: transparent;
+  }
+}

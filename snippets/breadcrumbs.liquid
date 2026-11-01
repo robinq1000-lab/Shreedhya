@@ -1,0 +1,49 @@
+{% unless template == 'index' %}
+{% unless template contains 'collection' and collection.handle %}
+<div class="page-width breadcrumb_main">
+	<nav class="breadcrumb row" role="navigation" aria-label="breadcrumbs">
+		<div class="col-12 breadcrumb_colmun"> 
+			<a href="{{ routes.root_url }}" title="{{ 'wbcustomlabel.wballtext.home' | t }}">{{ 'wbcustomlabel.wballtext.home' | t }}</a>
+			{% if template contains 'page' %}
+				<span aria-hidden="true">{% render 'icon-arrow-right' %}</span>
+				<span>{{ page.title }}</span>
+			{% elsif template contains 'product' %}
+			{% if collection.url %}
+				<span aria-hidden="true">{% render 'icon-arrow-right' %}</span>
+				{{ collection.title | link_to: collection.url }}
+			{% endif %} 
+			<span aria-hidden="true">{% render 'icon-arrow-right' %}</span>
+			<span>{{ product.title }}</span>
+			{% elsif template contains 'collection' and collection.handle %}
+				<span aria-hidden="true">{% render 'icon-arrow-right' %}</span>
+			{% if current_tags %}
+			{% capture url %}/collections/{{ collection.handle }}{% endcapture %}
+				{{ collection.title | link_to: url }}
+				<span aria-hidden="true">{% render 'icon-arrow-right' %}</span>
+				<span>{{ current_tags | join: " + " }}</span>
+			{% else %}
+				<span>{{ collection.title }}</span>
+			{% endif %}
+			{% elsif template == 'blog' %}
+				<span aria-hidden="true">{% render 'icon-arrow-right' %}</span>
+			{% if current_tags %}
+				{{ blog.title | link_to: blog.url }}
+				<span aria-hidden="true">{% render 'icon-arrow-right' %}</span>
+				<span>{{ current_tags | join: " + " }}</span>
+			{% else %}
+				<span>{{ blog.title }}</span>
+			{% endif %}
+			{% elsif template == 'article' %}
+				<span aria-hidden="true">{% render 'icon-arrow-right' %}</span>
+				{{ blog.title | link_to: blog.url }}
+				<span aria-hidden="true">{% render 'icon-arrow-right' %}</span>
+				<span>{{ article.title }}</span>
+			{% else %}
+				<span aria-hidden="true">{% render 'icon-arrow-right' %}</span>
+				<span>{{ page_title }}</span>
+			{% endif %}
+		</div>
+	</nav>
+</div>
+{% endunless %}
+{% endunless %}

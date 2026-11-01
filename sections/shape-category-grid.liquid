@@ -1,0 +1,384 @@
+{%- comment -%}
+  Shape Category Grid
+  File: sections/shape-category-grid.liquid
+  - Aap apni image (arch/frame ke saath, transparent PNG) upload karo, code usko jaisa hai waisa dikhata hai
+  - Har image ka size alag se bada/chota kar sakte ho (block setting: Image size)
+  - Image ya title click karne par selected collection khulta hai
+  - Desktop: one row, Mobile: swipeable row
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+  assign mobile_cols = s.mobile_items | times: 1.0
+  assign mobile_gaps = mobile_cols | ceil | minus: 1
+
+  case s.image_ratio
+    when '1 / 1'
+      assign ratio = '1 / 1'
+    when '3 / 4'
+      assign ratio = '3 / 4'
+    when '2 / 3'
+      assign ratio = '2 / 3'
+    when 'auto'
+      assign ratio = 'auto'
+    when '4 / 5'
+      assign ratio = '4 / 5'
+    else
+      assign ratio = '5 / 6'
+  endcase
+-%}
+
+{% style %}
+  #sgc-{{ section.id }} {
+    --sgc-gap: {{ s.gap }}px;
+    --sgc-cols: {{ s.desktop_items }};
+    --sgc-mcols: {{ mobile_cols }};
+    --sgc-mgaps: {{ mobile_gaps }};
+    --sgc-title-color: {{ s.title_color }};
+    --sgc-title-size: {{ s.title_size }}px;
+    --sgc-ratio: {{ ratio }};
+    --sgc-maxw: {% if s.max_width == '0' %}100%{% else %}{{ s.max_width }}px{% endif %};
+    --sgc-side: {{ s.side_padding }}px;
+    background: {{ s.background }};
+    padding-top: {{ s.padding_top }}px;
+    padding-bottom: {{ s.padding_bottom }}px;
+  }
+  #sgc-{{ section.id }} .sgc__wrap {
+    max-width: var(--sgc-maxw);
+    margin: 0 auto;
+    padding: 0 var(--sgc-side);
+  }
+  #sgc-{{ section.id }} .sgc__heading {
+    margin: 0 0 28px;
+    text-align: center;
+    color: {{ s.heading_color }};
+    font-size: clamp(18px, 3vw, 32px);
+    font-weight: 500;
+  }
+  #sgc-{{ section.id }} .sgc__list {
+    display: flex;
+    gap: var(--sgc-gap);
+    justify-content: safe center;
+    list-style: none;
+    margin: 0;
+    padding: 0 0 4px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  #sgc-{{ section.id }} .sgc__list::-webkit-scrollbar { display: none; }
+  #sgc-{{ section.id }} .sgc__item {
+    flex: 0 0 calc((100% - (var(--sgc-cols) - 1) * var(--sgc-gap)) / var(--sgc-cols));
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+  #sgc-{{ section.id }} .sgc__link {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+  }
+  /* Fixed box so all titles stay in one line; image size changes inside this box */
+  #sgc-{{ section.id }} .sgc__media {
+    position: relative;
+    aspect-ratio: var(--sgc-ratio);
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+  }
+  #sgc-{{ section.id }} .sgc__media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: transparent;
+    transform: scale(var(--sgc-scale, 1));
+    transform-origin: center center;
+    transition: transform 0.45s ease;
+  }
+  #sgc-{{ section.id }}.sgc--auto .sgc__media img { height: auto; }
+  #sgc-{{ section.id }} .sgc__link:hover .sgc__media img {
+    transform: scale(calc(var(--sgc-scale, 1) * 1.05)) translateY(-3px);
+  }
+  #sgc-{{ section.id }} .sgc__title {
+    display: block;
+    margin-top: 14px;
+    font-size: var(--sgc-title-size);
+    color: var(--sgc-title-color);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+  #sgc-{{ section.id }} .sgc__empty {
+    width: 100%;
+    height: 100%;
+    border: 1px dashed rgba(0, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.5);
+  }
+  #sgc-{{ section.id }} .sgc__link:focus-visible {
+    outline: 2px solid var(--sgc-title-color);
+    outline-offset: 4px;
+  }
+  @media (max-width: 749px) {
+    #sgc-{{ section.id }} .sgc__wrap { padding: 0 min(var(--sgc-side), 12px); }
+    #sgc-{{ section.id }} .sgc__list { justify-content: flex-start; }
+    #sgc-{{ section.id }} .sgc__item {
+      flex-basis: calc((100% - var(--sgc-mgaps) * var(--sgc-gap)) / var(--sgc-mcols));
+    }
+    #sgc-{{ section.id }} .sgc__title { margin-top: 10px; letter-spacing: 0.08em; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #sgc-{{ section.id }} .sgc__media img { transition: none; }
+  }
+{% endstyle %}
+
+<section id="sgc-{{ section.id }}" class="sgc{% if ratio == 'auto' %} sgc--auto{% endif %}">
+  <div class="sgc__wrap">
+    {%- if s.heading != blank -%}
+      <h2 class="sgc__heading">{{ s.heading }}</h2>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <ul class="sgc__list" role="list">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign link_url = block.settings.collection.url | default: '/collections/all'
+            assign item_title = block.settings.title | default: block.settings.collection.title
+            assign scale = block.settings.image_size | divided_by: 100.0
+          -%}
+          <li class="sgc__item" style="--sgc-scale: {{ scale }};" {{ block.shopify_attributes }}>
+            <a class="sgc__link" href="{{ link_url }}">
+              <div class="sgc__media">
+                {%- if block.settings.image != blank -%}
+                  {{
+                    block.settings.image
+                    | image_url: width: 800
+                    | image_tag:
+                      loading: 'lazy',
+                      widths: '200, 300, 400, 600, 800',
+                      sizes: '(min-width: 750px) 15vw, 40vw',
+                      alt: item_title
+                  }}
+                {%- elsif request.design_mode -%}
+                  <div class="sgc__empty">Upload image</div>
+                {%- endif -%}
+              </div>
+
+              {%- if item_title != blank -%}
+                <span class="sgc__title">{{ item_title }}</span>
+              {%- endif -%}
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- elsif request.design_mode -%}
+      <p style="text-align:center;color:{{ s.heading_color }}">Add "Category item" blocks to show categories.</p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Shape category grid",
+  "tag": "div",
+  "class": "shape-category-grid-section",
+  "max_blocks": 10,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop by category"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#652D1C"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image box shape (all items)",
+      "info": "Box ke andar image ka size har item me alag se set kar sakte ho.",
+      "options": [
+        { "value": "4 / 5", "label": "4:5" },
+        { "value": "5 / 6", "label": "5:6" },
+        { "value": "3 / 4", "label": "3:4" },
+        { "value": "2 / 3", "label": "2:3" },
+        { "value": "1 / 1", "label": "1:1" },
+        { "value": "auto", "label": "Auto" }
+      ],
+      "default": "4 / 5"
+    },
+    {
+      "type": "select",
+      "id": "max_width",
+      "label": "Section width",
+      "info": "Full width se items bade dikhte hain.",
+      "options": [
+        { "value": "0", "label": "Full width" },
+        { "value": "1700", "label": "1700px" },
+        { "value": "1500", "label": "1500px" },
+        { "value": "1200", "label": "1200px" }
+      ],
+      "default": "0"
+    },
+    {
+      "type": "range",
+      "id": "side_padding",
+      "label": "Left/right space",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "desktop_items",
+      "label": "Items per row on desktop",
+      "min": 3,
+      "max": 8,
+      "step": 1,
+      "default": 6
+    },
+    {
+      "type": "select",
+      "id": "mobile_items",
+      "label": "Items visible on mobile",
+      "options": [
+        { "value": "2", "label": "2" },
+        { "value": "2.5", "label": "2.5 (swipe hint)" },
+        { "value": "3", "label": "3" }
+      ],
+      "default": "2.5"
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Item gap",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "Colors and text"
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background",
+      "default": "#F8EEEC"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title color",
+      "default": "#652D1C"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Title font size",
+      "min": 10,
+      "max": 22,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category_item",
+      "name": "Category item",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Category image",
+          "info": "Transparent PNG upload karo (arch/frame image me hi bana hua)."
+        },
+        {
+          "type": "range",
+          "id": "image_size",
+          "label": "Image size",
+          "info": "Sirf is item ki image bada/chota karne ke liye. 100 = normal.",
+          "min": 50,
+          "max": 160,
+          "step": 5,
+          "unit": "%",
+          "default": 100
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Category"
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Link to collection"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Shape category grid",
+      "blocks": [
+        { "type": "category_item", "settings": { "title": "Sale" } },
+        { "type": "category_item", "settings": { "title": "Sarees" } },
+        { "type": "category_item", "settings": { "title": "Kurta Sets" } },
+        { "type": "category_item", "settings": { "title": "Dress Materials" } },
+        { "type": "category_item", "settings": { "title": "Lehengas" } },
+        { "type": "category_item", "settings": { "title": "Pure Silk Sarees" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

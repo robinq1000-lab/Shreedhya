@@ -1,0 +1,25 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-blog",
+      "settings": {
+        "layout": "grid",
+        "show_image": true,
+        "image_height": "adapt",
+        "columns_desktop": 4,
+        "show_date": true,
+        "date_position": "top",
+        "show_author": true,
+        "show_desc": false,
+        "show_cmment": true,
+        "show_read_more_button": true,
+        "button_style": "link",
+        "padding_top": 0,
+        "padding_bottom": 60
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

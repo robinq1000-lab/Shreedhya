@@ -1,0 +1,29 @@
+.wbstockinfo-bar {
+    position: relative;
+    display: block;
+    margin: 10px 0 20px;
+    height: 4px;
+    border-radius: 4px;
+    background: rgba(var(--color-foreground),.07);
+    overflow: hidden;
+}
+.wbstockinfo {
+    position: relative;
+    display: block;
+    font-weight: var(--font-body-weight-semibold);
+}
+.wbstockinfo-probar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 0;
+    display: block;
+    transition: width 1.15s ease-in-out;
+}
+.wbstockinfo_high + .wbstockinfo-bar > .wbstockinfo-probar {
+    background: var(--product-in-stock-color);
+}
+.wbstockinfo_low + .wbstockinfo-bar > .wbstockinfo-probar {
+    background: var(--product-low-stock-color);
+}

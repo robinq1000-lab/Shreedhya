@@ -1,0 +1,372 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "disabled": true,
+      "settings": {
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+    "rich_text_PYUBcf": {
+      "type": "rich-text",
+      "blocks": {
+        "heading_AciiRd": {
+          "type": "heading",
+          "settings": {
+            "heading": "<strong>Highlight Key Features</strong>",
+            "heading_size": "h1"
+          }
+        },
+        "text_6UAz9R": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Identify the unique features of our fashion theme that set it apart from others. Whether it's advanced product filtering, customizable lookbooks, or seamless integration with social media, make sure to showcase these prominently on your features page.</p>",
+            "text_style": "body"
+          }
+        },
+        "button_gj6AHT": {
+          "type": "button",
+          "settings": {
+            "button_label": "Purchase Now",
+            "button_link": "https://themes.shopify.com/themes/cello/styles/elegance",
+            "button_style_secondary": "solid",
+            "button_label_2": "",
+            "button_link_2": "",
+            "button_style_secondary_2": "solid",
+            "link_window": true
+          }
+        }
+      },
+      "block_order": [
+        "heading_AciiRd",
+        "text_6UAz9R",
+        "button_gj6AHT"
+      ],
+      "custom_css": [
+        ".rich-text {border-bottom: 1px solid rgba(var(--color-foreground), 0.1);}"
+      ],
+      "settings": {
+        "full_width": true,
+        "desktop_content_position": "center",
+        "content_alignment": "center",
+        "color_scheme": "",
+        "padding_top": 40,
+        "padding_bottom": 40
+      }
+    },
+    "image_with_text_9V4iAY": {
+      "type": "image-with-text",
+      "blocks": {
+        "heading_37RgHQ": {
+          "type": "heading",
+          "settings": {
+            "subheading": "",
+            "heading": "<strong>Discover the Power of Our Fashion Forward Theme</strong>",
+            "heading_size": "h2"
+          }
+        },
+        "text_beLrhA": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Elevate your fashion store's visual appeal with our integrated lookbook feature. Seamlessly curate stunning collections and outfit inspirations to captivate your audience. With easy customization options, you can effortlessly create engaging lookbooks that highlight your products in their best light. Inspire your customers and drive conversions with our intuitive lookbook feature.</p>",
+            "text_style": "subtitle"
+          }
+        }
+      },
+      "block_order": [
+        "heading_37RgHQ",
+        "text_beLrhA"
+      ],
+      "settings": {
+        "full_width": false,
+        "enable_full_width_bg": false,
+        "image": "",
+        "full_img_radius": false,
+        "banner_offer_text": "",
+        "banner_offer_text_color": "#ffffff",
+        "height": "adapt",
+        "desktop_image_width": "medium",
+        "layout": "image_first",
+        "desktop_content_position": "middle",
+        "desktop_content_alignment": "left",
+        "color_scheme": "background-1",
+        "secondary_background": true,
+        "image_behavior": "none",
+        "mobile_content_alignment": "left",
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    },
+    "image_with_text_grMWtY": {
+      "type": "image-with-text",
+      "blocks": {
+        "heading_z6PxbM": {
+          "type": "heading",
+          "settings": {
+            "subheading": "",
+            "heading": "<strong>Simplify Navigation with Predictive Search.</strong>",
+            "heading_size": "h1"
+          }
+        },
+        "text_3PXRhV": {
+          "type": "text",
+          "settings": {
+            "text": "<p>With live search, results appear dynamically, allowing you to find products or content quickly without having to wait for page reloads.</p>",
+            "text_style": "subtitle"
+          }
+        }
+      },
+      "block_order": [
+        "heading_z6PxbM",
+        "text_3PXRhV"
+      ],
+      "settings": {
+        "full_width": false,
+        "enable_full_width_bg": true,
+        "image": "",
+        "full_img_radius": false,
+        "banner_offer_text": "",
+        "banner_offer_text_color": "#ffffff",
+        "height": "adapt",
+        "desktop_image_width": "large",
+        "layout": "text_first",
+        "desktop_content_position": "middle",
+        "desktop_content_alignment": "left",
+        "color_scheme": "accent-1",
+        "secondary_background": false,
+        "image_behavior": "none",
+        "mobile_content_alignment": "left",
+        "padding_top": 0,
+        "padding_bottom": 60
+      }
+    },
+    "image_banner_wbrcmH": {
+      "type": "image-banner",
+      "blocks": {
+        "banner_with_text_XnHfnp": {
+          "type": "banner_with_text",
+          "settings": {
+            "image": "",
+            "image_overlay_opacity": 0,
+            "banner_width": 33,
+            "banner_offer_text": "",
+            "subheading": "",
+            "mini_heading_style": "link",
+            "heading": "",
+            "heading_size": "h1",
+            "text": "",
+            "text_style": "body",
+            "button_label_1": "",
+            "button_link_1": "",
+            "link_window": true,
+            "view_all_style": "solid",
+            "show_text_box": true,
+            "container_overlay_opacity": 40,
+            "desktop_content_position": "middle-center",
+            "desktop_content_alignment": "center",
+            "color_scheme": "",
+            "image_behavior": "none",
+            "mobile_content_alignment": "center"
+          }
+        },
+        "banner_with_text_TGGRqy": {
+          "type": "banner_with_text",
+          "settings": {
+            "image": "",
+            "image_overlay_opacity": 0,
+            "banner_width": 33,
+            "banner_offer_text": "",
+            "subheading": "",
+            "mini_heading_style": "link",
+            "heading": "",
+            "heading_size": "h1",
+            "text": "",
+            "text_style": "body",
+            "button_label_1": "",
+            "button_link_1": "",
+            "link_window": true,
+            "view_all_style": "solid",
+            "show_text_box": true,
+            "container_overlay_opacity": 40,
+            "desktop_content_position": "middle-center",
+            "desktop_content_alignment": "center",
+            "color_scheme": "",
+            "image_behavior": "none",
+            "mobile_content_alignment": "center"
+          }
+        },
+        "banner_with_text_97Xx6h": {
+          "type": "banner_with_text",
+          "settings": {
+            "image": "",
+            "image_overlay_opacity": 0,
+            "banner_width": 33,
+            "banner_offer_text": "",
+            "subheading": "",
+            "mini_heading_style": "link",
+            "heading": "",
+            "heading_size": "h1",
+            "text": "",
+            "text_style": "body",
+            "button_label_1": "",
+            "button_link_1": "",
+            "link_window": true,
+            "view_all_style": "solid",
+            "show_text_box": true,
+            "container_overlay_opacity": 40,
+            "desktop_content_position": "middle-center",
+            "desktop_content_alignment": "center",
+            "color_scheme": "background-1",
+            "image_behavior": "none",
+            "mobile_content_alignment": "center"
+          }
+        }
+      },
+      "block_order": [
+        "banner_with_text_XnHfnp",
+        "banner_with_text_TGGRqy",
+        "banner_with_text_97Xx6h"
+      ],
+      "settings": {
+        "full_width": false,
+        "enable_sidespace": true,
+        "title": "",
+        "heading_size": "h0",
+        "description": "",
+        "description_style": "body",
+        "heading_alignment": "left",
+        "image_height": "adapt",
+        "show_gap": true,
+        "section_color_scheme": "",
+        "padding_top": 0,
+        "padding_bottom": 60
+      }
+    },
+    "collapsible_content_AMftfX": {
+      "type": "collapsible-content",
+      "blocks": {
+        "collapsible_row_t88cb7": {
+          "type": "collapsible_row",
+          "settings": {
+            "heading": "Create a unique store with our 20+ personalize sections",
+            "icon": "none",
+            "row_content": "<p>Take customization to the next level with our selection of 20+ personalized sections. From hero banners and product grids to testimonials and Instagram feeds, our platform offers a wide range of customizable sections that allow you to tailor your store's design.</p>",
+            "page": ""
+          }
+        },
+        "collapsible_row_BcX7Bm": {
+          "type": "collapsible_row",
+          "settings": {
+            "heading": "Flexible Navigation Structure",
+            "icon": "none",
+            "row_content": "<p>Organize your product categories in a way that makes sense for your store and your customers.</p><p>Whether you have a handful of broad categories or a wide range of subcategories, the Category in Header feature</p><p>accommodates various navigation structures, ensuring that visitors can find what they're looking for with ease.</p>",
+            "page": ""
+          }
+        },
+        "collapsible_row_NA6acH": {
+          "type": "collapsible_row",
+          "settings": {
+            "heading": "Predictive default and live search",
+            "icon": "none",
+            "row_content": "<p>Tailor the search experience to match your brand's aesthetic and user preferences.</p><p>With customizable search options, you can choose the layout, styling, and behavior of the search bar and results,</p><p>ensuring a seamless integration with your Shopify theme and a cohesive brand experience.</p>",
+            "page": ""
+          }
+        },
+        "collapsible_row_brqrzB": {
+          "type": "collapsible_row",
+          "settings": {
+            "heading": "Maximize Sales with Cart Drawer Upsell Products",
+            "icon": "none",
+            "row_content": "<p>Increase your store's revenue potential with our Cart Drawer featuring Upsell Products.</p><p>Seamlessly integrate upsell recommendations into the cart drawer, encouraging customers</p><p>to add complementary items to their purchase and boosting average order value.</p>",
+            "page": ""
+          }
+        },
+        "collapsible_row_JnzPUf": {
+          "type": "collapsible_row",
+          "settings": {
+            "heading": "Immersive Image Display",
+            "icon": "none",
+            "row_content": "<p>Present your products in stunning detail with our fully supported image feature. Showcase high-resolution images that allow customers to zoom in and explore every aspect of your products, creating an immersive shopping experience.</p>",
+            "page": ""
+          }
+        },
+        "collapsible_row_8CAGdi": {
+          "type": "collapsible_row",
+          "settings": {
+            "heading": "Increase Average Order Value",
+            "icon": "none",
+            "row_content": "<p>Drive revenue growth by increasing the average order value of each transaction. Our Complementary Products feature encourages customers to add more items to their cart, resulting in larger purchases and higher overall sales. By strategically pairing products together, you can create compelling offers that entice customers to buy more.</p>",
+            "page": ""
+          }
+        },
+        "collapsible_row_9ezKem": {
+          "type": "collapsible_row",
+          "settings": {
+            "heading": "Product Models / AR",
+            "icon": "none",
+            "row_content": "<p>Allow customer to add 3D model image.</p>",
+            "page": ""
+          }
+        },
+        "collapsible_row_8dgw36": {
+          "type": "collapsible_row",
+          "settings": {
+            "heading": "Variant Images",
+            "icon": "none",
+            "row_content": "<p>Let customers see what colors are available for a product with either a solid color or a textured image. </p>",
+            "page": ""
+          }
+        },
+        "collapsible_row_gFLxej": {
+          "type": "collapsible_row",
+          "settings": {
+            "heading": "Dynamic checkout buttons",
+            "icon": "none",
+            "row_content": "<p>Let returning customers quickly checkout with their preferred payment method</p>",
+            "page": ""
+          }
+        }
+      },
+      "block_order": [
+        "collapsible_row_t88cb7",
+        "collapsible_row_BcX7Bm",
+        "collapsible_row_NA6acH",
+        "collapsible_row_brqrzB",
+        "collapsible_row_JnzPUf",
+        "collapsible_row_8CAGdi",
+        "collapsible_row_9ezKem",
+        "collapsible_row_8dgw36",
+        "collapsible_row_gFLxej"
+      ],
+      "settings": {
+        "enable_sticky_part": false,
+        "caption": "",
+        "mini_heading_style": "link",
+        "heading": "<strong>More Features of Our Theme...</strong>",
+        "heading_position": "coll_next",
+        "heading_size": "h1",
+        "description": "",
+        "button_label_1": "",
+        "button_link_1": "",
+        "view_all_style": "solid",
+        "heading_alignment": "left",
+        "layout": "section",
+        "color_scheme": "background-1",
+        "secondary_background": false,
+        "image_ratio": "adapt",
+        "desktop_layout": "image_second",
+        "padding_top": 0,
+        "padding_bottom": 60
+      }
+    }
+  },
+  "order": [
+    "main",
+    "rich_text_PYUBcf",
+    "image_with_text_9V4iAY",
+    "image_with_text_grMWtY",
+    "image_banner_wbrcmH",
+    "collapsible_content_AMftfX"
+  ]
+}

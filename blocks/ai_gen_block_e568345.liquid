@@ -1,0 +1,215 @@
+{% doc %}
+  @prompt
+    Add a small clickable "📏 Size chart" text link that appears right next to or below the size variant picker buttons on the product page (similar to an edit/pencil icon style link). When clicked, it should open a popup modal that displays a size chart image (with a customizable image setting in theme editor so merchant can upload their own size chart image). The modal should close with an X button or by clicking outside. The text should be small, subtle, and styled to match the theme. The block should have a setting to upload/select the size chart image.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-size-chart-{{ ai_gen_id }} {
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    color: #652d1c;
+    font-family: inherit;
+  }
+
+  .ai-size-chart-{{ ai_gen_id }}__trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 0;
+    border: 0;
+    background: transparent;
+    color: #652d1c;
+    font: inherit;
+    font-size: 13px;
+    line-height: 1.4;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+
+  .ai-size-chart-{{ ai_gen_id }}__trigger:hover {
+    color: #3c2821;
+  }
+
+  .ai-size-chart-{{ ai_gen_id }}__trigger:focus-visible,
+  .ai-size-chart-{{ ai_gen_id }}__close:focus-visible {
+    outline: 2px solid #652d1c;
+    outline-offset: 3px;
+  }
+
+  .ai-size-chart-{{ ai_gen_id }}__overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(25, 20, 18, 0.68);
+  }
+
+  .ai-size-chart-{{ ai_gen_id }}__overlay.is-open {
+    display: flex;
+  }
+
+  .ai-size-chart-{{ ai_gen_id }}__dialog {
+    position: relative;
+    width: min(760px, 100%);
+    max-height: 90vh;
+    overflow: auto;
+    padding: 24px;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #1a1817;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  }
+
+  .ai-size-chart-{{ ai_gen_id }}__title {
+    margin: 0 40px 18px 0;
+    color: #652d1c;
+    font-size: 20px;
+    line-height: 1.3;
+  }
+
+  .ai-size-chart-{{ ai_gen_id }}__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #1a1817;
+    cursor: pointer;
+  }
+
+  .ai-size-chart-{{ ai_gen_id }}__close:hover {
+    background: #f8eeec;
+  }
+
+  .ai-size-chart-{{ ai_gen_id }}__image {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: calc(90vh - 110px);
+    object-fit: contain;
+  }
+
+  .ai-size-chart-{{ ai_gen_id }}__placeholder {
+    display: flex;
+    min-height: 280px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: #f8eeec;
+    color: #44372b;
+    text-align: center;
+    padding: 24px;
+  }
+
+  .ai-size-chart-{{ ai_gen_id }}__placeholder svg {
+    display: block;
+    width: min(100%, 320px);
+    height: 220px;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-size-chart-{{ ai_gen_id }}__dialog {
+      padding: 20px 16px;
+    }
+  }
+{% endstyle %}
+
+<size-chart-{{ ai_gen_id }} class="ai-size-chart-{{ ai_gen_id }}" style="width: {{ block.settings.desktop_width_percent }}%;" {{ block.shopify_attributes }}>
+  <button class="ai-size-chart-{{ ai_gen_id }}__trigger" type="button" aria-haspopup="dialog" aria-controls="ai-size-chart-dialog-{{ ai_gen_id }}">
+    <span aria-hidden="true">📏</span><span>{{ block.settings.link_label | escape }}</span>
+  </button>
+  <div class="ai-size-chart-{{ ai_gen_id }}__overlay" data-overlay id="ai-size-chart-dialog-{{ ai_gen_id }}" role="dialog" aria-modal="true" aria-label="{{ block.settings.dialog_title | escape }}" aria-hidden="true">
+    <div class="ai-size-chart-{{ ai_gen_id }}__dialog" data-dialog>
+      <button class="ai-size-chart-{{ ai_gen_id }}__close" type="button" data-close aria-label="Close size chart">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <h2 class="ai-size-chart-{{ ai_gen_id }}__title">{{ block.settings.dialog_title | escape }}</h2>
+      {% if block.settings.chart_image != blank %}
+        <img class="ai-size-chart-{{ ai_gen_id }}__image" src="{{ block.settings.chart_image | image_url: width: 1600 }}" alt="{{ block.settings.chart_image.alt | default: block.settings.dialog_title | escape }}" loading="lazy" width="{{ block.settings.chart_image.width }}" height="{{ block.settings.chart_image.height }}">
+      {% else %}
+        <div class="ai-size-chart-{{ ai_gen_id }}__placeholder">
+          {{ 'image' | placeholder_svg_tag }}
+          <span>Add a size chart image in this block's settings.</span>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</size-chart-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    const tagName = 'size-chart-{{ ai_gen_id }}';
+    if (customElements.get(tagName)) return;
+    class SizeChart extends HTMLElement {
+      connectedCallback() {
+        this.trigger = this.querySelector('.ai-size-chart-{{ ai_gen_id }}__trigger');
+        this.overlay = this.querySelector('[data-overlay]');
+        this.closeButton = this.querySelector('[data-close]');
+        this.dialog = this.querySelector('[data-dialog]');
+        this.onKeydown = this.handleKeydown.bind(this);
+        this.trigger.addEventListener('click', () => this.open());
+        this.closeButton.addEventListener('click', () => this.close());
+        this.overlay.addEventListener('click', (event) => {
+          if (event.target === this.overlay) this.close();
+        });
+      }
+      open() {
+        this.overlay.classList.add('is-open');
+        this.overlay.setAttribute('aria-hidden', 'false');
+        document.addEventListener('keydown', this.onKeydown);
+        this.closeButton.focus();
+      }
+      close() {
+        this.overlay.classList.remove('is-open');
+        this.overlay.setAttribute('aria-hidden', 'true');
+        document.removeEventListener('keydown', this.onKeydown);
+        this.trigger.focus();
+      }
+      handleKeydown(event) {
+        if (event.key === 'Escape') this.close();
+        if (event.key === 'Tab' && this.overlay.classList.contains('is-open')) {
+          const focusable = this.dialog.querySelectorAll('button, a, input, [tabindex]:not([tabindex="-1"])');
+          if (!focusable.length) return;
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+          }
+        }
+      }
+    }
+    customElements.define(tagName, SizeChart);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Size chart link",
+  "settings": [
+    { "type": "image_picker", "id": "chart_image", "label": "Size chart image" },
+    { "type": "text", "id": "link_label", "label": "Link label", "default": "Size chart" },
+    { "type": "text", "id": "dialog_title", "label": "Popup title", "default": "Size chart" },
+    { "type": "range", "id": "desktop_width_percent", "label": "Desktop width", "min": 50, "max": 100, "step": 5, "unit": "%", "default": 100 }
+  ],
+  "presets": [{ "name": "Size chart link" }],
+  "tag": null,
+  "class": "size-chart-link-block"
+}
+{% endschema %}

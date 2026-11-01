@@ -1,0 +1,95 @@
+.collection-hero .breadcrumb{
+  position: relative;
+  z-index: 1;
+  padding: 0;
+  margin-bottom: 8px !important;
+}
+.collection-hero{
+  margin-top: 30px;
+}
+.collection-hero__title{
+  margin: 0;
+  font-size: calc(var(--font-heading-scale) * 34px);
+}
+.chero-column img{
+  border-radius: var(--media-radius);
+}
+.chero-overlay {
+  position: relative;
+  padding: calc(20px + var(--media-border-width));
+  border-radius: var(--media-radius);
+}
+@media screen and (min-width: 992px) {
+  .chero-overlay {
+    min-height: 25rem;
+  }
+}
+.chero-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: var(--media-radius);
+}
+.chero-overlay .collection-hero__text-wrapper {
+  z-index: 2;
+}
+.chero-overlay .collection-hero__image-wrapper {
+  position: absolute;
+  inset: 0;
+}
+.chero-overlay .collection-hero__image-container {
+  min-height: 100%;
+  height: 100%;
+  width: 100%;
+  margin-top: 0;
+}
+.collection-hero__inner {
+  display: flex;
+  flex-direction: column;
+}
+.collection-hero__text-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+}
+.chero-column .collection-hero__text-wrapper:has( .collection-hero__description:empty) {
+    gap: 0;
+}
+.collection-hero__description {
+  max-width: 80rem;
+  color: rgb(var(--color-foreground),0.9);
+  word-break: break-word;
+}
+.collection-hero__description a{
+  font-weight: var(--font-body-weight-medium);
+}
+.collection-hero__image-wrapper {
+  position: relative;
+  overflow: visible;
+}
+.collection-hero__image-container {
+  align-self: stretch;
+  min-height: 20rem;
+  margin-top: 30px;
+}
+.chero-column .collection-hero__description{
+  max-width: unset;
+}
+.collection-hero .breadcrumb_colmun a:hover{
+  color: rgb(var(--color-link-hover));
+}
+@media screen and (min-width: 768px) {
+  .collection-hero__image-wrapper_bottom {
+    padding-bottom: 6.1rem;
+  }
+}
+@media (max-width: 991px){
+  .collection-hero__title{
+    font-size: calc(var(--font-heading-scale) * 20px);
+  }
+  .chero-overlay,.chero-overlay:before {
+    border-radius: calc(var(--media-radius) * 1 / 2);
+  }
+}

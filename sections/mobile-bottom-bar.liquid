@@ -1,0 +1,1725 @@
+{%- comment -%}
+  sections/mobile-bottom-bar.liquid  (v4)
+  MOBILE ONLY (< 768px)
+  1. Liquid-glass floating bottom bar (smooth finger-follow drag, spring release)
+  2. Menu button    -> Flipkart style "All Categories" panel
+  3. Cart button    -> own Cart panel, live count badge
+  4. Profile button -> Koskii style Profile panel. Rows open INSIDE the panel instantly (no page reload)
+  Search for "V4-" in this file to find every change made in this version.
+{%- endcomment -%}
+
+{%- if section.settings.enabled -%}
+  {%- assign alpha = section.settings.bar_opacity | divided_by: 100.0 -%}
+  {%- assign pill_alpha = section.settings.pill_opacity | divided_by: 100.0 -%}
+  {%- assign has_lottie = false -%}
+  {%- assign tab_count = 0 -%}
+  {%- for block in section.blocks -%}
+    {%- if block.type == 'item' and block.settings.lottie_url != blank -%}
+      {%- assign has_lottie = true -%}
+    {%- endif -%}
+    {%- if block.type == 'profile_link' and block.settings.lottie_url != blank -%}
+      {%- assign has_lottie = true -%}
+    {%- endif -%}
+    {%- if block.type == 'tab' -%}
+      {%- assign tab_count = tab_count | plus: 1 -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- if section.settings.empty_lottie != blank -%}{%- assign has_lottie = true -%}{%- endif -%}
+  {%- assign ac = section.settings.accent_color -%}
+  {%- assign btn_txt = section.settings.btn_text_color -%}
+
+  <style>
+    .sd-bb, .sd-cat, .sd-cart, .sd-prof { display: none; }
+
+    @media screen and (max-width: 767px) {
+      :root {
+        --sd-bb-total: calc({{ section.settings.bar_height }}px + {{ section.settings.bottom_offset }}px + 14px + env(safe-area-inset-bottom, 0px));
+      }
+      body { padding-bottom: var(--sd-bb-total); }
+      body.sd-lock { overflow: hidden; }
+      header-drawer,
+      .header__icon--menu { display: none !important; }
+
+      /* =========================================================
+         BOTTOM BAR  (liquid glass)
+      ========================================================= */
+      .sd-bb {
+        display: flex;
+        align-items: stretch;
+        justify-content: space-between;
+        position: fixed;
+        left: {{ section.settings.side_margin }}px;
+        right: {{ section.settings.side_margin }}px;
+        bottom: calc({{ section.settings.bottom_offset }}px + env(safe-area-inset-bottom, 0px));
+        height: {{ section.settings.bar_height }}px;
+        padding: 6px;
+        box-sizing: border-box;
+        z-index: 900;
+        border-radius: {{ section.settings.radius }}px;
+        background: {{ section.settings.bar_bg | color_modify: 'alpha', alpha }};
+        -webkit-backdrop-filter: blur({{ section.settings.blur }}px) saturate(190%) brightness(1.06);
+        backdrop-filter: blur({{ section.settings.blur }}px) saturate(190%) brightness(1.06);
+        border: 1px solid rgba(255, 255, 255, .6);
+        box-shadow:
+          0 14px 34px rgba(20, 20, 40, .18),
+          0 2px 6px rgba(20, 20, 40, .08),
+          inset 0 1.5px 1px rgba(255, 255, 255, .95),
+          inset 0 -1.5px 1px rgba(255, 255, 255, .35),
+          inset 0 0 22px rgba(255, 255, 255, .3);
+        transition: translate .5s cubic-bezier(.2, .9, .3, 1), opacity .3s ease;
+        animation: sd-bb-rise .7s cubic-bezier(.2, .9, .3, 1) backwards;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: none; /* V4-1: no browser scroll takeover while dragging the pill */
+        isolation: isolate;
+        overflow: visible;
+        --sx: 1; --sy: 1;
+      }
+      .sd-bb::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background:
+          radial-gradient(120% 150% at 15% -20%, rgba(255, 255, 255, .6), rgba(255, 255, 255, 0) 55%),
+          linear-gradient(180deg, rgba(255, 255, 255, .22), rgba(255, 255, 255, 0) 60%);
+        pointer-events: none;
+        z-index: 0;
+      }
+      .sd-bb::after {
+        content: "";
+        position: absolute;
+        left: 12%; right: 12%; bottom: 0;
+        height: 40%;
+        background: radial-gradient(60% 100% at 50% 120%, rgba(255, 255, 255, .45), rgba(255, 255, 255, 0));
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      body:has(.ks-search.is-open) .sd-bb,
+      body:has(.sd-pop.open) .sd-bb,
+      body.sd-cart-open .sd-bb,
+      .sd-bb.is-kb { translate: 0 190%; opacity: 0; pointer-events: none; }
+
+      /* ---- V4-1: the liquid glass pill (no backdrop-filter = no lag, glass look from layered highlights) ---- */
+      .sd-bb__pill {
+        position: absolute;
+        top: 6px; bottom: 6px; left: 0;
+        width: 0;
+        border-radius: 999px;
+        z-index: 0;
+        pointer-events: none;
+        opacity: 0;
+        background-color: var(--pc, rgba(101, 45, 28, .14));
+        background-image:
+          radial-gradient(120% 90% at 25% 0%, rgba(255, 255, 255, .95), rgba(255, 255, 255, 0) 55%),
+          radial-gradient(100% 80% at 80% 115%, rgba(255, 255, 255, .75), rgba(255, 255, 255, 0) 60%),
+          linear-gradient(180deg, rgba(255, 255, 255, .5), rgba(255, 255, 255, .12));
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 255, 255, .75),
+          inset 3px 3px 4px -1px rgba(255, 255, 255, .95),
+          inset -3px -4px 5px -2px rgba(255, 255, 255, .7),
+          inset 0 0 18px rgba(255, 255, 255, .55),
+          0 6px 18px rgba(20, 20, 40, .16),
+          0 1px 2px rgba(20, 20, 40, .1);
+        transform: translate3d(var(--x, 0px), 0, 0) scale(var(--sx), var(--sy));
+        transition:
+          transform .55s cubic-bezier(.22, 1.5, .36, 1),
+          width .45s cubic-bezier(.22, 1.3, .36, 1),
+          background-color .35s ease,
+          box-shadow .3s ease,
+          opacity .25s ease;
+        will-change: transform;
+        backface-visibility: hidden;
+      }
+      .sd-bb__pill.no-t { transition: none !important; }
+      .sd-bb__pill.squish { --sx: 1.14; --sy: .9; }
+      .sd-bb.is-press .sd-bb__pill {
+        --sx: 1.14; --sy: 1.2;
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 255, 255, .9),
+          inset 4px 4px 6px -1px rgba(255, 255, 255, 1),
+          inset -4px -5px 7px -2px rgba(255, 255, 255, .8),
+          inset 0 0 26px rgba(255, 255, 255, .7),
+          0 10px 26px rgba(20, 20, 40, .2);
+      }
+      /* while dragging: transform is set by JS every frame (finger-follow), so no transform transition */
+      .sd-bb.is-drag .sd-bb__pill { transition: width .2s ease, background-color .3s ease, box-shadow .3s ease; }
+      /* ===== V5: iOS liquid glass bar ===== */
+      .sd-bb {
+        display: flex;
+        align-items: stretch;
+        justify-content: space-between;
+        position: fixed;
+        left: {{ section.settings.side_margin }}px;
+        right: {{ section.settings.side_margin }}px;
+        bottom: calc({{ section.settings.bottom_offset }}px + env(safe-area-inset-bottom, 0px));
+        height: {{ section.settings.bar_height }}px;
+        padding: 6px;
+        box-sizing: border-box;
+        z-index: 900;
+        border-radius: {{ section.settings.radius }}px;
+        box-shadow: 0 14px 34px rgba(20, 20, 40, .18), 0 2px 6px rgba(20, 20, 40, .08);
+        transition: translate .5s cubic-bezier(.2, .9, .3, 1), opacity .3s ease;
+        animation: sd-bb-rise .7s cubic-bezier(.2, .9, .3, 1) backwards;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: none;
+        isolation: isolate;
+        overflow: visible;
+        --sx: 1; --sy: 1;
+      }
+
+      /* bar glass = its own layer (sibling of the pill, so both can see the page behind) */
+      .sd-bb__glass {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        border-radius: inherit;
+        background: {{ section.settings.bar_bg | color_modify: 'alpha', alpha }};
+        -webkit-backdrop-filter: blur({{ section.settings.blur }}px) saturate(190%) brightness(1.06);
+        backdrop-filter: blur({{ section.settings.blur }}px) saturate(190%) brightness(1.06);
+        border: 1px solid rgba(255, 255, 255, .6);
+        box-shadow:
+          inset 0 1.5px 1px rgba(255, 255, 255, .95),
+          inset 0 -1.5px 1px rgba(255, 255, 255, .35),
+          inset 0 0 22px rgba(255, 255, 255, .3);
+      }
+      .sd-bb__glass::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background:
+          radial-gradient(120% 150% at 15% -20%, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0) 55%),
+          linear-gradient(180deg, rgba(255, 255, 255, .2), rgba(255, 255, 255, 0) 60%);
+      }
+      .sd-bb__glass::after {
+        content: "";
+        position: absolute;
+        left: 12%; right: 12%; bottom: 0;
+        height: 40%;
+        background: radial-gradient(60% 100% at 50% 120%, rgba(255, 255, 255, .4), rgba(255, 255, 255, 0));
+      }
+
+      body:has(.ks-search.is-open) .sd-bb,
+      body:has(.sd-pop.open) .sd-bb,
+      body.sd-cart-open .sd-bb,
+      .sd-bb.is-kb { translate: 0 190%; opacity: 0; pointer-events: none; }
+
+      /* the moving glass pill (real backdrop blur + lens-like saturation) */
+      .sd-bb__pill {
+        position: absolute;
+        top: 6px; bottom: 6px; left: 0;
+        width: 0;
+        border-radius: 999px;
+        z-index: 1;
+        pointer-events: none;
+        opacity: 0;
+        background-color: var(--pc, rgba(101, 45, 28, .14));
+        background-image:
+          radial-gradient(130% 100% at 20% 0%, rgba(255, 255, 255, .5), rgba(255, 255, 255, 0) 60%),
+          linear-gradient(180deg, rgba(255, 255, 255, .26), rgba(255, 255, 255, .05));
+        -webkit-backdrop-filter: saturate(170%) brightness(1.1);
+        backdrop-filter: saturate(170%) brightness(1.1);
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 255, 255, .5),
+          inset 2px 3px 3px -1px rgba(255, 255, 255, .95),
+          inset -2px -3px 4px -2px rgba(255, 255, 255, .55),
+          inset 0 0 14px rgba(255, 255, 255, .35),
+          0 6px 16px rgba(20, 20, 40, .14),
+          0 1px 2px rgba(20, 20, 40, .1);
+        transform: translate3d(var(--x, 0px), 0, 0) scale(var(--sx), var(--sy));
+        transition:
+          transform .42s cubic-bezier(.32, 1.08, .4, 1),
+          background-color .3s ease,
+          opacity .2s ease;
+        will-change: transform;
+      }
+      /* rainbow glass rim (like the iOS lens edge) */
+      .sd-bb__pill::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        padding: 1.5px;
+        background: conic-gradient(from 200deg, rgba(255, 255, 255, .95), rgba(255, 255, 255, .3), rgba(255, 255, 255, .85), rgba(255, 255, 255, .3), rgba(255, 255, 255, .95));
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+        opacity: .85;
+      }
+      /* top shine */
+      .sd-bb__pill::after {
+        content: "";
+        position: absolute;
+        left: 14%; right: 14%; top: 3px;
+        height: 36%;
+        border-radius: 999px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, .6), rgba(255, 255, 255, 0));
+        opacity: .7;
+      }
+      .sd-bb__pill.no-t { transition: none !important; }
+      .sd-bb__pill.squish { --sx: 1.04; --sy: .97; }
+      .sd-bb.is-press .sd-bb__pill {
+        --sx: 1.05; --sy: 1.07;
+      }
+      .sd-bb.is-drag .sd-bb__pill { transition: width .2s ease, background-color .3s ease, box-shadow .3s ease; }
+      .sd-bb.is-drag .sd-bb__item.is-hover .sd-bb__ico { transform: scale(1.18); }
+
+      .sd-bb .sd-bb__item { z-index: 2; }
+      .sd-bb .sd-bb__item.is-on .sd-bb__ico { transform: scale(1.1); }
+
+      .sd-bb__item {
+        position: relative;
+        flex: 1 1 0;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        text-decoration: none;
+        color: var(--sd-icon);
+        z-index: 1;
+        border-radius: 999px;
+        transition: color .35s ease, transform .25s ease;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+      }
+      .sd-bb__item > * { position: relative; z-index: 1; }
+      .sd-bb__item.is-on { color: var(--c-active); }
+      .sd-bb.is-drag .sd-bb__item.is-hover { color: var(--c-active); }
+
+      .sd-bb__ico {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: {{ section.settings.icon_size }}px;
+        height: {{ section.settings.icon_size }}px;
+        transform-origin: 50% 70%;
+        transition: transform .3s cubic-bezier(.3, 1.4, .45, 1);
+        will-change: transform;
+      }
+      .sd-bb__ico svg {
+        width: 100%; height: 100%;
+        fill: currentColor; fill-opacity: 0;
+        stroke: currentColor; stroke-width: 1.8;
+        stroke-linecap: round; stroke-linejoin: round;
+        transition: fill-opacity .35s ease;
+        overflow: visible;
+      }
+      .sd-bb__item.is-on .sd-bb__ico svg { fill-opacity: .2; }
+      .sd-bb__img { width: 100%; height: 100%; object-fit: contain; display: block; }
+      .sd-bb__ico.has-on .sd-bb__img--on { display: none; }
+      .sd-bb__item.is-on .sd-bb__ico.has-on .sd-bb__img--on { display: block; }
+      .sd-bb__item.is-on .sd-bb__ico.has-on .sd-bb__img--off { display: none; }
+      .sd-bb__lottie { position: absolute; inset: -4px; display: none; }
+      .sd-bb__ico.is-lottie .sd-bb__lottie { display: block; }
+      .sd-bb__ico.is-lottie > svg, .sd-bb__ico.is-lottie > img { visibility: hidden; }
+
+      .sd-bb__label {
+        font-size: 10.5px; line-height: 1.1; font-weight: 500; letter-spacing: .2px;
+        max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        color: var(--sd-label);
+        transition: color .3s ease, opacity .3s ease, max-height .3s ease;
+      }
+      .sd-bb__item.is-on .sd-bb__label { color: var(--c-active); font-weight: 600; }
+      .sd-bb--active-only .sd-bb__label { max-height: 0; opacity: 0; }
+      .sd-bb--active-only .sd-bb__item.is-on .sd-bb__label { max-height: 14px; opacity: 1; }
+
+      .sd-bb__badge {
+        position: absolute;
+        top: 6px; left: 50%; margin-left: 6px;
+        min-width: 17px; height: 17px; padding: 0 4px; box-sizing: border-box;
+        border-radius: 9px;
+        background: {{ section.settings.badge_bg }};
+        color: {{ section.settings.badge_text }};
+        font-size: 10px; font-weight: 700; line-height: 17px; text-align: center;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, .25), 0 0 0 1.5px rgba(255, 255, 255, .9);
+        z-index: 3 !important;
+        transition: transform .3s cubic-bezier(.34, 1.56, .64, 1), opacity .2s ease;
+      }
+      .sd-bb__badge.is-empty { transform: scale(0); opacity: 0; }
+      .sd-bb__badge.bump { animation: sd-bb-badge .5s cubic-bezier(.34, 1.56, .64, 1); }
+
+      .sd-bb__item.is-anim[data-anim="bounce"] .sd-bb__ico { animation: sd-bb-bounce .65s cubic-bezier(.3, .7, .4, 1); }
+      .sd-bb__item.is-anim[data-anim="pop"] .sd-bb__ico    { animation: sd-bb-pop .55s cubic-bezier(.3, .7, .4, 1); }
+      .sd-bb__item.is-anim[data-anim="jelly"] .sd-bb__ico  { animation: sd-bb-jelly .7s ease; }
+      .sd-bb__item.is-anim[data-anim="wiggle"] .sd-bb__ico { animation: sd-bb-wiggle .65s ease; }
+      .sd-bb__item.is-anim[data-anim="draw"] .sd-bb__ico svg * { stroke-dasharray: 1; stroke-dashoffset: 1; animation: sd-bb-draw .75s ease forwards; }
+      .sd-bb__item.is-anim[data-anim="draw"] .sd-bb__ico { animation: sd-bb-pop .55s cubic-bezier(.3, .7, .4, 1); }
+
+      @keyframes sd-bb-rise { from { transform: translateY(140%); opacity: 0; } to { transform: none; opacity: 1; } }
+      @keyframes sd-bb-bounce { 0% { transform: translateY(0) scale(1,1); } 18% { transform: translateY(0) scale(1.2,.8); } 45% { transform: translateY(-10px) scale(.9,1.12); } 70% { transform: translateY(0) scale(1.12,.9); } 100% { transform: translateY(0) scale(1,1); } }
+      @keyframes sd-bb-pop { 0% { transform: scale(1); } 35% { transform: scale(.65); } 70% { transform: scale(1.3); } 100% { transform: scale(1); } }
+      @keyframes sd-bb-jelly { 0% { transform: scale(1,1); } 25% { transform: scale(1.3,.7); } 45% { transform: scale(.75,1.25); } 65% { transform: scale(1.15,.87); } 85% { transform: scale(.95,1.05); } 100% { transform: scale(1,1); } }
+      @keyframes sd-bb-wiggle { 0%,100% { transform: rotate(0); } 20% { transform: rotate(-18deg) scale(1.1); } 40% { transform: rotate(14deg) scale(1.1); } 60% { transform: rotate(-9deg); } 80% { transform: rotate(5deg); } }
+      @keyframes sd-bb-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+      @keyframes sd-bb-badge { 0% { transform: scale(1); } 40% { transform: scale(1.5); } 100% { transform: scale(1); } }
+
+      /* =========================================================
+         SHARED PANEL (categories + cart + profile)
+      ========================================================= */
+      .sd-cat, .sd-cart, .sd-prof {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        inset: 0;
+        background: {{ section.settings.panel_bg }};
+        color: {{ section.settings.text_color }};
+        visibility: hidden;
+        opacity: 0;
+        transform: translateY(28px);
+        transition: transform .45s cubic-bezier(.2, .9, .3, 1), opacity .3s ease, visibility 0s linear .45s;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .sd-cat, .sd-prof { z-index: 850; }
+      .sd-cart { z-index: 950; }
+      .sd-cat.is-open, .sd-cart.is-open, .sd-prof.is-open {
+        visibility: visible; opacity: 1; transform: none;
+        transition: transform .45s cubic-bezier(.2, .9, .3, 1), opacity .3s ease, visibility 0s;
+      }
+      .sd-cat [hidden], .sd-cart [hidden], .sd-prof [hidden] { display: none !important; }
+      .sd-ph {
+        flex: none;
+        display: flex; align-items: center; gap: 6px;
+        padding: calc(env(safe-area-inset-top, 0px) + 6px) 10px 6px 6px;
+        min-height: 56px; box-sizing: border-box;
+        background: {{ section.settings.panel_bg }};
+        border-bottom: 1px solid rgba(0, 0, 0, .06);
+      }
+      .sd-ph__btn {
+        position: relative; flex: none;
+        width: 42px; height: 42px; border: 0; background: transparent; padding: 0;
+        display: flex; align-items: center; justify-content: center;
+        color: inherit; border-radius: 50%; text-decoration: none; cursor: pointer;
+      }
+      .sd-ph__btn:active { background: rgba(0, 0, 0, .06); }
+      .sd-ph__btn svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+      .sd-ph__title { flex: 1; font-size: 17px; font-weight: 600; letter-spacing: .2px; }
+      .sd-ph .sd-bb__badge { top: 2px; left: auto; right: 0; margin: 0; }
+
+      /* =========================================================
+         CATEGORIES PANEL
+      ========================================================= */
+      .sd-cat__main { flex: 1; min-height: 0; display: flex; }
+      /* V4-3: wider + taller left tabs (easy to tap on a real phone) */
+      .sd-cat__tabs {
+        flex: none; width: {{ section.settings.tab_width }}px; overflow-y: auto; overscroll-behavior: contain;
+        background: {{ section.settings.sidebar_bg }};
+        padding-bottom: var(--sd-bb-total);
+      }
+      .sd-cat--notabs .sd-cat__tabs { display: none; }
+      .sd-cat__tab {
+        position: relative; width: 100%; min-height: 64px; box-sizing: border-box;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+        padding: 16px 6px; border: 0; background: transparent; cursor: pointer;
+        font: inherit; font-size: 13px; font-weight: 500; line-height: 1.25; text-align: center;
+        color: #6b6f80; border-bottom: 1px solid rgba(0, 0, 0, .05);
+        touch-action: manipulation;
+        transition: background .3s ease, color .3s ease;
+      }
+      .sd-cat__tab:active { background: rgba(0, 0, 0, .05); }
+      .sd-cat__tab img { width: var(--ts, 48px); height: var(--ts, 48px); object-fit: contain; display: block; }
+      .sd-cat__tab::before {
+        content: ""; position: absolute; left: 0; top: 14%; bottom: 14%; width: 4px;
+        border-radius: 0 4px 4px 0; background: {{ ac }};
+        transform: scaleY(0); transition: transform .35s cubic-bezier(.3, 1.4, .45, 1);
+      }
+      .sd-cat__tab.is-on { background: {{ section.settings.panel_bg }}; color: {{ ac }}; font-weight: 600; }
+      .sd-cat__tab.is-on::before { transform: scaleY(1); }
+      .sd-cat__body {
+        flex: 1; min-width: 0; overflow-y: auto; overscroll-behavior: contain;
+        padding: 16px 12px calc(var(--sd-bb-total) + 16px);
+      }
+      .sd-cat__pane { display: none; }
+      .sd-cat__pane.is-on { display: block; animation: sd-fade .35s ease; }
+      @keyframes sd-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+      .sd-cat__grid { display: grid; grid-template-columns: repeat({{ section.settings.cat_columns }}, minmax(0, 1fr)); gap: {{ section.settings.cat_row_gap }}px {{ section.settings.cat_col_gap }}px; }
+      .sd-cat__h { grid-column: 1 / -1; margin: 6px 0 -4px; font-size: 16px; font-weight: 700; }
+      .sd-cat__item { display: flex; flex-direction: column; align-items: center; gap: 8px; text-decoration: none; color: inherit; min-width: 0; }
+      .sd-cat__item:active { transform: scale(.96); }
+      .sd-cat__img {
+        position: relative; display: block;
+        width: 100%; aspect-ratio: {{ section.settings.cat_image_ratio }};
+        overflow: hidden; box-sizing: border-box;
+        background: var(--tile, #f3f4f8); border-radius: var(--r, 16px);
+      }
+      .sd-cat__img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .sd-cat__tag {
+        position: absolute; left: 0; right: 0; bottom: 0;
+        font-size: 10.5px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase;
+        text-align: center; padding: 3px 4px; background: var(--tg, #16a34a); color: var(--tc, #fff);
+      }
+      .sd-cat__name { font-size: 12.5px; line-height: 1.25; text-align: center; font-weight: 500; word-break: break-word; }
+
+      /* =========================================================
+         PROFILE PANEL  (Koskii style)
+      ========================================================= */
+      .sd-prof__scroll {
+        flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+        padding-bottom: calc(var(--sd-bb-total) + 16px);
+      }
+      .sd-prof__hero { padding: 24px 16px 20px; background: {{ section.settings.prof_hero_bg }}; }
+      .sd-prof__guest { text-align: center; }
+      .sd-prof__guest h3 { margin: 6px 0 8px; font-size: 24px; font-weight: 700; letter-spacing: .2px; }
+      .sd-prof__guest p { margin: 0 0 20px; font-size: 14.5px; line-height: 1.45; opacity: .7; }
+      .sd-prof__user { display: flex; align-items: center; gap: 16px; margin-bottom: 22px; }
+      .sd-prof__avatar {
+        flex: none; width: 68px; height: 68px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        background: {{ ac }}; color: {{ btn_txt }}; font-size: 30px; font-weight: 700; text-transform: uppercase;
+        box-shadow: 0 8px 20px -8px {{ ac }};
+      }
+      .sd-prof__who { min-width: 0; }
+      .sd-prof__name { font-size: 19px; font-weight: 600; line-height: 1.25; word-break: break-word; }
+      .sd-prof__sub { margin-top: 4px; font-size: 14px; opacity: .6; word-break: break-all; }
+      .sd-btn--line {
+        background: transparent; color: {{ ac }}; box-shadow: none;
+        border: 1.5px solid {{ ac }}; text-transform: none; font-size: 16px; font-weight: 600; letter-spacing: .3px;
+        padding: 13px 18px;
+      }
+      .sd-prof__list { display: flex; flex-direction: column; }
+      .sd-prof__row {
+        display: flex; align-items: center; gap: 14px;
+        padding: 12px 16px; text-decoration: none; color: inherit;
+        transition: background .2s ease; animation: sd-fade .4s ease backwards;
+      }
+      .sd-prof__row:active { background: rgba(0, 0, 0, .04); }
+      .sd-prof__ico {
+        position: relative; flex: none;
+        width: var(--is, 48px); height: var(--is, 48px); border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        background: var(--ib, #652D1C); color: var(--ic, #F8EEEC);
+        overflow: hidden;
+      }
+      .sd-prof__ico svg { width: 52%; height: 52%; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+      .sd-prof__ico > img { width: 64%; height: 64%; object-fit: contain; display: block; }
+      .sd-prof__lottie { position: absolute; inset: 14%; }
+      .sd-prof__txt { flex: 1; min-width: 0; }
+      .sd-prof__t { font-size: 17px; font-weight: 600; line-height: 1.25; }
+      .sd-prof__s { margin-top: 2px; font-size: 13.5px; opacity: .6; line-height: 1.3; }
+      .sd-prof__chev { flex: none; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; opacity: .45; }
+
+      /* V4-4: in-panel detail page (Terms, Privacy, FAQ ... open here instantly, no reload) */
+      .sd-prof__page {
+        position: absolute; inset: 0; z-index: 5;
+        display: flex; flex-direction: column;
+        background: {{ section.settings.panel_bg }};
+        visibility: hidden;
+        transform: translateX(100%);
+        transition: transform .38s cubic-bezier(.2, .9, .3, 1), visibility 0s linear .38s;
+      }
+      .sd-prof__page.is-open { visibility: visible; transform: none; transition: transform .38s cubic-bezier(.2, .9, .3, 1), visibility 0s; }
+      .sd-prof__pbody {
+        flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+        padding: 18px 18px calc(var(--sd-bb-total) + 20px);
+        font-size: 15px; line-height: 1.65; word-break: break-word;
+      }
+      .sd-prof__pbody > * { max-width: 100%; }
+      .sd-prof__pbody img, .sd-prof__pbody video, .sd-prof__pbody iframe { max-width: 100%; height: auto; }
+      .sd-prof__pbody table { display: block; overflow-x: auto; max-width: 100%; border-collapse: collapse; }
+      .sd-prof__pbody td, .sd-prof__pbody th { padding: 6px 8px; border: 1px solid rgba(0, 0, 0, .12); }
+      .sd-prof__pbody h1 { font-size: 22px; line-height: 1.3; margin: 0 0 14px; }
+      .sd-prof__pbody h2 { font-size: 19px; margin: 22px 0 8px; }
+      .sd-prof__pbody h3 { font-size: 17px; margin: 18px 0 6px; }
+      .sd-prof__pbody p { margin: 0 0 12px; }
+      .sd-prof__pbody .page-width, .sd-prof__pbody [class*="page-width"] { padding-left: 0; padding-right: 0; max-width: 100%; }
+      .sd-prof__pbody .shopify-policy__title, .sd-prof__pbody .main-page-title { display: none; }
+      .sd-prof__pbody .shopify-section { margin: 0; padding: 0; }
+      .sd-prof__load { display: flex; justify-content: center; padding: 60px 0; }
+      .sd-prof__load i {
+        width: 30px; height: 30px; border-radius: 50%;
+        border: 3px solid rgba(0, 0, 0, .1); border-top-color: {{ ac }};
+        animation: sd-spin .7s linear infinite;
+      }
+      @keyframes sd-spin { to { transform: rotate(360deg); } }
+      .sd-prof__err { text-align: center; padding: 50px 10px; }
+      .sd-prof__err a { color: {{ ac }}; font-weight: 600; }
+
+      /* =========================================================
+         CART PANEL
+      ========================================================= */
+      .sd-cart__scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; background: {{ section.settings.panel_bg }}; }
+      .sd-cart__empty { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 26px 20px 8px; }
+      .sd-cart__media { position: relative; max-width: 100%; display: flex; align-items: center; justify-content: center; }
+      .sd-cart__media img, .sd-cart__media svg { width: 100%; height: 100%; object-fit: contain; }
+      .sd-cart__lottie { width: 100%; height: 100%; }
+      .sd-cart__empty h3 { margin: 18px 0 6px; font-size: 20px; font-weight: 700; }
+      .sd-cart__empty p { margin: 0 0 18px; font-size: 14px; opacity: .7; line-height: 1.45; }
+      .sd-btn {
+        display: block; width: 100%; box-sizing: border-box; text-align: center; text-decoration: none;
+        padding: 15px 18px; border: 0; border-radius: 12px; cursor: pointer;
+        font: inherit; font-size: 14px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase;
+        background: {{ ac }}; color: {{ btn_txt }};
+        box-shadow: 0 8px 20px -8px {{ ac }};
+        transition: transform .2s ease;
+      }
+      .sd-btn:active { transform: scale(.97); }
+      .sd-cart__empty .sd-btn { width: 100%; max-width: 420px; }
+      /* V4-9: keep button text color on hover / tap / focus / visited */
+      .sd-btn,
+      .sd-btn:hover,
+      .sd-btn:focus,
+      .sd-btn:focus-visible,
+      .sd-btn:active,
+      .sd-btn:visited {
+        color: {{ btn_txt }} !important;
+        background-color: {{ ac }};
+        text-decoration: none;
+      }
+      /* Logout button (outline style) keeps its own colors */
+      .sd-btn--line,
+      .sd-btn--line:hover,
+      .sd-btn--line:focus,
+      .sd-btn--line:focus-visible,
+      .sd-btn--line:active,
+      .sd-btn--line:visited {
+        color: {{ ac }} !important;
+        background: transparent;
+      }
+      /* profile rows: theme hover should not recolor the text */
+      .sd-prof__row,
+      .sd-prof__row:hover,
+      .sd-prof__row:focus,
+      .sd-prof__row:visited { color: inherit; text-decoration: none; }
+      .sd-save { margin: 12px 14px 0; padding: 10px 12px; border-radius: 10px; background: #e7f8ee; color: #15803d; font-size: 13.5px; font-weight: 700; text-align: center; }
+      .sd-ship { margin: 12px 14px 0; font-size: 12.5px; }
+      .sd-ship__bar { height: 4px; border-radius: 4px; background: rgba(0, 0, 0, .08); margin-top: 7px; overflow: hidden; }
+      .sd-ship__bar i { display: block; height: 100%; width: 0; background: {{ ac }}; border-radius: 4px; transition: width .6s cubic-bezier(.3, 1, .4, 1); }
+      .sd-ci { display: flex; gap: 12px; padding: 16px 14px; border-bottom: 1px solid rgba(0, 0, 0, .07); transition: opacity .25s ease; animation: sd-fade .35s ease; }
+      .sd-ci.is-busy { opacity: .45; pointer-events: none; }
+      .sd-ci__img { flex: none; width: 92px; }
+      .sd-ci__img img { width: 92px; height: 122px; object-fit: cover; border-radius: 10px; display: block; background: #f3f4f8; }
+      .sd-ci__info { flex: 1; min-width: 0; }
+      .sd-ci__top { display: flex; gap: 8px; align-items: flex-start; }
+      .sd-ci__title { flex: 1; font-size: 14.5px; line-height: 1.3; font-weight: 600; color: inherit; text-decoration: none; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+      .sd-ci__rm { flex: none; border: 0; background: transparent; padding: 2px; color: #9a9aa8; cursor: pointer; }
+      .sd-ci__rm svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; display: block; }
+      .sd-ci__opts { margin-top: 4px; font-size: 12.5px; opacity: .65; }
+      .sd-ci__qty { margin-top: 10px; display: inline-flex; align-items: center; border: 1px solid rgba(0, 0, 0, .14); border-radius: 10px; overflow: hidden; }
+      .sd-ci__qty button { width: 34px; height: 32px; border: 0; background: transparent; font-size: 18px; line-height: 1; color: {{ ac }}; cursor: pointer; }
+      .sd-ci__qty button:active { background: rgba(0, 0, 0, .06); }
+      .sd-ci__qty span { min-width: 30px; text-align: center; font-size: 14px; font-weight: 600; }
+      .sd-ci__price { margin-top: 10px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+      .sd-ci__price b { font-size: 16px; }
+      .sd-ci__price s { font-size: 12.5px; opacity: .5; }
+      .sd-ci__price em { font-style: normal; font-size: 12px; font-weight: 700; color: #dc2626; }
+      .sd-cart__foot {
+        flex: none; display: flex; align-items: center; gap: 14px;
+        padding: 12px 14px calc(env(safe-area-inset-bottom, 0px) + 12px);
+        background: {{ section.settings.panel_bg }};
+        box-shadow: 0 -10px 30px rgba(20, 20, 40, .1);
+      }
+      .sd-cart__tot small { display: block; font-size: 12px; opacity: .6; }
+      .sd-cart__tot b { display: block; font-size: 20px; line-height: 1.2; }
+      .sd-cart__foot .sd-btn { flex: 1; }
+      .sd-reco { padding: 22px 14px 26px; }
+      .sd-reco h4 { margin: 0 0 14px; text-align: center; font-size: 13.5px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; }
+      .sd-reco__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 10px; }
+      .sd-reco__card { text-decoration: none; color: inherit; display: block; }
+      .sd-reco__card img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 12px; display: block; background: #f3f4f8; }
+      .sd-reco__t { margin-top: 8px; font-size: 13px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+      .sd-reco__p { margin-top: 3px; font-size: 13.5px; font-weight: 700; }
+      .sd-reco__p s { font-weight: 400; opacity: .5; margin-left: 6px; font-size: 12px; }
+
+      @media (prefers-reduced-motion: reduce) {
+        .sd-bb, .sd-bb *, .sd-bb *::before, .sd-cat, .sd-cart, .sd-prof, .sd-prof * { animation: none !important; transition-duration: .01s !important; }
+      }
+    }
+  </style>
+
+  {%- comment -%} ================= BOTTOM BAR ================= {%- endcomment -%}
+  <nav
+    class="sd-bb{% if section.settings.label_mode == 'active' %} sd-bb--active-only{% endif %}"
+    id="sd-bb-{{ section.id }}"
+    aria-label="Mobile navigation"
+    style="--sd-icon: {{ section.settings.icon_color }}; --sd-label: {{ section.settings.label_color }};"
+  >
+    <span class="sd-bb__glass" aria-hidden="true"></span>
+    <span class="sd-bb__pill" aria-hidden="true"></span>
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'item' -%}
+        {%- liquid
+          assign act = block.settings.action
+          assign href = block.settings.link
+          assign is_current = false
+          case act
+            when 'menu'
+              if href == blank
+                assign href = routes.collections_url
+              endif
+            when 'cart'
+              assign href = routes.cart_url
+              if request.page_type == 'cart'
+                assign is_current = true
+              endif
+            when 'profile'
+              if customer
+                assign href = routes.account_url
+              else
+                assign href = routes.account_login_url
+              endif
+              if request.page_type contains 'customers'
+                assign is_current = true
+              endif
+            else
+              if href == blank
+                assign href = routes.root_url
+              endif
+              if href == routes.root_url and request.page_type == 'index'
+                assign is_current = true
+              elsif href == request.path
+                assign is_current = true
+              endif
+          endcase
+          assign active_color = section.settings.accent_color
+          assign pill_color = active_color | color_modify: 'alpha', pill_alpha
+          assign use_img = false
+          if block.settings.icon_image != blank and block.settings.lottie_url == blank
+            assign use_img = true
+          endif
+        -%}
+        <a
+          href="{{ href }}"
+          class="sd-bb__item{% if is_current %} is-on is-current{% endif %}"
+          data-action="{{ act }}"
+          data-anim="{{ block.settings.icon_animation }}"
+          data-pill="{{ pill_color }}"
+          aria-label="{{ block.settings.title | escape }}"
+          draggable="false"
+          {% if is_current %}aria-current="page"{% endif %}
+          style="--c-active: {{ active_color }};"
+          {{ block.shopify_attributes }}
+        >
+          <span class="sd-bb__ico{% if block.settings.icon_image_active != blank %} has-on{% endif %}" aria-hidden="true">
+            {%- if use_img -%}
+              {{ block.settings.icon_image | image_url: width: 120 | image_tag: class: 'sd-bb__img sd-bb__img--off', width: 60, height: 60, loading: 'eager', alt: '' }}
+              {%- if block.settings.icon_image_active != blank -%}
+                {{ block.settings.icon_image_active | image_url: width: 120 | image_tag: class: 'sd-bb__img sd-bb__img--on', width: 60, height: 60, loading: 'eager', alt: '' }}
+              {%- endif -%}
+            {%- else -%}
+              <svg viewBox="0 0 24 24" focusable="false">
+                {%- case block.settings.icon_preset -%}
+                  {%- when 'home' -%}
+                    <path pathLength="1" d="M3 10.5 12 3l9 7.5"/>
+                    <path pathLength="1" d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/>
+                  {%- when 'categories' -%}
+                    <rect pathLength="1" x="3.5" y="3.5" width="7" height="7" rx="2"/>
+                    <rect pathLength="1" x="13.5" y="3.5" width="7" height="7" rx="2"/>
+                    <rect pathLength="1" x="3.5" y="13.5" width="7" height="7" rx="2"/>
+                    <rect pathLength="1" x="13.5" y="13.5" width="7" height="7" rx="2"/>
+                  {%- when 'bag' -%}
+                    <path pathLength="1" d="M5 8h14l-1 12H6L5 8Z"/>
+                    <path pathLength="1" d="M9 8V6.5a3 3 0 0 1 6 0V8"/>
+                  {%- when 'cart' -%}
+                    <circle pathLength="1" cx="9" cy="20" r="1.4"/>
+                    <circle pathLength="1" cx="17" cy="20" r="1.4"/>
+                    <path pathLength="1" d="M3 4h2.5l2.2 11h10l2-8H6.5"/>
+                  {%- when 'user' -%}
+                    <circle pathLength="1" cx="12" cy="8" r="4"/>
+                    <path pathLength="1" d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>
+                  {%- when 'heart' -%}
+                    <path pathLength="1" d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.3 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10Z"/>
+                  {%- when 'search' -%}
+                    <circle pathLength="1" cx="11" cy="11" r="7"/>
+                    <path pathLength="1" d="M16.5 16.5 21 21"/>
+                  {%- when 'tag' -%}
+                    <path pathLength="1" d="M3 12V4h8l10 10-8 8L3 12Z"/>
+                    <circle pathLength="1" cx="7.5" cy="8.5" r="1.2"/>
+                  {%- when 'star' -%}
+                    <path pathLength="1" d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9L12 3Z"/>
+                  {%- when 'diamond' -%}
+                    <path pathLength="1" d="M6 4h12l4 6-10 11L2 10l4-6Z"/>
+                    <path pathLength="1" d="M2 10h20M9 4l-2 6 5 11 5-11-2-6"/>
+                  {%- else -%}
+                    <circle pathLength="1" cx="12" cy="12" r="8"/>
+                {%- endcase -%}
+              </svg>
+            {%- endif -%}
+            {%- if block.settings.lottie_url != blank -%}
+              <span class="sd-bb__lottie" data-src="{{ block.settings.lottie_url }}"></span>
+            {%- endif -%}
+          </span>
+
+          {%- if section.settings.label_mode != 'never' and block.settings.title != blank -%}
+            <span class="sd-bb__label">{{ block.settings.title | escape }}</span>
+          {%- endif -%}
+
+          {%- if act == 'cart' and block.settings.show_badge -%}
+            <span class="sd-bb__badge{% if cart.item_count < 1 %} is-empty{% endif %}">{{ cart.item_count }}</span>
+          {%- endif -%}
+        </a>
+      {%- endif -%}
+    {%- endfor -%}
+  </nav>
+
+  {%- comment -%} ================= CATEGORIES PANEL ================= {%- endcomment -%}
+  <div class="sd-cat{% if tab_count == 0 %} sd-cat--notabs{% endif %}" id="sd-cat-{{ section.id }}" aria-hidden="true" role="dialog" aria-label="{{ section.settings.cat_title | escape }}">
+    <div class="sd-ph">
+      <button type="button" class="sd-ph__btn" data-sd-close aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      </button>
+      <span class="sd-ph__title">{{ section.settings.cat_title | escape }}</span>
+      <a class="sd-ph__btn" href="{{ routes.search_url }}" aria-label="Search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+      </a>
+      <button type="button" class="sd-ph__btn" data-sd-opencart aria-label="Cart">
+        <svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6L5 8Z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>
+        <span class="sd-bb__badge{% if cart.item_count < 1 %} is-empty{% endif %}">{{ cart.item_count }}</span>
+      </button>
+    </div>
+    <div class="sd-cat__main">
+      <nav class="sd-cat__tabs">
+        {%- assign tn = 0 -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'tab' -%}
+            {%- assign tn = tn | plus: 1 -%}
+            <button type="button" class="sd-cat__tab{% if tn == 1 %} is-on{% endif %}" data-tab="{{ tn }}" style="--ts: {{ block.settings.image_size }}px;" {{ block.shopify_attributes }}>
+              {%- if block.settings.image != blank -%}
+                {{ block.settings.image | image_url: width: 200 | image_tag: width: block.settings.image_size, height: block.settings.image_size, loading: 'lazy', alt: block.settings.title }}
+              {%- endif -%}
+              <span>{{ block.settings.title | escape }}</span>
+            </button>
+          {%- endif -%}
+        {%- endfor -%}
+      </nav>
+      <div class="sd-cat__body">
+        {%- assign pane_total = tab_count -%}
+        {%- if pane_total == 0 -%}{%- assign pane_total = 1 -%}{%- endif -%}
+        {%- for t in (1..pane_total) -%}
+          <section class="sd-cat__pane{% if t == 1 %} is-on{% endif %}" data-pane="{{ t }}">
+            <div class="sd-cat__grid">
+              {%- assign cur_tab = 0 -%}
+              {%- for block in section.blocks -%}
+                {%- if block.type == 'tab' -%}
+                  {%- assign cur_tab = cur_tab | plus: 1 -%}
+                {%- elsif block.type == 'category' -%}
+                  {%- assign owner = block.settings.tab -%}
+                  {%- if owner == 0 -%}
+                    {%- assign owner = cur_tab -%}
+                    {%- if owner == 0 -%}{%- assign owner = 1 -%}{%- endif -%}
+                  {%- endif -%}
+                  {%- if owner == t or tab_count == 0 -%}
+                    {%- if block.settings.heading != blank -%}
+                      <h4 class="sd-cat__h">{{ block.settings.heading | escape }}</h4>
+                    {%- endif -%}
+                    <a href="{{ block.settings.link | default: routes.collections_url }}" class="sd-cat__item" draggable="false" {{ block.shopify_attributes }}>
+                     <span class="sd-cat__img" style="--r: {{ block.settings.image_radius }}px; --tile: {{ block.settings.tile_bg }}; --tg: {{ block.settings.tag_bg }}; --tc: {{ block.settings.tag_color }};">
+                        {%- if block.settings.image != blank -%}
+                          {{ block.settings.image | image_url: width: 600 | image_tag: loading: 'lazy', alt: block.settings.title }}
+                        {%- endif -%}
+                        {%- if block.settings.tag_text != blank -%}
+                          <span class="sd-cat__tag">{{ block.settings.tag_text | escape }}</span>
+                        {%- endif -%}
+                      </span>
+                      <span class="sd-cat__name">{{ block.settings.title | escape }}</span>
+                    </a>
+                  {%- endif -%}
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+          </section>
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%} ================= PROFILE PANEL ================= {%- endcomment -%}
+  <div class="sd-prof" id="sd-prof-{{ section.id }}" aria-hidden="true" role="dialog" aria-label="{{ section.settings.prof_title | escape }}">
+    <div class="sd-ph">
+      <button type="button" class="sd-ph__btn" data-sd-close aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      </button>
+      <span class="sd-ph__title">{{ section.settings.prof_title | escape }}</span>
+    </div>
+
+    <div class="sd-prof__scroll">
+      <div class="sd-prof__hero">
+        {%- if customer -%}
+          {%- liquid
+            assign p_name = customer.name | strip
+            if p_name == blank
+              assign p_name = customer.email
+            endif
+            assign p_sub = customer.phone
+            if p_sub == blank
+              assign p_sub = customer.email
+            endif
+          -%}
+          <div class="sd-prof__user">
+            <div class="sd-prof__avatar">{{ p_name | strip | slice: 0 | escape }}</div>
+            <div class="sd-prof__who">
+              <div class="sd-prof__name">{{ p_name | escape }}</div>
+              <div class="sd-prof__sub">{{ p_sub | escape }}</div>
+            </div>
+          </div>
+          <a class="sd-btn sd-btn--line" href="{{ routes.account_logout_url }}">{{ section.settings.prof_logout_text | escape }}</a>
+        {%- else -%}
+          <div class="sd-prof__guest">
+            <h3>{{ section.settings.prof_guest_heading | escape }}</h3>
+            <p>{{ section.settings.prof_guest_text | escape }}</p>
+            <a class="sd-btn" href="{{ routes.account_login_url }}" style="text-transform:none;font-size:17px;font-weight:600;letter-spacing:.3px;">{{ section.settings.prof_login_text | escape }}</a>
+          </div>
+        {%- endif -%}
+      </div>
+
+      <div class="sd-prof__list">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'profile_link' -%}
+            {%- if block.settings.show_for == 'logged_in' and customer == blank -%}
+              {%- continue -%}
+            {%- endif -%}
+            {%- liquid
+              assign r_href = block.settings.link
+              if r_href == blank
+                case block.settings.icon_preset
+                  when 'orders'
+                    assign r_href = routes.account_url
+                  when 'doc'
+                    assign r_href = '/policies/terms-of-service'
+                  when 'shield'
+                    assign r_href = '/policies/privacy-policy'
+                  when 'return'
+                    assign r_href = '/policies/refund-policy'
+                  else
+                    assign r_href = '#'
+                endcase
+              endif
+              assign r_img = false
+              if block.settings.icon_image != blank and block.settings.lottie_url == blank
+                assign r_img = true
+              endif
+              comment
+                V4-5: decide if this row opens inside the panel (no reload).
+                Orders / account pages need a full page, so they always reload.
+              endcomment
+              assign r_inline = block.settings.open_inline
+              if r_href == '#'
+                assign r_inline = false
+              endif
+              if block.settings.link == blank and block.settings.icon_preset == 'orders'
+                assign r_inline = false
+              endif
+            -%}
+            <a class="sd-prof__row" href="{{ r_href }}" data-inline="{{ r_inline }}" draggable="false" style="--is: {{ section.settings.prof_icon_size }}px; --ib: {{ section.settings.prof_icon_bg }}; --ic: {{ section.settings.prof_icon_color }};" {{ block.shopify_attributes }}>
+              <span class="sd-prof__ico" aria-hidden="true">
+                {%- if r_img -%}
+                  {{ block.settings.icon_image | image_url: width: 120 | image_tag: width: 40, height: 40, loading: 'lazy', alt: '' }}
+                {%- elsif block.settings.lottie_url != blank -%}
+                  <span class="sd-prof__lottie" data-src="{{ block.settings.lottie_url }}"></span>
+                {%- else -%}
+                  <svg viewBox="0 0 24 24" focusable="false">
+                    {%- case block.settings.icon_preset -%}
+                      {%- when 'orders' -%}
+                        <path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r=".8"/><circle cx="4" cy="12" r=".8"/><circle cx="4" cy="18" r=".8"/>
+                      {%- when 'sparkle' -%}
+                        <path d="M9 4l1.6 4.4L15 10l-4.4 1.6L9 16l-1.6-4.4L3 10l4.4-1.6L9 4Z"/><path d="M18 14l.8 2.2L21 17l-2.2.8L18 20l-.8-2.2L15 17l2.2-.8L18 14Z"/>
+                      {%- when 'phone' -%}
+                        <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/>
+                      {%- when 'size' -%}
+                        <path d="M5 19 19 5M14 5h5v5M10 19H5v-5"/>
+                      {%- when 'help' -%}
+                        <circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7M12 17h.01"/>
+                      {%- when 'store' -%}
+                        <path d="M4 9l1.5-5h13L20 9M4 9v11h16V9M4 9a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0A2.7 2.7 0 0 0 20 9M10 20v-5h4v5"/>
+                      {%- when 'doc' -%}
+                        <path d="M7 3h7l5 5v13H7V3Z"/><path d="M14 3v5h5M10 13h6M10 17h6"/>
+                      {%- when 'shield' -%}
+                        <path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3Z"/>
+                      {%- when 'return' -%}
+                        <path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>
+                      {%- when 'heart' -%}
+                        <path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.3 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10Z"/>
+                      {%- when 'gift' -%}
+                        <path d="M4 10h16v10H4V10ZM3 7h18v3H3V7ZM12 7v13M12 7C10 7 8 6 8 4.5S10.5 3 12 7c1.5-4 4-3.5 4-2.5S14 7 12 7Z"/>
+                      {%- when 'user' -%}
+                        <circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>
+                      {%- when 'pin' -%}
+                        <path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/>
+                      {%- when 'star' -%}
+                        <path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9L12 3Z"/>
+                      {%- else -%}
+                        <circle cx="12" cy="12" r="8"/>
+                    {%- endcase -%}
+                  </svg>
+                {%- endif -%}
+              </span>
+              <span class="sd-prof__txt">
+                <span class="sd-prof__t" style="display:block;">{{ block.settings.title | escape }}</span>
+                {%- if block.settings.subtitle != blank -%}
+                  <span class="sd-prof__s" style="display:block;">{{ block.settings.subtitle | escape }}</span>
+                {%- endif -%}
+              </span>
+              <svg class="sd-prof__chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>
+            </a>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+
+    {%- comment -%} V4-6: in-panel detail page layer {%- endcomment -%}
+    <div class="sd-prof__page" data-page aria-hidden="true">
+      <div class="sd-ph">
+        <button type="button" class="sd-ph__btn" data-sd-pageback aria-label="Back">
+          <svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+        </button>
+        <span class="sd-ph__title" data-page-title></span>
+      </div>
+      <div class="sd-prof__pbody" data-page-body></div>
+    </div>
+  </div>
+
+  {%- comment -%} ================= CART PANEL ================= {%- endcomment -%}
+  <div class="sd-cart" id="sd-cart-{{ section.id }}" aria-hidden="true" role="dialog" aria-label="{{ section.settings.cart_title | escape }}">
+    <div class="sd-ph">
+      <button type="button" class="sd-ph__btn" data-sd-close aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      </button>
+      <span class="sd-ph__title">{{ section.settings.cart_title | escape }}</span>
+    </div>
+
+    <div class="sd-cart__scroll">
+      <div class="sd-cart__empty" data-empty {% if cart.item_count > 0 %}hidden{% endif %}>
+        <div class="sd-cart__media" style="width: {{ section.settings.empty_media_width }}px; height: {{ section.settings.empty_media_height }}px;">
+          {%- if section.settings.empty_model != blank -%}
+            <model-viewer src="{{ section.settings.empty_model }}" auto-rotate camera-controls disable-zoom interaction-prompt="none" shadow-intensity="1" exposure="1" style="width:100%;height:100%;background:transparent;--poster-color:transparent;"></model-viewer>
+          {%- elsif section.settings.empty_lottie != blank -%}
+            <div class="sd-cart__lottie" data-src="{{ section.settings.empty_lottie }}"></div>
+          {%- elsif section.settings.empty_image != blank -%}
+            {{ section.settings.empty_image | image_url: width: 700 | image_tag: loading: 'lazy', alt: section.settings.empty_heading }}
+          {%- else -%}
+            <svg viewBox="0 0 120 120" fill="none" stroke="{{ ac }}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M24 40h72l-6 62H30L24 40Z" fill="{{ ac }}" fill-opacity=".12"/><path d="M44 40V32a16 16 0 0 1 32 0v8"/><circle cx="48" cy="64" r="2.5" fill="{{ ac }}"/><circle cx="72" cy="64" r="2.5" fill="{{ ac }}"/><path d="M50 78c6 6 14 6 20 0"/></svg>
+          {%- endif -%}
+        </div>
+        <h3>{{ section.settings.empty_heading | escape }}</h3>
+        <p>{{ section.settings.empty_text | escape }}</p>
+        <a class="sd-btn" href="{{ section.settings.empty_link | default: routes.collections_url }}">{{ section.settings.empty_button | escape }}</a>
+      </div>
+
+      <div data-filled hidden>
+        <div class="sd-save" data-save hidden></div>
+        <div class="sd-ship" data-ship hidden><span data-ship-t></span><div class="sd-ship__bar"><i data-ship-b></i></div></div>
+        <div data-list></div>
+      </div>
+
+      {%- if section.settings.reco_collection != blank -%}
+        <div class="sd-reco">
+          <h4>{{ section.settings.reco_heading | escape }}</h4>
+          <div class="sd-reco__grid">
+            {%- for product in section.settings.reco_collection.products limit: section.settings.reco_limit -%}
+              <a class="sd-reco__card" href="{{ product.url }}" draggable="false">
+                {%- if product.featured_media -%}
+                  {{ product.featured_media | image_url: width: 500 | image_tag: loading: 'lazy', alt: product.title }}
+                {%- endif -%}
+                <div class="sd-reco__t">{{ product.title | escape }}</div>
+                <div class="sd-reco__p">{{ product.price | money }}{% if product.compare_at_price > product.price %}<s>{{ product.compare_at_price | money }}</s>{% endif %}</div>
+              </a>
+            {%- endfor -%}
+          </div>
+        </div>
+      {%- endif -%}
+    </div>
+
+    <div class="sd-cart__foot" data-foot {% if cart.item_count < 1 %}hidden{% endif %}>
+      <div class="sd-cart__tot"><small>{{ section.settings.total_label | escape }}</small><b data-total>{{ cart.total_price | money }}</b></div>
+      <a class="sd-btn" href="{{ routes.root_url }}checkout" data-checkout>{{ section.settings.checkout_label | escape }}</a>
+    </div>
+  </div>
+
+  {%- if has_lottie -%}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer="defer"></script>
+  {%- endif -%}
+  {%- if section.settings.empty_model != blank -%}
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+  {%- endif -%}
+
+  <script>
+    (function () {
+      /* ---------- global: detect add-to-cart from ANY button (fetch + XHR) ---------- */
+      var nativeFetch = window.__sdOrigFetch || window.fetch.bind(window);
+      if (!window.__sdOrigFetch) {
+        window.__sdOrigFetch = nativeFetch;
+        var CART_RE = /\/cart\/(add|change|update|clear)/;
+        window.fetch = function () {
+          var a = arguments, u = '';
+          try { u = (a[0] && a[0].url) || String(a[0]); } catch (e) {}
+          var p = nativeFetch.apply(window, a);
+          if (CART_RE.test(u)) p.then(function () { document.dispatchEvent(new CustomEvent('sd:cart-changed')); }, function () {});
+          return p;
+        };
+        var xo = XMLHttpRequest.prototype.open;
+        XMLHttpRequest.prototype.open = function (m, u) {
+          var self = this; self.__sdu = String(u);
+          self.addEventListener('load', function () { if (CART_RE.test(self.__sdu || '')) document.dispatchEvent(new CustomEvent('sd:cart-changed')); });
+          return xo.apply(this, arguments);
+        };
+      }
+
+      var CFG = {
+        prefix: {{ section.settings.money_prefix | json }},
+        dec: {{ section.settings.money_decimals | json }},
+        thr: {{ section.settings.free_ship_threshold | default: 0 | times: 100 }},
+        shipTxt: {{ section.settings.ship_progress_text | json }},
+        shipDone: {{ section.settings.ship_done_text | json }},
+        savedTxt: {{ section.settings.saved_text | json }},
+        root: {{ routes.root_url | json }},
+        cartJs: {{ routes.cart_url | append: '.js' | json }},
+        changeJs: {{ routes.cart_change_url | json }}
+      };
+
+      function init() {
+        var bar = document.getElementById('sd-bb-{{ section.id }}');
+        var catP = document.getElementById('sd-cat-{{ section.id }}');
+        var cartP = document.getElementById('sd-cart-{{ section.id }}');
+        var profP = document.getElementById('sd-prof-{{ section.id }}');
+        if (!bar) return;
+        var mq = window.matchMedia('(max-width: 767px)');
+        var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var items = [].slice.call(bar.querySelectorAll('.sd-bb__item'));
+        var pill = bar.querySelector('.sd-bb__pill');
+        var menuItem = bar.querySelector('[data-action="menu"]');
+        var cartItem = bar.querySelector('[data-action="cart"]');
+        var profItem = bar.querySelector('[data-action="profile"]');
+        var lotties = new Map();
+        var current = bar.querySelector('.sd-bb__item.is-current');
+        var active = current;
+        var BODY = document.body;
+
+        /* ---------- icon animation ---------- */
+        function play(item) {
+          if (!item) return;
+          item.classList.remove('is-anim'); void item.offsetWidth; item.classList.add('is-anim');
+          var a = lotties.get(item); if (a) { try { a.goToAndPlay(0, true); } catch (e) {} }
+          clearTimeout(item._t); item._t = setTimeout(function () { item.classList.remove('is-anim'); }, 900);
+        }
+
+        /* ---------- the sliding glass pill ---------- */
+        var pillX = null, pillW = 0;
+        function place(item, instant) {
+          if (!pill) return;
+          if (!item) { pill.style.opacity = 0; return; }
+          var wasHidden = pill.style.opacity === '' || pill.style.opacity === '0';
+          var snap = instant || wasHidden || pillX === null;
+          if (snap) pill.classList.add('no-t');
+          pill.style.width = (item.offsetWidth - 4) + 'px';
+          pill.style.setProperty('--x', (item.offsetLeft + 2) + 'px');
+          pill.style.setProperty('--pc', item.dataset.pill);
+          pill.style.opacity = 1;
+          if (snap) { void pill.offsetWidth; pill.classList.remove('no-t'); }
+          pillX = item.offsetLeft + 2; pillW = item.offsetWidth - 4;
+        }
+        function squish() {
+          if (!pill || reduce) return;
+          pill.classList.add('squish');
+          clearTimeout(pill._s); pill._s = setTimeout(function () { pill.classList.remove('squish'); }, 190);
+        }
+        function setActive(item) {
+          active = item;
+          items.forEach(function (i) { i.classList.toggle('is-on', i === item); });
+          place(item); squish(); play(item);
+        }
+        function restore() {
+          items.forEach(function (i) { i.classList.toggle('is-on', i === current); });
+          active = current; place(current); if (current) squish();
+        }
+        if (active) place(active, true);
+        window.addEventListener('load', function () { place(active, true); });
+        window.addEventListener('resize', function () { place(active, true); });
+        if (window.ResizeObserver) new ResizeObserver(function () { place(active, true); }).observe(bar);
+
+        /* ---------- V4-8: profile rows open INSIDE the panel (no reload) ---------- */
+        var pageEl = profP ? profP.querySelector('[data-page]') : null;
+        var pageTitle = profP ? profP.querySelector('[data-page-title]') : null;
+        var pageBody = profP ? profP.querySelector('[data-page-body]') : null;
+        var pageOpen = false, pageToken = 0, pageHtml = {}, pageReq = {};
+
+        function extract(html) {
+          var d = new DOMParser().parseFromString(html, 'text/html');
+          var root = d.querySelector('.shopify-policy__container') || d.querySelector('#MainContent') || d.querySelector('main') || d.body;
+          root = root.cloneNode(true);
+          root.querySelectorAll('script, noscript, link[rel="preload"]').forEach(function (n) { n.remove(); });
+          root.querySelectorAll('*').forEach(function (n) {
+            [].slice.call(n.attributes).forEach(function (a) {
+              if (/^on/i.test(a.name) || (/^(href|src)$/i.test(a.name) && /^\s*javascript:/i.test(a.value))) n.removeAttribute(a.name);
+            });
+          });
+          return root.innerHTML;
+        }
+        function rowUrl(row) {
+          if (!row || row.dataset.inline !== 'true') return null;
+          var u;
+          try { u = new URL(row.getAttribute('href'), location.href); } catch (e) { return null; }
+          if (u.origin !== location.origin) return null;
+          var p = u.pathname.replace(/^\/[a-z]{2}(-[a-z]{2})?\//, '/');
+          if (/^\/(account|customer|checkout|cart)/.test(p)) return null;
+          return u.pathname + u.search;
+        }
+        function getPage(url) {
+          if (pageReq[url]) return pageReq[url];
+          var pr = nativeFetch(url, { credentials: 'same-origin' })
+            .then(function (r) { if (!r.ok) throw new Error('bad'); return r.text(); })
+            .then(function (t) { var h = extract(t); pageHtml[url] = h; return h; });
+          pageReq[url] = pr;
+          pr.catch(function () { delete pageReq[url]; });
+          return pr;
+        }
+        function prefetchRows() {
+          if (!profP || !mq.matches) return;
+          [].slice.call(profP.querySelectorAll('.sd-prof__row[data-inline="true"]')).forEach(function (row) {
+            var u = rowUrl(row); if (u) getPage(u).catch(function () {});
+          });
+        }
+        function showPage(url, title) {
+          if (!pageEl) return;
+          var tk = ++pageToken;
+          pageTitle.textContent = title;
+          pageBody.scrollTop = 0;
+          if (pageHtml[url]) { pageBody.innerHTML = pageHtml[url]; }
+          else {
+            pageBody.innerHTML = '<div class="sd-prof__load"><i></i></div>';
+            getPage(url).then(function (h) { if (tk === pageToken) pageBody.innerHTML = h; })
+              .catch(function () { if (tk === pageToken) pageBody.innerHTML = '<div class="sd-prof__err">Could not load this page.<br><a href="' + url + '">Open full page</a></div>'; });
+          }
+          pageEl.classList.add('is-open'); pageEl.setAttribute('aria-hidden', 'false');
+          if (!pageOpen) { try { history.pushState({ sd: 'page' }, '', location.href); } catch (e) {} }
+          pageOpen = true;
+        }
+        function hidePage() {
+          if (!pageEl) return;
+          pageEl.classList.remove('is-open'); pageEl.setAttribute('aria-hidden', 'true');
+          pageOpen = false; pageToken++;
+        }
+        function backPage() {
+          if (!pageOpen) return;
+          if (history.state && history.state.sd === 'page') history.back(); else hidePage();
+        }
+        window.addEventListener('popstate', function () { if (pageOpen) hidePage(); });
+        if (profP) {
+          profP.addEventListener('click', function (e) {
+            if (e.target.closest('[data-sd-pageback]')) { backPage(); return; }
+            var row = e.target.closest('.sd-prof__row');
+            if (!row || e.metaKey || e.ctrlKey || e.shiftKey) return;
+            var u = rowUrl(row); if (!u) return;
+            e.preventDefault();
+            var t = row.querySelector('.sd-prof__t');
+            showPage(u, t ? t.textContent : '');
+          });
+          if (mq.matches) setTimeout(prefetchRows, 2500);
+        }
+
+        /* ---------- panels ---------- */
+        function setOpen(p, on) {
+          if (!p) return;
+          p.classList.toggle('is-open', on);
+          p.setAttribute('aria-hidden', on ? 'false' : 'true');
+        }
+        function isOpen(p) { return !!(p && p.classList.contains('is-open')); }
+        function lock() {
+          BODY.classList.toggle('sd-lock', isOpen(catP) || isOpen(cartP) || isOpen(profP));
+          BODY.classList.toggle('sd-cart-open', isOpen(cartP));
+        }
+        function closeAll(skipRestore) {
+          if (pageOpen) { var had = history.state && history.state.sd === 'page'; hidePage(); if (had) history.back(); }
+          setOpen(catP, false); setOpen(cartP, false); setOpen(profP, false); lock();
+          if (!skipRestore) restore();
+        }
+        function openCat() {
+          setOpen(cartP, false); setOpen(profP, false); setOpen(catP, true); lock();
+          if (menuItem) setActive(menuItem);
+        }
+        function openProf() {
+          setOpen(cartP, false); setOpen(catP, false); setOpen(profP, true); lock();
+          if (profItem) setActive(profItem);
+        }
+        function openCart() {
+          setOpen(catP, false); setOpen(profP, false); setOpen(cartP, true); lock();
+          if (cartItem) setActive(cartItem);
+          if (cart) render();
+          refreshCart(true);
+        }
+        [catP, cartP, profP].forEach(function (p) {
+          if (!p) return;
+          p.addEventListener('click', function (e) {
+            if (e.target.closest('[data-sd-close]')) { closeAll(); return; }
+            if (e.target.closest('[data-sd-opencart]')) { openCart(); return; }
+          });
+        });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { if (pageOpen) backPage(); else closeAll(); } });
+
+        /* category tabs */
+        if (catP) {
+          var tabs = [].slice.call(catP.querySelectorAll('.sd-cat__tab'));
+          var panes = [].slice.call(catP.querySelectorAll('.sd-cat__pane'));
+          var cbody = catP.querySelector('.sd-cat__body');
+          tabs.forEach(function (t) {
+            t.addEventListener('click', function () {
+              tabs.forEach(function (x) { x.classList.toggle('is-on', x === t); });
+              panes.forEach(function (p) { p.classList.toggle('is-on', p.dataset.pane === t.dataset.tab); });
+              if (cbody) cbody.scrollTop = 0;
+            });
+          });
+        }
+
+        /* theme editor: selecting a block in the editor jumps to its tab / panel */
+        document.addEventListener('shopify:block:select', function (e) {
+          var el = e.target; if (!el || !el.closest) return;
+          if (catP && catP.contains(el)) {
+            var pane = el.closest('.sd-cat__pane'), tb = el.closest('.sd-cat__tab');
+            var n = pane ? pane.dataset.pane : (tb ? tb.dataset.tab : null);
+            openCat();
+            if (n) { var t = catP.querySelector('.sd-cat__tab[data-tab="' + n + '"]'); if (t) t.click(); }
+          } else if (profP && profP.contains(el)) { openProf(); }
+          else if (cartP && cartP.contains(el)) { openCart(); }
+        });
+        
+        /* ---------- bar interaction: tap + smooth finger-follow drag ---------- */
+        function trigger(item) {
+          var act = item.dataset.action;
+          if (act === 'menu') { if (isOpen(catP)) closeAll(); else openCat(); return; }
+          if (act === 'cart') { if (isOpen(cartP)) closeAll(); else openCart(); return; }
+          if (act === 'profile' && profP) { if (isOpen(profP)) closeAll(); else openProf(); return; }
+          closeAll(true);
+          setActive(item);
+          if (item.classList.contains('is-current') && act === 'link') { window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }); return; }
+          var href = item.getAttribute('href'); if (!href) return;
+          setTimeout(function () { window.location.href = href; }, reduce ? 0 : 340);
+        }
+        function itemAt(x) {
+          var best = null, d = 1e9;
+          items.forEach(function (i) { var r = i.getBoundingClientRect(); var dd = Math.abs(x - (r.left + r.width / 2)); if (dd < d) { d = dd; best = i; } });
+          return best;
+        }
+
+        /* V4-7: pill follows the finger every frame (lerp = liquid feel, zero lag) */
+        var drag = null, suppress = false, raf = 0, px = 0, tx = 0, lastX = 0;
+        function loop() {
+          if (!drag || !drag.moved) { raf = 0; return; }
+          px += (tx - px) * 0.38;
+          pill.style.transform = 'translate3d(' + px.toFixed(2) + 'px,0,0) scale(1.05,1.07)';
+          raf = requestAnimationFrame(loop);
+        }
+        bar.addEventListener('pointerdown', function (e) {
+          if (!mq.matches) return;
+          drag = { x: e.clientX, moved: false, id: e.pointerId };
+          bar.classList.add('is-press');
+        });
+        bar.addEventListener('pointermove', function (e) {
+          if (!drag) return;
+          lastX = e.clientX;
+          if (!drag.moved && Math.abs(e.clientX - drag.x) > 5) {
+            drag.moved = true;
+            bar.classList.add('is-drag');
+            try { bar.setPointerCapture(drag.id); } catch (er) {}
+            var start = active || items[0];
+            px = tx = start.offsetLeft + 2;
+            pill.style.opacity = 1;
+            if (!raf) raf = requestAnimationFrame(loop);
+          }
+          if (drag.moved && pill) {
+            var r = bar.getBoundingClientRect(), w = pill.offsetWidth;
+            tx = Math.max(2, Math.min(e.clientX - r.left - w / 2, r.width - w - 2));
+            var hov = itemAt(e.clientX);
+            items.forEach(function (i) { i.classList.toggle('is-hover', i === hov); });
+          }
+        });
+        function endDrag(e, cancel) {
+          if (!drag) return;
+          var moved = drag.moved; drag = null;
+          if (raf) { cancelAnimationFrame(raf); raf = 0; }
+          bar.classList.remove('is-press', 'is-drag');
+          items.forEach(function (i) { i.classList.remove('is-hover'); });
+          if (!moved) return;
+          suppress = true; setTimeout(function () { suppress = false; }, 80);
+          var target = cancel ? active : itemAt(e.clientX || lastX);
+          /* snap: set the target var first, then drop the inline transform -> CSS spring animates from finger position */
+          if (target) { pill.style.width = (target.offsetWidth - 4) + 'px'; pill.style.setProperty('--x', (target.offsetLeft + 2) + 'px'); pill.style.setProperty('--pc', target.dataset.pill); }
+          pill.style.transform = '';
+          if (target) { pillX = target.offsetLeft + 2; pillW = target.offsetWidth - 4; }
+          if (cancel || !target || target === active) return;
+          trigger(target);
+        }
+        bar.addEventListener('pointerup', function (e) { endDrag(e, false); });
+        bar.addEventListener('pointercancel', function (e) { endDrag(e, true); });
+        bar.addEventListener('click', function (e) {
+          var item = e.target.closest('.sd-bb__item');
+          if (!item || !mq.matches) return;
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+          e.preventDefault();
+          if (suppress) return;
+          trigger(item);
+        });
+        bar.addEventListener('dragstart', function (e) { e.preventDefault(); });
+
+        /* ---------- Lottie icons ---------- */
+        function initLottie() {
+          var holders = document.querySelectorAll('#sd-bb-{{ section.id }} .sd-bb__lottie[data-src], #sd-cart-{{ section.id }} .sd-cart__lottie[data-src], #sd-prof-{{ section.id }} .sd-prof__lottie[data-src]');
+          if (!holders.length) return;
+          if (!window.lottie) { setTimeout(initLottie, 150); return; }
+          holders.forEach(function (h) {
+            if (h._done) return; h._done = true;
+            var inBar = !!h.closest('.sd-bb');
+            var item = h.closest('.sd-bb__item'), ico = h.closest('.sd-bb__ico');
+            try {
+              var anim = window.lottie.loadAnimation({ container: h, renderer: 'svg', loop: !inBar, autoplay: !inBar, path: h.dataset.src });
+              if (inBar) {
+                anim.addEventListener('DOMLoaded', function () {
+                  ico.classList.add('is-lottie'); lotties.set(item, anim);
+                  if (item.classList.contains('is-current')) anim.goToAndPlay(0, true); else anim.goToAndStop(0, true);
+                });
+                anim.addEventListener('data_failed', function () { ico.classList.remove('is-lottie'); });
+              }
+            } catch (e) {}
+          });
+        }
+        initLottie();
+
+        /* ---------- cart: data + render ---------- */
+        var badges = [].slice.call(document.querySelectorAll('#sd-bb-{{ section.id }} .sd-bb__badge, #sd-cat-{{ section.id }} .sd-bb__badge'));
+        var cart = null, cmp = {};
+        var elEmpty = cartP.querySelector('[data-empty]'), elFilled = cartP.querySelector('[data-filled]'), elFoot = cartP.querySelector('[data-foot]');
+        var elList = cartP.querySelector('[data-list]'), elSave = cartP.querySelector('[data-save]'), elShip = cartP.querySelector('[data-ship]');
+        var elShipT = cartP.querySelector('[data-ship-t]'), elShipB = cartP.querySelector('[data-ship-b]'), elTotal = cartP.querySelector('[data-total]');
+
+        function setCount(n) {
+          badges.forEach(function (b) {
+            var next = n > 99 ? '99+' : String(n);
+            var changed = b.textContent !== next;
+            b.textContent = next; b.classList.toggle('is-empty', n < 1);
+            if (changed) { b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump'); }
+          });
+        }
+        function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+        function fmt(c) {
+          return CFG.prefix + (c / 100).toLocaleString('en-IN', { minimumFractionDigits: CFG.dec ? 2 : 0, maximumFractionDigits: 2 });
+        }
+        function img(u, w) { if (!u) return ''; return u + (u.indexOf('?') > -1 ? '&' : '?') + 'width=' + w; }
+
+        function loadCompare(c) {
+          var need = [];
+          c.items.forEach(function (i) { if (!(i.handle in cmp) && need.indexOf(i.handle) < 0) need.push(i.handle); });
+          return Promise.all(need.map(function (h) {
+            return nativeFetch(CFG.root + 'products/' + h + '.js').then(function (r) { return r.json(); }).then(function (p) {
+              cmp[h] = {}; p.variants.forEach(function (v) { cmp[h][v.id] = v.compare_at_price || 0; });
+            }).catch(function () { cmp[h] = {}; });
+          }));
+        }
+
+        function render() {
+          if (!cart) return;
+          var list = cart.items, none = !list.length;
+          elEmpty.hidden = !none; elFilled.hidden = none; elFoot.hidden = none;
+          if (none) return;
+          var saved = 0, html = '';
+          list.forEach(function (it) {
+            var cp = (cmp[it.handle] && cmp[it.handle][it.variant_id]) || 0;
+            var orig = Math.max(cp * it.quantity, it.original_line_price), fin = it.final_line_price;
+            var off = orig > fin ? Math.round((1 - fin / orig) * 100) : 0;
+            saved += Math.max(0, orig - fin);
+            var opts = (it.options_with_values || []).filter(function (o) { return o.name !== 'Title'; })
+              .map(function (o) { return esc(o.name) + ' : <b>' + esc(o.value) + '</b>'; }).join(' &nbsp;·&nbsp; ');
+            html += '<div class="sd-ci" data-key="' + esc(it.key) + '" data-qty="' + it.quantity + '">' +
+              '<a class="sd-ci__img" href="' + esc(it.url) + '">' + (it.image ? '<img src="' + esc(img(it.image, 260)) + '" alt="' + esc(it.product_title) + '" loading="lazy">' : '') + '</a>' +
+              '<div class="sd-ci__info"><div class="sd-ci__top"><a class="sd-ci__title" href="' + esc(it.url) + '">' + esc(it.product_title) + '</a>' +
+              '<button type="button" class="sd-ci__rm" data-rm aria-label="Remove"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-12M9 7V4h6v3"/></svg></button></div>' +
+              (opts ? '<div class="sd-ci__opts">' + opts + '</div>' : '') +
+              '<div class="sd-ci__qty"><button type="button" data-q="-1" aria-label="Less">&minus;</button><span>' + it.quantity + '</span><button type="button" data-q="1" aria-label="More">+</button></div>' +
+              '<div class="sd-ci__price"><b>' + fmt(fin) + '</b>' + (off > 0 ? '<s>' + fmt(orig) + '</s><em>' + off + '% OFF</em>' : '') + '</div>' +
+              '</div></div>';
+          });
+          elList.innerHTML = html;
+          if (saved > 0) { elSave.hidden = false; elSave.textContent = CFG.savedTxt.replace('{amount}', fmt(saved)); } else elSave.hidden = true;
+          if (CFG.thr > 0) {
+            elShip.hidden = false;
+            var left = CFG.thr - cart.total_price;
+            elShipT.textContent = left > 0 ? CFG.shipTxt.replace('{amount}', fmt(left)) : CFG.shipDone;
+            elShipB.style.width = Math.min(100, Math.round(cart.total_price / CFG.thr * 100)) + '%';
+          } else elShip.hidden = true;
+          elTotal.textContent = fmt(cart.total_price);
+        }
+
+        var busy = false;
+        function refreshCart(renderNow) {
+          return nativeFetch(CFG.cartJs, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+            .then(function (r) { return r.json(); })
+            .then(function (c) {
+              cart = c; setCount(c.item_count);
+              if (cartP.classList.contains('is-open') || renderNow) { render(); loadCompare(c).then(render); }
+            }).catch(function () {});
+        }
+        var tmr;
+        function refreshSoon() { if (busy) return; clearTimeout(tmr); tmr = setTimeout(function () { refreshCart(); }, 140); }
+
+        elList.addEventListener('click', function (e) {
+          var row = e.target.closest('.sd-ci'); if (!row) return;
+          var q = e.target.closest('[data-q]'), rm = e.target.closest('[data-rm]');
+          if (!q && !rm) return;
+          var qty = parseInt(row.dataset.qty, 10) || 1;
+          var next = rm ? 0 : Math.max(0, qty + parseInt(q.dataset.q, 10));
+          row.classList.add('is-busy'); busy = true;
+          nativeFetch(CFG.changeJs + '.js', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ id: row.dataset.key, quantity: next })
+          }).then(function (r) { return r.json(); }).then(function (c) {
+            if (c && c.items) { cart = c; setCount(c.item_count); render(); loadCompare(c).then(render); }
+            else row.classList.remove('is-busy');
+          }).catch(function () { row.classList.remove('is-busy'); }).then(function () { busy = false; });
+        });
+
+        /* live count: any add-to-cart / change anywhere on the store */
+        document.addEventListener('sd:cart-changed', refreshSoon);
+        document.addEventListener('cart:refresh', refreshSoon);
+        document.addEventListener('cart:updated', refreshSoon);
+        if (typeof window.subscribe === 'function' && window.PUB_SUB_EVENTS && PUB_SUB_EVENTS.cartUpdate) {
+          window.subscribe(PUB_SUB_EVENTS.cartUpdate, refreshSoon);
+        }
+        var bubble = document.getElementById('cart-icon-bubble');
+        if (bubble) new MutationObserver(refreshSoon).observe(bubble, { childList: true, subtree: true, characterData: true });
+        window.addEventListener('pageshow', function (e) { if (e.persisted) { closeAll(true); restore(); refreshSoon(); } });
+
+        /* ---------- hide bar while keyboard is open ---------- */
+        document.addEventListener('focusin', function (e) {
+          if (e.target.matches && e.target.matches('input:not([type=checkbox]):not([type=radio]):not([type=hidden]), textarea, select')) bar.classList.add('is-kb');
+        });
+        document.addEventListener('focusout', function () { bar.classList.remove('is-kb'); });
+
+        /* entrance animation of current tab */
+        if (current && !reduce) setTimeout(function () { play(current); }, 350);
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+    })();
+  </script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Mobile Bottom Bar",
+  "max_blocks": 50,
+  "settings": [
+    { "type": "checkbox", "id": "enabled", "label": "Show bottom bar (mobile only)", "default": true },
+
+    { "type": "header", "content": "Glass style" },
+    { "type": "color", "id": "bar_bg", "label": "Glass tint color", "default": "#ffffff" },
+    { "type": "range", "id": "bar_opacity", "label": "Glass opacity", "min": 10, "max": 90, "step": 5, "unit": "%", "default": 45 },
+    { "type": "range", "id": "blur", "label": "Blur strength", "min": 0, "max": 40, "step": 2, "unit": "px", "default": 22 },
+    { "type": "range", "id": "radius", "label": "Corner radius", "min": 12, "max": 40, "step": 2, "unit": "px", "default": 34 },
+    { "type": "range", "id": "bar_height", "label": "Bar height", "min": 52, "max": 80, "step": 2, "unit": "px", "default": 66 },
+    { "type": "range", "id": "side_margin", "label": "Side margin", "min": 4, "max": 30, "step": 2, "unit": "px", "default": 14 },
+    { "type": "range", "id": "bottom_offset", "label": "Distance from bottom", "min": 4, "max": 30, "step": 2, "unit": "px", "default": 12 },
+
+    { "type": "header", "content": "Icons & labels" },
+    { "type": "range", "id": "icon_size", "label": "Icon size", "min": 18, "max": 36, "step": 2, "unit": "px", "default": 24 },
+    { "type": "color", "id": "icon_color", "label": "Icon color (inactive)", "default": "#5b5b66" },
+    { "type": "color", "id": "label_color", "label": "Label color (inactive)", "default": "#5b5b66" },
+    {
+      "type": "select", "id": "label_mode", "label": "Labels",
+      "options": [
+        { "value": "always", "label": "Always show" },
+        { "value": "active", "label": "Only on active tab" },
+        { "value": "never", "label": "Icons only (no label)" }
+      ],
+      "default": "always"
+    },
+    { "type": "range", "id": "pill_opacity", "label": "Active pill tint strength", "min": 6, "max": 40, "step": 2, "unit": "%", "default": 16 },
+
+    { "type": "header", "content": "Cart badge" },
+    { "type": "color", "id": "badge_bg", "label": "Badge background", "default": "#B63A2B" },
+    { "type": "color", "id": "badge_text", "label": "Badge text", "default": "#ffffff" },
+
+    { "type": "header", "content": "Panels: colors (Categories / Profile / Cart)" },
+    { "type": "color", "id": "accent_color", "label": "Button background (accent)", "default": "#652D1C" },
+    { "type": "color", "id": "btn_text_color", "label": "Button text & icon color", "default": "#F8EEEC" },
+    { "type": "color", "id": "panel_bg", "label": "Panel background", "default": "#ffffff" },
+    { "type": "color", "id": "sidebar_bg", "label": "Left tabs background", "default": "#f3f4f8" },
+    { "type": "color", "id": "text_color", "label": "Text color", "default": "#1f2130" },
+
+    { "type": "header", "content": "Categories panel (Menu button)" },
+    { "type": "text", "id": "cat_title", "label": "Panel title", "default": "All Categories" },
+    { "type": "range", "id": "tab_width", "label": "Left tabs width", "min": 84, "max": 140, "step": 4, "unit": "px", "default": 108 },
+    { "type": "select", "id": "cat_columns", "label": "Category columns", "options": [ { "value": "2", "label": "2 columns (big images)" }, { "value": "3", "label": "3 columns" } ], "default": "3" },
+    { "type": "select", "id": "cat_image_ratio", "label": "Category image shape", "options": [ { "value": "1 / 1", "label": "Square (1:1)" }, { "value": "4 / 5", "label": "Portrait (4:5)" }, { "value": "3 / 4", "label": "Portrait (3:4)" }, { "value": "2 / 3", "label": "Tall portrait (2:3)" } ], "default": "3 / 4" },
+    { "type": "range", "id": "cat_col_gap", "label": "Gap between columns", "min": 4, "max": 24, "step": 2, "unit": "px", "default": 10 },
+    { "type": "range", "id": "cat_row_gap", "label": "Gap between rows", "min": 8, "max": 40, "step": 2, "unit": "px", "default": 18 },
+
+    { "type": "header", "content": "Profile panel (Profile button)" },
+    { "type": "paragraph", "content": "Menu rows are added as 'Profile: menu row' blocks. Order of blocks = order of rows." },
+    { "type": "text", "id": "prof_title", "label": "Panel title", "default": "Profile" },
+    { "type": "color", "id": "prof_hero_bg", "label": "Top section background", "default": "#f7f7f8" },
+    { "type": "text", "id": "prof_guest_heading", "label": "Guest heading", "default": "Welcome, Guest!" },
+    { "type": "text", "id": "prof_guest_text", "label": "Guest sub text", "default": "Login to access all features and track your orders" },
+    { "type": "text", "id": "prof_login_text", "label": "Login button text", "default": "Login Now" },
+    { "type": "text", "id": "prof_logout_text", "label": "Logout button text", "default": "Logout" },
+    { "type": "range", "id": "prof_icon_size", "label": "Row icon circle size", "min": 36, "max": 72, "step": 2, "unit": "px", "default": 48 },
+    { "type": "color", "id": "prof_icon_bg", "label": "Row icon circle background", "default": "#652D1C" },
+    { "type": "color", "id": "prof_icon_color", "label": "Row icon color", "default": "#F8EEEC" },
+
+    { "type": "header", "content": "Cart panel" },
+    { "type": "text", "id": "cart_title", "label": "Title", "default": "Shopping Bag" },
+    { "type": "text", "id": "checkout_label", "label": "Checkout button text", "default": "Proceed to Checkout" },
+    { "type": "text", "id": "total_label", "label": "Total label", "default": "Total" },
+    { "type": "text", "id": "money_prefix", "label": "Price prefix", "default": "Rs. " },
+    { "type": "checkbox", "id": "money_decimals", "label": "Show .00 decimals", "default": true },
+    { "type": "text", "id": "saved_text", "label": "Savings banner", "info": "{amount} is replaced automatically.", "default": "You saved {amount} on this order" },
+    { "type": "number", "id": "free_ship_threshold", "label": "Free shipping above (amount)", "info": "0 = hide the free shipping bar.", "default": 0 },
+    { "type": "text", "id": "ship_progress_text", "label": "Free shipping - progress text", "default": "Add {amount} more to unlock FREE shipping" },
+    { "type": "text", "id": "ship_done_text", "label": "Free shipping - unlocked text", "default": "Congratulations! You've unlocked FREE Shipping!" },
+
+    { "type": "header", "content": "Empty cart" },
+    { "type": "text", "id": "empty_model", "label": "3D model (.glb) URL", "info": "Optional. Upload .glb in Content > Files and paste the URL. Highest priority." },
+    { "type": "text", "id": "empty_lottie", "label": "Lottie JSON URL", "info": "Optional. Used if no 3D model." },
+    { "type": "image_picker", "id": "empty_image", "label": "Image / GIF", "info": "Optional. Used if no 3D model / Lottie. Transparent PNG, WebP or GIF looks best." },
+    { "type": "range", "id": "empty_media_width", "label": "Media width", "min": 80, "max": 360, "step": 10, "unit": "px", "default": 200 },
+    { "type": "range", "id": "empty_media_height", "label": "Media height", "min": 80, "max": 360, "step": 10, "unit": "px", "default": 200 },
+    { "type": "text", "id": "empty_heading", "label": "Heading", "default": "Your shopping bag is empty!" },
+    { "type": "text", "id": "empty_text", "label": "Sub text", "default": "Looks like you haven't added anything yet." },
+    { "type": "text", "id": "empty_button", "label": "Button text", "default": "Start Shopping" },
+    { "type": "url", "id": "empty_link", "label": "Button link" },
+
+    { "type": "header", "content": "You may also like (inside cart)" },
+    { "type": "text", "id": "reco_heading", "label": "Heading", "default": "You may also like" },
+    { "type": "collection", "id": "reco_collection", "label": "Collection to show" },
+    { "type": "range", "id": "reco_limit", "label": "Number of products", "min": 2, "max": 12, "step": 2, "default": 6 }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Bottom bar button",
+      "limit": 5,
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "Home" },
+        {
+          "type": "select", "id": "action", "label": "Button action",
+          "options": [
+            { "value": "link", "label": "Open link (Home / any page)" },
+            { "value": "menu", "label": "Open Categories panel" },
+            { "value": "cart", "label": "Open Cart panel" },
+            { "value": "profile", "label": "Open Profile panel" }
+          ],
+          "default": "link"
+        },
+        { "type": "url", "id": "link", "label": "Link", "info": "Used for 'Open link'. Leave empty = Home page." },
+        {
+          "type": "select", "id": "icon_preset", "label": "Built-in animated icon",
+          "options": [
+            { "value": "home", "label": "Home" },
+            { "value": "categories", "label": "Categories / Grid" },
+            { "value": "bag", "label": "Bag" },
+            { "value": "cart", "label": "Cart" },
+            { "value": "user", "label": "Profile" },
+            { "value": "heart", "label": "Heart" },
+            { "value": "search", "label": "Search" },
+            { "value": "tag", "label": "Sale tag" },
+            { "value": "star", "label": "Star" },
+            { "value": "diamond", "label": "Diamond" }
+          ],
+          "default": "home"
+        },
+        { "type": "image_picker", "id": "icon_image", "label": "Custom icon (PNG / GIF / WebP)", "info": "Optional. Overrides the built-in icon." },
+        { "type": "image_picker", "id": "icon_image_active", "label": "Custom icon - active state", "info": "Optional." },
+        { "type": "text", "id": "lottie_url", "label": "Lottie JSON URL", "info": "Optional. Overrides the other icons." },
+        {
+          "type": "select", "id": "icon_animation", "label": "Tap animation",
+          "options": [
+            { "value": "bounce", "label": "Bounce" },
+            { "value": "pop", "label": "Pop" },
+            { "value": "jelly", "label": "Jelly" },
+            { "value": "wiggle", "label": "Wiggle" },
+            { "value": "draw", "label": "Line draw" },
+            { "value": "none", "label": "None" }
+          ],
+          "default": "bounce"
+        },
+        { "type": "color", "id": "active_color", "label": "Active color (icon, label & pill)", "default": "#E8604C" },
+        { "type": "checkbox", "id": "show_badge", "label": "Show cart count badge", "info": "Only for the 'Open Cart panel' action.", "default": true }
+      ]
+    },
+    {
+      "type": "tab",
+      "name": "Categories: left tab",
+      "settings": [
+        { "type": "paragraph", "content": "Tabs are numbered in the order you add them: 1st tab = 1, 2nd tab = 2 ..." },
+        { "type": "image_picker", "id": "image", "label": "Tab image" },
+        { "type": "range", "id": "image_size", "label": "Tab image size", "min": 24, "max": 80, "step": 2, "unit": "px", "default": 52 },
+        { "type": "text", "id": "title", "label": "Tab title", "default": "Kurta Sets" }
+      ]
+    },
+    {
+      "type": "category",
+      "name": "Categories: category item",
+      "settings": [
+        { "type": "range", "id": "tab", "label": "Show under tab number", "info": "0 = Auto: item goes under the Left tab block placed above it. 1-12 = force a specific tab.", "min": 0, "max": 12, "step": 1, "default": 0 },
+        { "type": "text", "id": "heading", "label": "Section heading (optional)", "info": "Fill it to start a new heading row before this item, e.g. Popular Store." },
+        { "type": "image_picker", "id": "image", "label": "Category image" },
+        { "type": "range", "id": "image_width", "label": "Image width", "min": 40, "max": 200, "step": 2, "unit": "px", "default": 84 },
+        { "type": "range", "id": "image_height", "label": "Image height", "min": 40, "max": 240, "step": 2, "unit": "px", "default": 84 },
+        { "type": "range", "id": "image_radius", "label": "Image corner radius", "min": 0, "max": 60, "step": 2, "unit": "px", "default": 16 },
+        { "type": "color", "id": "tile_bg", "label": "Image background", "default": "#f3f4f8" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Anarkali" },
+        { "type": "url", "id": "link", "label": "Link" },
+        { "type": "text", "id": "tag_text", "label": "Offer tag text (optional)", "info": "e.g. NEW, 50% OFF, BUY NOW" },
+        { "type": "color", "id": "tag_bg", "label": "Tag background", "default": "#16a34a" },
+        { "type": "color", "id": "tag_color", "label": "Tag text color", "default": "#ffffff" }
+      ]
+    },
+    {
+      "type": "profile_link",
+      "name": "Profile: menu row",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "Orders" },
+        { "type": "text", "id": "subtitle", "label": "Sub text (optional)", "default": "Track your orders here" },
+        { "type": "url", "id": "link", "label": "Link", "info": "Leave empty for Orders / Terms / Privacy / Return icons = automatic Shopify page." },
+        { "type": "checkbox", "id": "open_inline", "label": "Open inside the panel (instant, no reload)", "info": "ON = page content opens instantly inside Profile with a Back button. Account / checkout pages always open normally.", "default": true },
+        {
+          "type": "select", "id": "icon_preset", "label": "Built-in icon",
+          "options": [
+            { "value": "orders", "label": "Orders (list)" },
+            { "value": "sparkle", "label": "Sparkle" },
+            { "value": "phone", "label": "Phone / Contact" },
+            { "value": "size", "label": "Size chart (arrows)" },
+            { "value": "help", "label": "FAQ / Help" },
+            { "value": "store", "label": "Store" },
+            { "value": "doc", "label": "Document (Terms)" },
+            { "value": "shield", "label": "Shield (Privacy)" },
+            { "value": "return", "label": "Return" },
+            { "value": "heart", "label": "Heart / Wishlist" },
+            { "value": "gift", "label": "Gift" },
+            { "value": "user", "label": "User" },
+            { "value": "pin", "label": "Location" },
+            { "value": "star", "label": "Star" }
+          ],
+          "default": "orders"
+        },
+        { "type": "image_picker", "id": "icon_image", "label": "Custom icon image (PNG / WebP / GIF)", "info": "Optional. Overrides the built-in icon." },
+        { "type": "text", "id": "lottie_url", "label": "Animated icon - Lottie JSON URL", "info": "Optional. Upload the .json in Content > Files and paste the URL. Overrides the other icons." },
+        {
+          "type": "select", "id": "show_for", "label": "Show this row to",
+          "options": [
+            { "value": "always", "label": "Everyone" },
+            { "value": "logged_in", "label": "Logged-in customers only" }
+          ],
+          "default": "always"
+        }
+      ]
+    }
+  ],
+  "default": {
+    "blocks": [
+      { "type": "item", "settings": { "title": "Home", "action": "link", "icon_preset": "home", "icon_animation": "bounce" } },
+      { "type": "item", "settings": { "title": "Menu", "action": "menu", "icon_preset": "categories", "icon_animation": "pop" } },
+      { "type": "item", "settings": { "title": "Cart", "action": "cart", "icon_preset": "bag", "icon_animation": "jelly", "show_badge": true } },
+      { "type": "item", "settings": { "title": "Profile", "action": "profile", "icon_preset": "user", "icon_animation": "wiggle" } },
+      { "type": "profile_link", "settings": { "title": "Orders", "subtitle": "Track your orders here", "icon_preset": "orders" } },
+      { "type": "profile_link", "settings": { "title": "Wishlist", "subtitle": "Your saved styles", "icon_preset": "heart", "show_for": "logged_in" } },
+      { "type": "profile_link", "settings": { "title": "Contact Us", "subtitle": "Get help and support", "icon_preset": "phone" } },
+      { "type": "profile_link", "settings": { "title": "Size Chart", "subtitle": "Find your perfect fit", "icon_preset": "size" } },
+      { "type": "profile_link", "settings": { "title": "FAQ", "subtitle": "Frequently asked questions", "icon_preset": "help" } },
+      { "type": "profile_link", "settings": { "title": "Terms & Conditions", "subtitle": "Read our terms and conditions", "icon_preset": "doc" } },
+      { "type": "profile_link", "settings": { "title": "Privacy Policy", "subtitle": "Our privacy and data policy", "icon_preset": "shield" } },
+      { "type": "profile_link", "settings": { "title": "Return Policy", "subtitle": "Our return policy", "icon_preset": "return" } }
+    ]
+  }
+}
+{% endschema %}

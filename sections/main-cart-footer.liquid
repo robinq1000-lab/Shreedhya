@@ -1,0 +1,220 @@
+<link rel="preload" as="style" href="{{ 'component-cart.css' | asset_url }}">
+  {{ 'component-cart.css' | asset_url | stylesheet_tag }}
+<link rel="preload" as="style" href="{{ 'component-totals.css' | asset_url }}">
+  {{ 'component-totals.css' | asset_url | stylesheet_tag }}
+<link rel="preload" as="style" href="{{ 'component-price.css' | asset_url }}">
+{{ 'component-price.css' | asset_url | stylesheet_tag }}
+<link rel="preload" as="style" href="{{ 'component-discounts.css' | asset_url }}">
+  {{ 'component-discounts.css' | asset_url | stylesheet_tag }}
+{%- style -%}
+.section-{{ section.id }}-padding {
+  padding-top: {{ section.settings.padding_top }}px;
+  padding-bottom: {{ section.settings.padding_bottom }}px;
+}
+@media screen and (max-width: 991px) {
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.5 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.5 | round: 0 }}px;
+  }
+}
+{%- endstyle -%}
+<div class="section-{{ section.id }}-padding page-width{% if cart == empty %} is-empty{% endif %}" id="main-cart-footer" data-id="{{ section.id }}">
+  <div>
+    <div class="cart__footer color-{{ section.settings.color_scheme }} gradient">
+      {%- if settings.show_cart_note -%}
+        <cart-note class="cart__note field">
+          <label for="Cart-note">{{ 'sections.cart.note' | t }}</label>
+          <textarea
+            class="text-area field__input"
+            name="note"
+            form="cart"
+            id="Cart-note"
+            placeholder="{{ 'sections.cart.note' | t }}"
+          >{{ cart.note }}</textarea>
+        </cart-note>
+      {%- endif -%}
+
+      <div class="cart__blocks">
+        {% for block in section.blocks %}
+          {%- case block.type -%}
+            {%- when '@app' -%}
+              {% render block %}
+            {%- when 'subtotal' -%}
+              <div class="js-contents" {{ block.shopify_attributes }}>
+                <div class="totals">
+                  <span class="totals__subtotal">{{ 'sections.cart.subtotal' | t }} ({{ cart.item_count }})</span>
+                  <p class="product-option price-original">
+                    {%- if settings.currency_code_enabled -%}
+                      {{ cart.total_price | money_with_currency }}
+                    {%- else -%}
+                      {{ cart.total_price | money }}
+                    {%- endif -%}
+                  </p>
+                </div>
+
+                <div>
+                  {%- if cart.cart_level_discount_applications.size > 0 -%}
+                    <ul class="discounts list-unstyled" role="list" aria-label="{{ 'customer.order.discount' | t }}">
+                      {%- for discount in cart.cart_level_discount_applications -%}
+                        <li class="discounts__discount discounts__discount--position">
+                          {%- render 'icon-discount' -%}
+                          {{ discount.title }}
+                          (-{{ discount.total_allocated_amount | money }})
+                        </li>
+                      {%- endfor -%}
+                    </ul>
+                  {%- endif -%}
+                </div>
+
+                <small class="tax-note caption-large rte">
+                  {%- if cart.taxes_included and shop.shipping_policy.body != blank -%}
+                    {{ 'sections.cart.taxes_included_and_shipping_policy_html' | t: link: shop.shipping_policy.url }}
+                  {%- elsif cart.taxes_included -%}
+                    {{ 'sections.cart.taxes_included_but_shipping_at_checkout' | t }}
+                  {%- elsif shop.shipping_policy.body != blank -%}
+                    {{ 'sections.cart.taxes_and_shipping_policy_at_checkout_html' | t: link: shop.shipping_policy.url }}
+                  {%- else -%}
+                    {{ 'sections.cart.taxes_and_shipping_at_checkout' | t }}
+                  {%- endif -%}
+                </small>
+              </div>
+              {% if settings.wbenable_ship %}
+                <div class="js-contents-shiping">
+                {%- liquid
+                    assign isNumber = settings.wbmin_order | plus: 0
+                    if isNumber != 0
+                      assign shipminprice = settings.wbmin_order | times: 100
+                    else
+                      assign ship_multicurrencies = settings.wbmin_order | split: ","
+                      for ship_multicurrency in ship_multicurrencies
+                        assign shipminprices = ship_multicurrency | split: ":"
+                        if shipminprices.first == localization.country.currency.iso_code
+                          assign shipminprice = shipminprices.last | times: 100
+                        endif
+                      endfor
+                    endif
+                -%}
+                  <div class="wbship">
+                      {% if cart.total_price >= shipminprice %}
+                        <div class="wbshipinner">{{ 'wbcustomlabel.wballtext.free_ship' | t }}<b>&nbsp;{{ 'wbcustomlabel.wballtext.free_shipinner' | t }}</b><span>{% render 'icon-truck' %}</span></div>
+                      {% elsif cart.total_price < shipminprice %}
+                        {{ 'wbcustomlabel.wballtext.free_shiponly' | t }} <b>{% if settings.currency_code_enabled %}{{ shipminprice | minus: cart.total_price | money_with_currency }}{% else %}{{ shipminprice | minus: cart.total_price | money }}{% endif %}</b> {{ 'wbcustomlabel.wballtext.free_shipaway' | t }}
+                      {% endif %}
+                    <div class="progress">
+                        <div class="determinate color-{{ settings.pcolor_scheme }} gradient" style="width: {{ cart.total_price | times: 100 | divided_by: shipminprice | round | at_most: 100 }}%">
+                        </div>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+              
+              {%- when 'buttons' -%}
+              <div class="cart__ctas" {{ block.shopify_attributes }}>
+                <noscript>
+                  <button type="submit" class="cart__update-button button button--secondary" form="cart">
+                    {{ 'sections.cart.update' | t }}
+                  </button>
+                </noscript>
+
+                <button
+                  type="submit"
+                  id="checkout"
+                  class="cart__checkout-button button"
+                  name="checkout"
+                  {% if cart == empty %}
+                    disabled
+                  {% endif %}
+                  form="cart"
+                >
+                  {{ 'sections.cart.checkout' | t }}
+                </button>
+              </div>
+
+              {%- if additional_checkout_buttons -%}
+                <div class="cart__dynamic-checkout-buttons additional-checkout-buttons">
+                  {{ content_for_additional_checkout_buttons }}
+                </div>
+              {%- endif -%}
+          {%- endcase -%}
+        {% endfor %}
+
+        <div id="cart-errors"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    function isIE() {
+      const ua = window.navigator.userAgent;
+      const msie = ua.indexOf('MSIE ');
+      const trident = ua.indexOf('Trident/');
+
+      return msie > 0 || trident > 0;
+    }
+
+    if (!isIE()) return;
+    const cartSubmitInput = document.createElement('input');
+    cartSubmitInput.setAttribute('name', 'checkout');
+    cartSubmitInput.setAttribute('type', 'hidden');
+    document.querySelector('#cart').appendChild(cartSubmitInput);
+    document.querySelector('#checkout').addEventListener('click', function (event) {
+      document.querySelector('#cart').submit();
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "t:sections.main-cart-footer.name",
+  "class": "cart__footer-wrapper",
+  "blocks": [
+    {
+      "type": "subtotal",
+      "name": "t:sections.main-cart-footer.blocks.subtotal.name",
+      "limit": 1
+    },
+    {
+      "type": "buttons",
+      "name": "t:sections.main-cart-footer.blocks.buttons.name",
+      "limit": 1
+    },
+    {
+      "type": "@app"
+    }
+  ],
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "background-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 60
+    }
+  ]
+}
+{% endschema %}

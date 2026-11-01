@@ -1,0 +1,292 @@
+<div class="section-{{ section.id }}-padding">
+  <div class="marquee color-{{ section.settings.card_color_scheme }} marquee_inner-{{ section.id }} gradient{% if section.settings.enable_transp == true %} trans_bg{% endif %}">
+    {%- for i in (1..10) -%}
+      <div class="marquee-child marquee_inner-{{ section.id }} {% if section.settings.marq_diection == 'left_right' %} left_right {% else %} right_left {% endif %}" >
+        <p>{{ section.settings.wb_marktext }}</p>
+      </div>
+    {%- endfor -%}
+  </div>
+</div> 
+{%- style -%}
+.marquee {
+    grid: auto / auto-flow max-content;
+    justify-content: center;
+    display: grid;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.marquee .marquee-child {
+    display: grid;
+    grid: unset;
+    align-items: center;
+    justify-content: center;
+}
+.marquee.marquee_inner-{{ section.id }} {
+  padding-top: {{ section.settings.text_padding_top }}px;
+  padding-bottom: {{ section.settings.text_padding_bottom }}px;
+}
+.marquee .marquee_inner-{{ section.id }}.marquee-child{
+  padding: 0 {{ section.settings.mark_space }}px;
+  position: relative;
+}
+.marquee_inner-{{ section.id }} p {
+    color: rgba(var(--color-foreground));
+    font-size: {{ section.settings.font_size }}px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .marquee_inner-{{ section.id }}.left_right {
+    animation: translateLeft {{ section.settings.mark_speed }}s linear infinite;
+  }
+  .marquee_inner-{{ section.id }}.right_left {
+    animation: translateRight {{ section.settings.mark_speed }}s linear infinite;
+  }
+}
+
+@keyframes translateLeft {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(calc(100% * 1));
+  }
+}
+@keyframes translateRight {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(calc(-100% * 1));
+  }
+}
+{% if section.settings.outline_text %}
+  .marquee_inner-{{ section.id }} .marquee-child p,.marquee_inner-{{ section.id }} .marquee-child p a{
+    -webkit-text-fill-color: rgb(var(--color-background));
+    -webkit-text-stroke-width: 2px;
+    -webkit-text-stroke-color: var(--color-foreground);
+    text-stroke: 1px var(--color-foreground);
+    color: transparent;
+  }     
+{% endif %}
+.marquee_inner-{{ section.id }} .marquee-child p,.marquee_inner-{{ section.id }} .marquee-child p a{
+  background: rgba(var(--color-foreground));
+  -webkit-background-clip: text;
+}
+{% if section.settings.seprater == 'dots' %}
+  .marquee_inner-{{ section.id }} .marquee-child::after {
+    content: "\A";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(var(--color-foreground));
+    display: inline-block;
+    margin: 0;
+    position: absolute;
+    right: 0;
+    left: -3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+{% elsif section.settings.seprater == 'pipe' %}
+  .marquee_inner-{{ section.id }} .marquee-child::after {
+    content: "";
+    display: inline-block;
+    margin: 0;
+    width: auto;
+    height: 100%;
+    position: relative;
+    border-right: 1px solid rgba(var(--color-foreground));
+    position: absolute;
+    right: 0;
+  }
+  {% elsif section.settings.seprater == 'star' %}
+  .marquee_inner-{{ section.id }} .marquee-child::after {
+    content: "\2726";
+    display: inline-block;
+    margin: 0;
+    position: absolute;
+    right: auto;
+    left: -10px;
+    color: #EB9D00;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+{% endif %}
+.section-{{ section.id }}-padding {
+  padding-top: {{ section.settings.padding_top }}px;
+  padding-bottom: {{ section.settings.padding_bottom }}px;
+}
+@media screen and (max-width: 991px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top | times: 0.5 | round: 0 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.5 | round: 0 }}px;
+    }
+    .marquee_inner-{{ section.id }} p {
+      font-size: {{ section.settings.font_size | times: 0.87 | round: 0 }}px;
+    } 
+    {% if section.settings.mark_space > 20 %}
+      .marquee .marquee_inner-{{ section.id }}.marquee-child{
+        padding: 0 {{ section.settings.mark_space | times: 0.5 | round: 0 }}px;
+      }
+    {% endif %}
+}
+{%- endstyle -%}
+{% schema %}
+{
+  "name": "t:sections.scrolling-bar.name",
+  "class": "section",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "wb_marktext",
+      "label": "t:sections.scrolling-bar.settings.heading.label",
+      "default": "Add promotional text here"
+    },
+    {
+      "type": "checkbox",
+      "id": "outline_text",
+      "label": "t:sections.scrolling-bar.settings.outline_text.label"
+    },
+    {
+      "type": "range",
+      "id": "mark_space",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "t:sections.scrolling-bar.settings.space_between_items.label",
+      "default": 30
+    }, 
+    {
+      "type": "range",
+      "id": "mark_speed",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "s",
+      "label": "t:sections.scrolling-bar.settings.speed.label",
+      "default": 2
+    },
+    {
+      "type": "select",
+      "id": "marq_diection",
+      "label": "t:sections.scrolling-bar.settings.marq_diection.label",
+      "options": [
+        {
+          "value": "left_right",
+          "label": "t:sections.scrolling-bar.settings.marq_diection.options__1.label"
+        },
+        {
+          "value": "right_left",
+          "label": "t:sections.scrolling-bar.settings.marq_diection.options__2.label"
+        }
+      ],
+      "default": "right_left"
+    },
+    {
+      "type": "select",
+      "id": "seprater",
+      "label": "t:sections.scrolling-bar.settings.seprater.label",
+      "options": [
+        {
+          "value": "star",
+          "label": "t:sections.scrolling-bar.settings.seprater.options__4.label"
+        },
+        {
+          "value": "dots",
+          "label": "t:sections.scrolling-bar.settings.seprater.options__1.label"
+        },
+        {
+          "value": "pipe",
+          "label": "t:sections.scrolling-bar.settings.seprater.options__2.label"
+        },
+        {
+          "value": "none",
+          "label": "t:sections.scrolling-bar.settings.seprater.options__3.label"
+        }
+      ],
+      "default": "dots"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "min": 14,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "label": "t:sections.scrolling-bar.settings.font_size.label",
+      "default": 20
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_transp",
+      "label": "t:sections.scrolling-bar.settings.enable_transp.label",
+      "default": false
+    },
+    {
+      "type": "color_scheme",
+      "id": "card_color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "inverse"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.scrolling-bar.settings.header.text_padding"
+    },
+    {
+      "type": "range",
+      "id": "text_padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "text_padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.scrolling-bar.presets.name"
+    }
+  ]
+}
+{% endschema %}

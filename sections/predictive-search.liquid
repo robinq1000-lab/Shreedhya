@@ -1,0 +1,362 @@
+{% comment %}theme-check-disable ImgLazyLoading{% endcomment %}
+{%- if predictive_search.performed -%}
+{% assign first_column_results_size = predictive_search.resources.queries.size
+| plus: predictive_search.resources.collections.size
+| plus: predictive_search.resources.pages.size
+| plus: predictive_search.resources.articles.size
+%}
+{% assign section_id = section.id %}
+  <div id="predictive-search-results" role="listbox" class="color-{{ settings.color_schemesearch }} gradient">
+
+    <div id="predictive-search-results-groups-wrapper" class="page-width {% if first_column_results_size > 0 %}predictive-search__results-groups-wrapper{% endif %}{% if predictive_search.resources.products.size < 0 %} predictive-search__results-groups-wrapper--no-products{% endif %}{% if predictive_search.resources.queries.size < 0 and predictive_search.resources.collections.size < 0 and predictive_search.resources.pages.size < 0 and predictive_search.resources.articles.size < 0 %} predictive-search__results-groups-wrapper--no-suggestions{% endif %}">
+      <div id="predictive-search-option-search-keywords" class="predictive-search__search-for-button">
+        <button
+          class="predictive-search__item predictive-search__item--term link link--text animate-arrow"
+          tabindex="-1"
+          role="option"
+          aria-selected="false"
+        >
+          <span class="search-result-text" data-predictive-search-search-for-text>{{ 'templates.search.search_for' | t: terms: predictive_search.terms }}</span>
+          {% render 'icon-arrow' %}
+        </button>
+      </div>
+    {%- if first_column_results_size > 0 -%}
+      <div class="predictive-search__result-group seachbar-left">
+        {%- if predictive_search.resources.queries.size > 0 or predictive_search.resources.collections.size > 0 -%}
+          <div>
+            <h2 id="predictive-search-queries" class="predictive-search__heading caption-with-letter-spacing">
+              {{- 'templates.search.suggestions' | t -}}
+            </h2>
+            <ul id="predictive-search-results-queries-list" class="predictive-search__results-list list-unstyled" role="group" aria-labelledby="predictive-search-queries">
+              {%- for query in predictive_search.resources.queries -%}
+                <li id="predictive-search-option-query-{{ forloop.index }}" class="predictive-search__list-item" role="option" aria-selected="false">
+                  <a href="{{ query.url }}" class="predictive-search__item link link--text" tabindex="-1">
+                    <div class="predictive-search__item-content predictive-search__item-content--centered">
+                      <p class="predictive-search__item-heading predictive-search__item-query-result" aria-label="{{ query.text }}">{{ query.styled_text }}</p>
+                    </div>
+                  </a>
+                </li>
+              {%- endfor -%}
+              {%- for collection in predictive_search.resources.collections -%}
+                <li id="predictive-search-option-collection-{{ forloop.index }}" class="predictive-search__list-item" role="option" aria-selected="false">
+                  <a href="{{ collection.url }}" class="predictive-search__item link link--text" tabindex="-1">
+                    <div class="predictive-search__item-content predictive-search__item-content--centered">
+                      <p class="predictive-search__item-heading">{{ collection.title }}</p>
+                    </div>
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- endif -%}
+        {%- if predictive_search.resources.articles.size > 0 or predictive_search.resources.pages.size > 0 -%}
+          <div class="predictive-search__pages-wrapper">
+            <h2 id="predictive-search-pages-desktop" class="predictive-search__heading caption-with-letter-spacing">
+              {{- 'templates.search.pages' | t -}}
+            </h2>
+            <ul id="predictive-search-results-pages-list-desktop" class="predictive-search__results-list list-unstyled" role="group" aria-labelledby="predictive-search-pages-desktop">
+              {%- for page in predictive_search.resources.pages -%}
+                <li id="predictive-search-option-page-desktop-{{ forloop.index }}" class="predictive-search__list-item" role="option" aria-selected="false">
+                  <a href="{{ page.url }}" class="predictive-search__item link link--text" tabindex="-1">
+                    <div class="predictive-search__item-content predictive-search__item-content--centered">
+                      <p class="predictive-search__item-heading">{{ page.title }}</p>
+                    </div>
+                  </a>
+                </li>
+              {%- endfor -%}
+              {%- for article in predictive_search.resources.articles -%}
+                <li id="predictive-search-option-article-desktop-{{ forloop.index }}" class="predictive-search__list-item" role="option" aria-selected="false">
+                  <a href="{{ article.url }}" class="predictive-search__item link link--text" tabindex="-1">
+                    <div class="predictive-search__item-content predictive-search__item-content--centered">
+                      <p class="predictive-search__item-heading">{{ article.title }}</p>
+                    </div>
+                  </a>
+                </li> 
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+      <div class="predictive-search__result-group searchbar-right wbsrightpart {% if settings.var_pill_style == 'button' %}background_pill{% endif %}">
+        {%- if predictive_search.resources.products.size > 0 -%}
+          <div class="pseach-prod">
+            <div class="heading-wrapper">
+              <div class="default-content-heading">{{- 'wbcustomlabel.wballtext.popular_products' | t -}}</div>
+              <a href="{{ routes.all_products_collection_url }}" class="default-heading-link">{{- 'wbcustomlabel.wballtext.all_products' | t -}}</a>
+            </div>
+            <ul id="predictive-search-results-products-list" class="predictive-search__results-list list-unstyled grid grid--1-col-desktop grid--1-col-tablet" role="group" aria-labelledby="predictive-search-products">
+              {%- for product in predictive_search.resources.products -%} 
+                <li id="predictive-search-option-product-{{ forloop.index }}" class="predictive-search__list-item grid__item" role="option" aria-selected="false">
+                  {%- if product and product != empty -%}
+                    {%- liquid
+                      assign ratio = 1
+                      if product.featured_media and settings.simage_ratio == 'portrait'
+                        assign ratio = 0.8
+                      elsif product.featured_media and settings.simage_ratio == 'adapt'
+                        assign ratio = product.featured_media.aspect_ratio
+                      endif
+                      if ratio == 0 or ratio == null
+                        assign ratio = 1
+                      endif
+                    -%}
+                    <div class="card-wrapper wbproduct-container product-card-wrapper">
+                      <div class=" card card--{{ settings.card_style }}{%- if product.featured_media == blank and settings.card_style == 'card' -%} blank__image {% endif %}{% if product.featured_media %} card--media{% else %} card--text{% endif %}{% if settings.card_style == 'card' %} color-{{ settings.card_color_scheme }} gradient{% endif %}" style="--ratio-percent: {{ 1 | divided_by: ratio | times: 100 }}%;">
+
+                      <div class="card__inner wbimgblock{% if settings.card_style == 'standard' %} color-{{ settings.card_color_scheme }} gradient{% endif %}{% if product.featured_media or settings.card_style == 'standard' %} ratio{% endif %}" style="--ratio-percent: {{ 1 | divided_by: ratio | times: 100 }}%;">
+                        {%- if product.featured_media -%}
+                          <div id="webipro-{{ section.id }}-{{ product.id }}" class="card__media color-{{ settings.card_color_scheme }} gradient">
+                            {%- assign media = product.selected_or_first_available_variant.featured_media -%}
+                            <div class="product__media-item" data-media-id="{{ section.id }}-{{ product.id }}-{{ media.id }}">
+                              <a href="{{ product.url | append: '?variant=' | append: product.selected_or_first_available_variant.id | default: '#' }}"
+                                title="{{ product.title | escape }}"
+                                class="media media--transparent media--hover-effect">
+                                  <img srcset="
+                                  {%- if product.featured_media.width >= 165 -%}{{ product.featured_media | image_url: width: 165 }} 165w,{%- endif -%}
+                                  {%- if product.featured_media.width >= 360 -%}{{ product.featured_media | image_url: width: 360 }} 360w,{%- endif -%}
+                                  {%- if product.featured_media.width >= 533 -%}{{ product.featured_media | image_url: width: 533 }} 533w,{%- endif -%}
+                                  {%- if product.featured_media.width >= 720 -%}{{ product.featured_media | image_url: width: 720 }} 720w,{%- endif -%}
+                                  {%- if product.featured_media.width >= 940 -%}{{ product.featured_media | image_url: width: 940 }} 940w,{%- endif -%}
+                                  {%- if product.featured_media.width >= 1066 -%}{{ product.featured_media | image_url: width: 1066 }} 1066w,{%- endif -%}
+                                  {{ product.featured_media | image_url }} {{ product.featured_media.width }}w" src="{{ product.featured_media | image_url: width: 533 }}"
+                                  sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 992px) calc((100vw - 130px) / 4), (min-width: 768px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
+                                  alt="{{ product.featured_media.alt | escape }}"
+                                  class="motion-reduce" loading="lazy" width="{{ product.featured_media.width }}" height="{{ product.featured_media.height }}">
+                                  {%- if product.media[1] != nil -%}
+                                      <img srcset="{%- if product.media[1].width >= 165 -%}{{ product.media[1] | image_url: width: 165 }} 165w,{%- endif -%}
+                                      {%- if product.media[1].width >= 360 -%}{{ product.media[1] | image_url: width: 360 }} 360w,{%- endif -%}
+                                      {% if product.media[1].width >= 493 %}{{ product.media[1] | image_url: width: 493 }} 493w,{% endif %}
+                                      {% if product.media[1].width >= 600 %}{{ product.media[1] | image_url: width: 600 }} 600w,{% endif %}
+                                      {% if product.media[1].width >= 713 %}{{ product.media[1] | image_url: width: 713 }} 713w,{% endif %}
+                                      {% if product.media[1].width >= 823 %}{{ product.media[1] | image_url: width: 823 }} 823w,{% endif %}
+                                      {% if product.media[1].width >= 992 %}{{ product.media[1] | image_url: width: 992 }} 992w,{% endif %}
+                                      {{ product.media[1] | image_url }} {{ product.media[1].width }}w"
+                                      src="{{ product.media[1] | image_url: width: 370 }}"
+                                      alt="{{ product.media[1].alt | escape }}"
+                                      sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 992px) calc((100vw - 130px) / 4), (min-width: 768px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
+                                      class="motion-reduce img-fluid mx-auto lazyload"
+                                      loading="lazy"
+                                      width="{{ product.media[1].width }}"
+                                      height="{{ product.media[1].height }}">
+                                  {%- endif -%}
+                              </a>
+                            </div>
+  
+                            {%- liquid
+                              assign media_to_render = product.featured_media.id
+                              for variant in product.variants
+                                assign media_to_render = media_to_render | append: variant.featured_media.id | append: ' '
+                              endfor
+                            -%}
+                              {%- for media in product.media -%}
+                                {%- if media_to_render contains media.id and media.id != product.selected_or_first_available_variant.featured_media.id -%}
+                                  <div class="product__media-item" data-media-id="{{ section.id }}-{{ product.id }}-{{ media.id }}">
+                                    <a href="{{ product.url | append: '?variant=' | append: product.selected_or_first_available_variant.id | default: '#' }}"
+                                      title="{{ product.title | escape }}"
+                                      class="media media--transparent media--hover-effect">
+                                        <img class="img-fluid mx-auto lazyload"
+                                          srcset="{%- if media.preview_image.width >= 165 -%}{{ media.preview_image | image_url: width: 165 }} 165w,{%- endif -%}
+                                          {%- if media.preview_image.width >= 360 -%}{{ media.preview_image | image_url: width: 360 }} 360w,{%- endif -%}
+                                          {% if media.preview_image.width >= 493 %}{{ media.preview_image | image_url: width: 493 }} 493w,{% endif %}
+                                          {% if media.preview_image.width >= 600 %}{{ media.preview_image | image_url: width: 600 }} 600w,{% endif %}
+                                          {% if media.preview_image.width >= 713 %}{{ media.preview_image | image_url: width: 713 }} 713w,{% endif %}
+                                          {% if media.preview_image.width >= 823 %}{{ media.preview_image | image_url: width: 823 }} 823w,{% endif %}
+                                          {% if media.preview_image.width >= 992 %}{{ media.preview_image | image_url: width: 992 }} 992w,{% endif %}
+                                          {% if media.preview_image.width >= 1100 %}{{ media.preview_image | image_url: width: 1100 }} 1100w,{% endif %}
+                                          {% if media.preview_image.width >= 1206 %}{{ media.preview_image | image_url: width: 1206 }} 1206w,{% endif %}
+                                          {% if media.preview_image.width >= 1346 %}{{ media.preview_image | image_url: width: 1346 }} 1346w,{% endif %}
+                                          {% if media.preview_image.width >= 1426 %}{{ media.preview_image | image_url: width: 1426 }} 1426w,{% endif %}
+                                          {% if media.preview_image.width >= 1646 %}{{ media.preview_image | image_url: width: 1646 }} 1646w,{% endif %}
+                                          {% if media.preview_image.width >= 1946 %}{{ media.preview_image | image_url: width: 1946 }} 1946w,{% endif %}
+                                          {{ media.preview_image | image_url }} {{ media.preview_image.width }}w"
+                                          src="{{ media.preview_image | image_url: width: 370 }} 370w"
+                                          sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 992px) calc((100vw - 130px) / 4), (min-width: 768px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
+                                          loading="lazy"
+                                          width="{{ media.preview_image.width }}"
+                                          height="{{ media.preview_image.height }}"
+                                          alt="{{ media.preview_image.alt | escape }}">
+                                        {%- if product.media[1] != nil -%}
+                                          <img srcset="{%- if product.media[1].width >= 165 -%}{{ product.media[1] | image_url: width: 165 }} 165w,{%- endif -%}
+                                            {%- if product.media[1].width >= 360 -%}{{ product.media[1] | image_url: width: 360 }} 360w,{%- endif -%}
+                                            {% if product.media[1].width >= 493 %}{{ product.media[1] | image_url: width: 493 }} 493w,{% endif %}
+                                            {% if product.media[1].width >= 600 %}{{ product.media[1] | image_url: width: 600 }} 600w,{% endif %}
+                                            {% if product.media[1].width >= 713 %}{{ product.media[1] | image_url: width: 713 }} 713w,{% endif %}
+                                            {% if product.media[1].width >= 823 %}{{ product.media[1] | image_url: width: 823 }} 823w,{% endif %}
+                                            {% if product.media[1].width >= 992 %}{{ product.media[1] | image_url: width: 992 }} 992w,{% endif %}
+                                            {{ product.media[1] | image_url }} {{ product.media[1].width }}w"
+                                            src="{{ product.media[1] | image_url: width: 370 }}"
+                                            alt="{{ product.media[1].alt | escape }}"
+                                            sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 992px) calc((100vw - 130px) / 4), (min-width: 768px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
+                                            class="motion-reduce img-fluid mx-auto lazyload"
+                                            loading="lazy"
+                                            width="{{ product.media[1].width }}"
+                                            height="{{ product.media[1].height }}">
+                                        {%- endif -%}
+                                    </a>
+                                  </div>
+                                {%- endif -%}
+                              {%- endfor -%}
+                          </div>
+                        {%- endif -%}
+                      </div>
+                      
+                      <div class="wbproductdes card__content">
+                          <div class="card__information">
+                            {%- if settings.predictive_search_show_vendor == true -%}
+                              <div class="product__vendor">{{ product.vendor }}</div>
+                            {%- endif -%}
+                            <h3 class="card__heading" {% if product.featured_media or settings.card_style == 'card' %} id="title-{{ section_id }}-{{ product.id }}" {% endif %}>
+                              <a href="{{ product.url | default: '#' }}" id="CardLink-{{ section_id }}-{{ product.id }}" class="full-unstyled-link" aria-labelledby="CardLink-{{ section_id }}-{{ product.id }} Badge-{{ section_id }}-{{ product.id }}" >
+                                {{ product.title | escape }}
+                              </a>
+                            </h3>
+                            {% if settings.predictive_search_show_price == true %}
+                              <div class="card-information">
+                                <span class="caption-large light">{{ block.settings.description | escape }}</span>
+                                <div class="no-js-hidden wbhprice" id="price-{{ section.id }}-{{ product.id }}" 
+                                role="status" {{ block.shopify_attributes }}>
+                                  {%- render 'price', product: product, use_variant: false, show_badges: true -%}
+                                </div>
+                                </div>
+                            {% endif %}
+                          </div>
+                      </div>
+                      </div>
+                    </div>
+                  {%- endif -%}
+                </li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- endif -%}
+        
+        {%- if predictive_search.resources.collections.size > 0 or predictive_search.resources.articles.size > 0 -%}
+          <div class="collection-and-articles">
+            {%- if predictive_search.resources.collections.size > 0 -%}
+              <div class="search_result-collections search__results">
+                <div class="heading-wrapper">
+                  <div class="default-content-heading">{{- 'wbcustomlabel.wballtext.popular_categories' | t -}}</div>
+                  <a href="{{ routes.collections_url }}" class="default-heading-link">{{- 'wbcustomlabel.wballtext.all_categories' | t -}}</a>
+                </div>
+                <div class="collection-list-wrapper flex-direction--column collection-card-info ">
+                <ul id="predictive-search-results-pages-list-mobile" class="predictive-search__results-list list-unstyled collection-list grid grid--4-col-desktop grid--3-col-tablet-down" role="group" aria-labelledby="prpredictive-search-pages-desktop">
+                  {%- for collection in predictive_search.resources.collections -%}
+                  <li class="collection-list__item grid__item">
+                    {% render 'card-collection',
+                    card_collection: collection,
+                    show_collection_title: settings.show_collection_title,
+                    show_item_count: settings.show_item_count,
+                    enable_collection_img_full: settings.enable_collection_img_full,
+                    columns: 3
+                    %}
+                  </li>
+                  {%- endfor -%}
+                </ul>
+              </div>
+              </div>
+            {%- endif -%}
+            {%- if predictive_search.resources.articles.size > 0 -%}
+              <div class="search_result-articles search__results">
+                <div class="heading-wrapper">
+                  <div class="default-content-heading">{{- 'wbcustomlabel.wballtext.popular_blogs' | t -}}</div>
+                  <a href="{{ settings.search_blog.url }}" class="default-heading-link">{{- 'wbcustomlabel.wballtext.all_blogs' | t -}}</a>
+                </div>
+
+                <div class="search_blog-wrapper">
+                  <ul id="predictive-search-results-pages-list-mobile" class="grid--1-col-desktop grid--1-col-tablet predictive-search__results-list blog__posts articles-wrapper contains-card contains-card--article grid product-grid contains-card{% if settings.blog_card_style == 'standard' %} contains-card--standard{% endif %}" role="group" aria-labelledby="prpredictive-search-pages-desktop">
+                    {%- for article in predictive_search.resources.articles -%}
+                      {%- liquid
+                        assign ratio = 1
+                        if ratio == 0 or ratio == null
+                          assign ratio = 1
+                        endif
+                      -%} 
+                      <li class="blog_col_wrapper grid__item">
+                        <div class="article-card-wrapper card-wrapper">
+                          <div class="card article-card card--{{ settings.blog_card_style }} flex_direction--row article-card__image--square{% if article.image %} card--media{% else %} card--text{% endif %}{% if settings.blog_card_style == 'card' %} color-{{ settings.blog_card_color_scheme }} gradient{% endif %}{% if template contains 'search' %} color-{{ settings.card_color_scheme }} gradient card--{{ settings.card_style }}{% endif %}">
+                            {%- if article.image -%}
+                              <div class="card__inner{% if settings.blog_card_style == 'standard' %} color-{{ settings.blog_card_color_scheme }} gradient{% endif %}{% if article.image or settings.blog_card_style == 'standard' %} ratio{% endif %}" style="--ratio-percent: {{ 1 | divided_by: ratio | times: 100 }}%;">
+                                <div class="article-card__image-wrapper card__media">
+                                  <a href="{{ article.url }}">
+                                    <div class="article-card__image media media--hover-effect">
+                                      <img srcset="
+                                      {%- if article.image.src.width >= 165 -%}
+                                        {{ article.image.src | image_url: width: 165 }} 165w,{%- endif -%}
+                                      {%- if article.image.src.width >= 360 -%}
+                                        {{ article.image.src | image_url: width: 360 }} 360w,{%- endif -%}
+                                      {%- if article.image.src.width >= 533 -%}
+                                        {{ article.image.src | image_url: width: 533 }} 533w,{%- endif -%}
+                                      {%- if article.image.src.width >= 720 -%}
+                                        {{ article.image.src | image_url: width: 720 }} 720w,{%- endif -%}
+                                      {%- if article.image.src.width >= 1000 -%}
+                                        {{ article.image.src | image_url: width: 1000 }} 1000w,{%- endif -%}
+                                      {%- if article.image.src.width >= 1500 -%}
+                                        {{ article.image.src | image_url: width: 1500 }} 1500w,{%- endif -%}
+                                      {{ article.image.src | image_url }} {{ article.image.src.width }}w"
+                                      src="{{ article.image.src | image_url: width: 533 }}"
+                                      sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 100 | divided_by: 2 }}px, (min-width: 768px) calc((100vw - 130px) / 2), calc((100vw - 50px) / 2)"
+                                      alt="{{ article.image.src.alt | escape }}"
+                                      class="motion-reduce"
+                                      loading="lazy"
+                                      width="{{ article.image.width }}"
+                                      height="{{ article.image.height }}">
+                                    </div>
+                                  </a>
+                                </div>
+                              </div>
+                            {%- endif -%}
+                            <div class="card__content">
+                                <h2 class="card__heading">
+                                  <a href="{{ article.url }}" class="full-unstyled-link">
+                                    {{ article.title }}
+                                  </a>
+                                </h2>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                    {%- endfor -%}
+                  </ul>
+                </div>
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <div class="predictive-search__loading-state" aria-hidden="true">
+      <svg
+        aria-hidden="true"
+        focusable="false"
+        class="spinner"
+        viewBox="0 0 66 66"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle class="path" fill="none" stroke-width="6" cx="33" cy="33" r="30"></circle>
+      </svg>
+    </div>
+  </div>
+
+  <span class="hidden" data-predictive-search-live-region-count-value>
+    {% liquid
+      assign total_results = predictive_search.resources.products.size | plus: first_column_results_size
+      if total_results == 0
+        echo 'templates.search.no_results' | t: terms: predictive_search.terms
+      else
+        echo 'templates.search.results_with_count' | t: count: total_results | append: ': '
+        if predictive_search.resources.queries.size > 0
+          assign count = predictive_search.resources.queries.size | plus: predictive_search.resources.collections.size
+          echo 'templates.search.results_suggestions_with_count' | t: count: count | append: ', '
+        endif
+        if predictive_search.resources.pages.size > 0
+          assign count = predictive_search.resources.pages.size | plus: predictive_search.resources.articles.size
+          echo 'templates.search.results_pages_with_count' | t: count: count | append: ', '
+        endif
+        if predictive_search.resources.products.size > 0
+          echo 'templates.search.results_products_with_count' | t: count: predictive_search.resources.products.size
+        endif
+      endif
+    %}
+  </span>
+{%- endif -%}

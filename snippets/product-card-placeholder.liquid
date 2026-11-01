@@ -1,0 +1,29 @@
+{% comment %}
+    Renders a product card placeholder
+
+    Usage:
+    {% render 'product-card-placeholder' %}
+{% endcomment %}
+
+<div class="card-wrapper wbproduct-container collagebg product-card-wrapper">
+    <div class="card card--{{ settings.card_style }}
+        {% if card_product.featured_media %} card--media{% else %} card--text{% endif %}
+        {% if settings.card_style == 'card' %} color-{{ settings.card_color_scheme }} gradient{% endif %}
+        {% if image_shape and image_shape != 'default' %} card--shape{% endif %}
+        {% if extend_height %} card--extend-height{% endif %}
+        {% if horizontal_class %} card--horizontal{% endif %}">
+        <div class="wbimgblock card__inner">
+            {% capture current %}{% cycle 1, 2, 3, 4, 5, 6 %}{% endcapture %}
+            {%- if placeholder_image -%}
+                {{ placeholder_image | placeholder_svg_tag: 'placeholder-svg' }}
+            {%- else -%}
+                {{ 'product-apparel-2' | placeholder_svg_tag: 'placeholder-svg' }}
+            {%- endif -%}
+        </div>
+        <div class="wbproductdes card__content">
+            <p class="product__vendor">{{ 'products.product.vendor' | t }}</p>
+            <h3 class="card__heading">{{ 'onboarding.product_title' | t }}</h3>
+            {% render 'price' %}
+        </div>
+    </div>
+</div>

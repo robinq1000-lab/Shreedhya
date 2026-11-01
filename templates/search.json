@@ -1,0 +1,25 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-search",
+      "settings": {
+        "columns_desktop": 3,
+        "enable_filtering": true,
+        "filter_type": "vertical",
+        "vertical_filter_bg_color": "#ffffff",
+        "enable_filter_bg": false,
+        "enable_sorting": true,
+        "article_show_date": true,
+        "date_position": "top",
+        "article_show_author": false,
+        "columns_mobile": "2",
+        "color_scheme": "background-1",
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

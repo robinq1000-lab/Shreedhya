@@ -1,0 +1,16 @@
+{%- if cart != empty -%}
+  {%- for item in cart.items -%}
+    <div id="cart-notification-price-{{ item.key }}">
+      <div class="cartnoti_price">
+        <span class="totals__subtotal">{{ 'sections.cart.subtotal' | t }} ({{ cart.item_count }}) {{ ':' }}</span>
+        <p class="product-option price-original">
+          {%- if settings.currency_code_enabled -%}
+            {{ cart.total_price | money_with_currency }}
+          {%- else -%}
+            {{ cart.total_price | money }}
+          {%- endif -%}
+        </p>
+      </div>  
+    </div>
+  {%- endfor -%}
+{%- endif -%}

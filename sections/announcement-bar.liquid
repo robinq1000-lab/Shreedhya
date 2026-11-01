@@ -1,0 +1,284 @@
+<link rel="preload" as="style" href="{{ 'component-slider.css' | asset_url }}">
+{{ 'component-slider.css' | asset_url | stylesheet_tag }}
+<link rel="preload" as="style" href="{{ 'component-list-social.css' | asset_url }}">
+{{ 'component-list-social.css' | asset_url | stylesheet_tag }}
+<link rel="preload" as="style" href="{{ 'section-announcement-bar.css' | asset_url }}">
+{{ 'section-announcement-bar.css' | asset_url | stylesheet_tag }}
+{%- if section.settings.enable_country_selector or section.settings.enable_language_selector -%}
+  <link rel="preload" as="style" href="{{ 'component-localization-form.css' | asset_url }}">
+  {{ 'component-localization-form.css' | asset_url | stylesheet_tag }}
+{%- endif -%}
+<div class="{% if section.settings.enable_announce_separator == true %}enable_announce_separator {% endif %}announcement--bar color-{{ section.settings.color_scheme }} gradient {% if section.settings.enable_transp == true %}trans_bg {% endif %} annoucehome {% if section.settings.mobile_bar %}mobile_announce{% endif %}">
+  <div class="headannunce {% if section.settings.full-width == true %}full-page-width{% else %}page-width{% endif %} announce_wrapper">
+    {%- liquid
+      assign has_social_icons = true
+      if settings.social_facebook_link == blank and settings.social_instagram_link == blank and settings.social_youtube_link == blank and settings.social_tiktok_link == blank and settings.social_twitter_link == blank and settings.social_pinterest_link == blank and settings.social_snapchat_link == blank and settings.social_tumblr_link == blank and settings.social_vimeo_link == blank
+          assign has_social_icons = false
+      endif
+    -%}
+    <div class="announce_item announce_social">
+    {%- if section.settings.show_social and has_social_icons -%}
+      {%- render 'social-icons' -%}
+    {%- endif -%}
+    </div>
+  <slideshow-component>
+    <div class="headannunce">
+      {%- if section.blocks.size > 1 -%}
+        <button type="button" class="focus-inset slider-button slider-button--prev" name="previous" aria-label="{{ 'sections.slideshow.previous_slideshow' | t }}" aria-controls="Slider-{{ section.id }}">{% render 'icon-caret' %}</button>
+      {%- endif -%}
+    <div class="slider grid" id="Slider-{{ section.id }}" data-autoplay="{{ section.settings.auto_rotate }}" data-speed="{{ section.settings.change_slides_speed }}" aria-live="polite"
+      aria-atomic="true">
+    {%- for block in section.blocks -%}
+      {%- case block.type -%}
+        {%- when 'announcement' -%}
+        <div class="slideshow__slide slider__slide" id="Slide-{{ section.id }}-{{ forloop.index }}">
+          <div class="announcement-bar" role="region" aria-label="{{ 'sections.header.announcement' | t }}" {{ block.shopify_attributes }}>
+            {%- if block.settings.text != blank -%}
+                  <span class="link">{{ block.settings.text }}</span>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endcase -%}
+    {%- endfor -%}
+    </div>
+    {%- if section.blocks.size > 1 -%}
+      <button type="button" class="focus-inset slider-button slider-button--next" name="next" aria-label="{{ 'sections.slideshow.next_slideshow' | t }}" aria-controls="Slider-{{ section.id }}">{% render 'icon-caret' %}</button>
+      <div class="slideshow__controls slider-buttons">
+          {%- if section.settings.auto_rotate -%}
+            <button type="button" class="focus-inset slideshow__autoplay hidden" aria-label="{{ 'sections.slideshow.pause_slideshow' | t }}">{{ 'sections.slideshow.pause_slideshow' | t }}</button>
+          {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+  </slideshow-component>
+  
+  <div class="localization-wrapper announce_item right">
+    {% if section.settings.enable_language_selector or section.settings.enable_country_selector %}
+      {%- if section.settings.enable_language_selector and localization.available_languages.size > 1 -%}
+        <noscript class="small-hide medium-hide">
+          {%- form 'localization', id: 'AnnouncementLanguageMobileFormNoScript', class: 'localization-form' -%}
+            <div class="localization-form__select">
+              <h2 class="visually-hidden" id="AnnouncementLanguageMobileLabelNoScript">
+                {{ 'localization.language_label' | t }}
+              </h2>
+              <select
+                class="localization-selector link"
+                name="locale_code"
+                aria-labelledby="AnnouncementLanguageMobileLabelNoScript"
+              >
+                {%- for language in localization.available_languages -%}
+                  <option
+                    value="{{ language.iso_code }}"
+                    lang="{{ language.iso_code }}"
+                    {%- if language.iso_code == localization.language.iso_code %}
+                      selected
+                    {% endif %}
+                  >
+                    {{ language.endonym_name | capitalize }}
+                  </option>
+                {%- endfor -%}
+              </select>
+              {% render 'icon-caret' %}
+            </div>
+            <button class="button button--tertiary">{{ 'localization.update_language' | t }}</button>
+          {%- endform -%}
+        </noscript>
+
+        <localization-form class="small-hide medium-hide no-js-hidden">
+          {%- form 'localization', id: 'AnnouncementLanguageForm', class: 'localization-form' -%}
+            <div>
+              <p class="visually-hidden" id="AnnouncementLanguageLabel">{{ 'localization.language_label' | t }}</p>
+              {%- render 'language-localization', localPosition: 'AnnouncementLanguage' -%}
+            </div>
+          {%- endform -%}
+        </localization-form>
+      {%- endif -%}
+
+      {%- if section.settings.enable_country_selector and localization.available_countries.size > 1 -%}
+        <noscript class="small-hide medium-hide">
+          {%- form 'localization', id: 'AnnouncementCountryMobileFormNoScript', class: 'localization-form' -%}
+            <div class="localization-form__select">
+              <h2 class="visually-hidden" id="AnnouncementCountryMobileLabelNoScript">
+                {{ 'localization.country_label' | t }}
+              </h2>
+              <select
+                class="localization-selector link"
+                name="country_code"
+                aria-labelledby="AnnouncementCountryMobileLabelNoScript"
+              >
+                {%- for country in localization.available_countries -%}
+                  <option
+                    value="{{ country.iso_code }}"
+                    {%- if country.iso_code == localization.country.iso_code %}
+                      selected
+                    {% endif %}
+                  >
+                    {{ country.name }} ({{ country.currency.iso_code }}
+                    {{ country.currency.symbol }})
+                  </option>
+                {%- endfor -%}
+              </select>
+              {% render 'icon-caret' %}
+            </div>
+            <button class="button button--tertiary">{{ 'localization.update_country' | t }}</button>
+          {%- endform -%}
+        </noscript>
+
+        <localization-form class="small-hide medium-hide no-js-hidden">
+          {%- form 'localization', id: 'AnnouncementCountryForm', class: 'localization-form' -%}
+            <div>
+              <P class="visually-hidden" id="AnnouncementCountryLabel">{{ 'localization.country_label' | t }}</P>
+      
+              {%- render 'country-localization', localPosition: 'AnnouncementCountry' -%}
+            </div>
+          {%- endform -%}
+        </localization-form>
+      {% endif %}
+    {% elsif section.settings.show_timer %}
+      <div data-date="{{ section.settings.wb_enddate }}" class="wb_product_countdown countd_all">
+        <div class="time main_cdays">
+            <span class="count wb_cdays">00</span>
+            <span class="label">{{ 'wbcustomlabel.wballtext.time_days' | t }}</span>
+        </div>
+        <div class="time main_chours">
+            <span class="count wb_chours">00</span>
+            <span class="label">{{ 'wbcustomlabel.wballtext.time_hour' | t }}</span>
+        </div>
+        <div class="time main_cminutes">
+            <span class="count wb_cminutes">00</span>
+            <span class="label">{{ 'wbcustomlabel.wballtext.time_min' | t }}</span>
+        </div>
+        <div class="time main_cseconds">
+            <span class="count wb_cseconds">00</span>
+            <span class="label">{{ 'wbcustomlabel.wballtext.time_sec' | t }}</span>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.announcement-bar.name",
+  "max_blocks": 12,
+  "class": "announcement-bar-section",
+  "enabled_on": {
+    "groups": [
+      "header"
+    ]
+  },
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "full-width",
+      "label": "t:sections.video.settings.full_width.label",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_announce_separator",
+      "default": false,
+      "label": "t:sections.announcement-bar.settings.enable_announce_separator.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "auto_rotate",
+      "label": "t:sections.announcement-bar.settings.auto_rotate.label",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "change_slides_speed",
+      "min": 3,
+      "max": 9,
+      "step": 2,
+      "unit": "s",
+      "label": "t:sections.announcement-bar.settings.change_slides_speed.label",
+      "default": 3
+    },
+    {
+      "type": "checkbox",
+      "id": "show_social",
+      "default": false,
+      "label": "t:sections.footer.settings.show_social.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_timer",
+      "default": false,
+      "label": "t:sections.footer.settings.show_timer.label",
+      "info": "t:sections.footer.settings.show_timer.info"
+    },
+    {
+      "type": "text",
+      "id": "wb_enddate",
+      "label": "t:sections.featured-collection.settings.Date.enddate.label",
+      "info": "t:sections.featured-collection.settings.Date.enddate.info"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.header.settings.header__3.content",
+      "info": "t:sections.header.settings.header__4.info"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_country_selector",
+      "default": false,
+      "label": "t:sections.header.settings.enable_country_selector.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.header.settings.header__5.content",
+      "info": "t:sections.header.settings.header__6.info"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_language_selector",
+      "default": false,
+      "label": "t:sections.header.settings.enable_language_selector.label"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "background-1"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_transp",
+      "label": "t:sections.announcement-bar.settings.enable_transp.label",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:sections.slideshow.settings.mobile.content"
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_bar",
+      "label": "t:sections.announcement-bar.settings.mobile_bar.label",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "announcement",
+      "name": "t:sections.announcement-bar.blocks.announcement.name",
+      "settings": [
+        {
+          "type": "inline_richtext",
+          "id": "text",
+          "default": "Welcome to our store",
+          "label": "t:sections.announcement-bar.blocks.announcement.settings.text.label"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.announcement-bar.presets.name"
+    }
+  ]
+}
+{% endschema %}

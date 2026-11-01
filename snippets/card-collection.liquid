@@ -1,0 +1,140 @@
+{% comment %}
+Renders a collection card
+
+Accepts:
+- card_collection: {Object} Collection Liquid object
+- media_aspect_ratio: {String} Size of the product image card. Values are "square" and "portrait". Default is "square" (optional)
+- columns: {Number}
+- extend_height: {Boolean} Card height extends to available container space. Default: false (optional)
+- wrapper_class: {String} Wrapper class for card (optional)
+
+Usage:
+{% render 'card-collection' %}
+{% endcomment %}
+
+{%- liquid
+  assign ratio = 1
+  if media_aspect_ratio == 'portrait'
+    assign ratio = 0.8
+  elsif media_aspect_ratio == 'adapt'
+    assign ratio = card_collection.featured_image.aspect_ratio
+  endif
+  if ratio == 0 or ratio == null
+    assign ratio = 1
+  endif
+  assign card_color_scheme = settings.collection_card_color_scheme
+  assign card_style = settings.collection_card_style
+-%}
+
+<div class="card-wrapper animate-arrow collection-card-wrapper{% if content_position == 'on_image' %} content-on-image{% endif %}">
+  <div class="card card--{{ card_style }} card--{{ collection_card_direction }} card--media{% if card_style == 'card' %} color-{{ card_color_scheme }} gradient{% endif %}{% if extend_height %} card--extend-height{% endif %}" style="--ratio-percent: {{ 1 | divided_by: ratio | times: 100 }}%;">
+    <div class="card__inner {% if enable_collection_img_full == true %} collection_img_full {% endif %} {% if card_style == 'standard' %}color-{{ card_color_scheme }} gradient{% endif %} ratio" style="--ratio-percent: {{ 1 | divided_by: ratio | times: 100 }}%;">
+      {%- if card_collection.featured_image -%}
+        <a class="full-width-link" href="{{ card_collection.url }}" aria-label="{{- card_collection.title | escape -}}"></a>
+          <div class="card__media">
+            <a {% if card_collection == blank %} role="link" aria-disabled="true"{% else %} href="{{ card_collection.url }}"{% endif %} class="full-unstyled-link h3 media media--transparent media--hover-effect" aria-label="{{ card_collection.title }}">
+              <img srcset="{%- if card_collection.featured_image.width >= 165 -%} {{ card_collection.featured_image | image_url: width: 165 }} 165w,{%- endif -%}
+              {%- if card_collection.featured_image.width >= 330 -%} {{ card_collection.featured_image | image_url: width: 200 }} 200w,{%- endif -%}
+              {{ card_collection.featured_image | image_url }} {{ card_collection.featured_image.width }}w"
+              src="{{ card_collection.featured_image | image_url: width: 200 }}"
+              sizes=" (min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 100 }}px,
+              (min-width: 768px) {% if columns > 1 %}calc((100vw - 10rem) / 2){% else %}calc(100vw - 10rem){% endif %},
+              calc(100vw - 3rem)"
+              alt=""
+              height="{{ card_collection.featured_image.height }}"
+              width="{{ card_collection.featured_image.width }}"
+              loading="lazy"
+              class="motion-reduce">
+              </a>
+          </div> 
+      {%- endif -%}
+      {%- if card_collection.featured_image == blank and show_collection_title or show_item_count -%}
+      <div class="card__content blank__image">
+        {% if settings.show_collection_title == true %}
+          <a {% if card_collection == blank %} role="link" class="h3" aria-disabled="true"{% else %} href="{{ card_collection.url }}" class="h3 {% if coll_upper == true %} uppercase{% endif %}"{% endif %}>
+            {%- if card_collection.title != blank -%}
+              {{- card_collection.title | escape -}}
+            {%- else -%}
+              {{ 'onboarding.collection_title' | t }}
+            {%- endif -%}
+          </a>
+        {%- endif -%}
+          {% if show_item_count %}
+              <p class="wp_itom_count">{{ card_collection.all_products_count }} {{ 'wbcustomlabel.wballtext.collection_item' | t }}</p>
+          {% endif %}
+      </div>
+    {%- endif -%}
+    </div>
+    {% if show_collection_title or show_item_count %}
+      {% if card_collection.featured_image != blank %}
+        <div class="card__content{% if collection_info != blank %} content-disabled{% endif %}">
+          <div class="card__information">
+            {% if show_collection_title != blank %}
+              {% comment %} <a class="full-width-link" href="{{ card_collection.url }}" aria-label="{{ card_collection.title }}"></a> {% endcomment %}
+              <h3 class="card__heading{% if section.settings.show_icon == true %} cwicon{% endif %}">
+                <a
+                  {% if card_collection == blank %}
+                  role="link"
+                  aria-disabled="true"
+                  {% else %}
+                  href="{{ card_collection.url }}"
+                  {% endif %}
+                  class="full-unstyled-link" aria-label="{{ card_collection.title }}">
+                  {%- if card_collection.title != blank -%}
+                    {{- card_collection.title | escape -}}
+                  {%- else -%}
+                    {{ 'onboarding.collection_title' | t }}
+                  {%- endif -%}
+                </a>
+                {% if section.settings.show_icon == true %}
+                  <a href="{{ card_collection.url }}" aria-label="{{ card_collection.title }}">
+                  <span class="{% if section.settings.icon_style == 'link' %}link {% elsif section.settings.icon_style == 'solid' %}onlylist-icon icon-button {% else %}onlylist-icon icon--secondary{% endif %}">{% render 'cross-arrow' %}</span></a>
+                {% endif %}
+              </h3>
+            {%- endif -%}
+
+            {% if list_collection != blank %}
+            <div class="wbcollection-list">
+                {% assign collection__list = list_collection %}
+                {%- for collection in collection__list -%}
+                    <h3 class="card__heading">
+                      <a
+                        {% if collection == blank %}
+                        role="link"
+                        aria-disabled="true"
+                        {% else %}
+                        href="{{ collection.url }}"
+                        {% endif %}
+                        class="full-unstyled-link" aria-label="{{ collection.title }}">
+                        {%- if collection.title != blank -%}
+                          {{- collection.title | escape -}}
+                        {%- endif -%}
+                      </a>
+                    </h3>
+                {%- endfor -%}
+              </div>
+            {% endif %}
+            
+            {% if show_item_count and card_collection.title %}
+              {% if card_collection.title != blank %}
+                <p class="wp_itom_count">{{ card_collection.all_products_count }} {{ 'wbcustomlabel.wballtext.collection_item' | t }}</p>
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>  
+      {% endif %}
+      {% else %}
+        <div class="only-icon card__content{% if collection_info != blank %} content-disabled{% endif %}">
+        <div class="card__information">
+            {% comment %} <a class="full-width-link" href="{{ card_collection.url }}" aria-label="{{ card_collection.title }}"></a> {% endcomment %}
+            <h3 class="card__heading{% if section.settings.show_icon == true %} cwicon{% endif %}">
+              {% if section.settings.show_icon == true %}
+                <a href="{{ card_collection.url }}" aria-label="{{ card_collection.title }}">
+                <span class="{% if section.settings.icon_style == 'link' %}link {% elsif section.settings.icon_style == 'solid' %}onlylist-icon icon-button {% else %}onlylist-icon icon--secondary{% endif %}">{% render 'cross-arrow' %}</span></a>
+              {% endif %}
+            </h3>
+            </div>
+        </div>
+      {% endif %}
+  </div>
+</div>

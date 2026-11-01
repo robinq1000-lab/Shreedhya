@@ -1,0 +1,713 @@
+<link rel="preload" as="style" href="{{ 'lookbook.css' | asset_url }}">
+{{ 'lookbook.css' | asset_url | stylesheet_tag }}
+<link rel="preload" as="style" href="{{ 'component-card.css' | asset_url }}">
+{{ 'component-card.css' | asset_url | stylesheet_tag }}
+{% unless product.has_only_default_variant %}
+<link rel="preload" as="style" href="{{ 'component-product-variant-picker.css' | asset_url }}">
+  {{ 'component-product-variant-picker.css' | asset_url | stylesheet_tag }}
+<link rel="preload" as="style" href="{{ 'component-swatch-input.css' | asset_url }}">
+  {{ 'component-swatch-input.css' | asset_url | stylesheet_tag }}
+<link rel="preload" as="style" href="{{ 'component-swatch.css' | asset_url }}">
+  {{ 'component-swatch.css' | asset_url | stylesheet_tag }}
+{% endunless %}
+{%- style -%}
+.section-{{ section.id }}-padding { 
+  padding-top: {{ section.settings.padding_top }}px;
+  padding-bottom: {{ section.settings.padding_bottom }}px;
+}
+@media screen and (max-width: 991px) {
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.5 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.5 | round: 0 }}px;
+  }
+}
+{%- endstyle -%}
+<div class="section-{{ section.id }}-padding wblook_b color-{{ section.settings.color_scheme }}">
+    <div class="{% unless section.settings.full_width %}page-width {% else %}section--full-width {% endunless %} {% if pro_preview_position == 'in_side' %} full-width {% endif %}">
+      {% if section.settings.pro_preview_position == 'in_side' %}
+        {% if section.settings.miniheading != blank or section.settings.title != blank or section.settings.description != blank %}
+        <div class="heading-top justify-content-{{ section.settings.heading_alignment }}">
+            <div class="heading inline-richtext {{ section.settings.heading_alignment }}">
+              {%- if section.settings.miniheading != blank -%}
+                <span class="{{ section.settings.heading_alignment }}">
+                  <span class="offer_pills {% if section.settings.mini_heading_style == 'button' %}offer_pills_button {% elsif section.settings.mini_heading_style == 'outline' %}offer_pills_outline {% else section.settings.mini_heading_style == 'link' %}offer_pills_link {% endif %} rte">
+                    {{ section.settings.miniheading }}
+                  </span> 
+                </span>
+              {%- endif %}
+              {%- if section.settings.title != blank -%} 
+                <h2 class="{{ section.settings.heading_size }}">
+                  {{ section.settings.title }}
+                </h2>
+              {%- endif %}
+              {%- if section.settings.description != blank -%}
+                <div class="description {{ section.settings.description_style }} rte">
+                  {{ section.settings.description -}}
+                </div>
+              {%- endif %}
+            </div>
+        </div>
+        {% endif %}
+        <div class="look-main-layout grid grid--1-col-tablet-down grid--{{ section.blocks.size }}-col-desktop grid--{{ section.blocks.size }}-col-tablet banner--{{ section.settings.image_height }}">
+          {% for block in section.blocks %}
+            {%- case block.type -%}
+              {%- when '@app' -%}
+                {% render block %}
+            {%- liquid
+              assign full_width = '100vw'
+              assign widths = '375, 550, 750, 1100, 1500, 1780, 2000, 3000, 3840'
+            -%}
+            {%- when 'text' -%}
+              
+            <div class="{% unless forloop.first %}product_res {% endunless %}grid__item{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}" {% if settings.animations_reveal_on_scroll %}
+                  data-cascade style="--animation-order: {{ forloop.index }};"
+                {% endif %}>
+              <div class="lookinner">
+                <div class="{% unless section.settings.image_height == 'adapt' %} banner__media{% endunless %} global-media-settings media{% if block.settings.image == blank and section.settings.image_height == 'adapt' %} wbimgblank_adapt{% endif %}" {% if section.settings.image_height == 'adapt' and block.settings.image != blank %} style="padding-bottom: {{ 1 | divided_by: block.settings.image.aspect_ratio | times: 100 }}%;"{% endif %}>
+                  {%- if block.settings.image != blank -%}
+                    {%- liquid
+                      assign image_height = block.settings.image.width | divided_by: block.settings.image.aspect_ratio | round
+                      assign sizes = full_width
+                    -%}
+                    {{
+                       block.settings.image
+                       | image_url: width: 3840
+                       | image_tag:
+                       loading: 'lazy',
+                       width: block.settings.image.width,
+                       height: image_height,
+                       class: "zoom_effect",
+                       sizes: sizes,
+                       widths: widths }}
+                  {% else %}
+                    {%- assign placeholder_slide = forloop.index | modulo: 2 -%}
+                    {%- if placeholder_slide == 1 -%}
+                      {{ 'hero-apparel-2' | placeholder_svg_tag: 'placeholder-svg' }}
+                    {%- else -%}
+                      {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                    {%- endif -%} 
+                  {%- endif -%}
+                </div>
+                {%- for i in (1..4) -%}
+                  {%- liquid 
+                    assign wblooktop = 'wblooktop_' | append: i
+                    assign wblooktop = block.settings[wblooktop]
+                    assign wblookleft = 'wblookleft_' | append: i
+                    assign wblookleft = block.settings[wblookleft]
+                    assign wblookpd = 'product_' | append: i
+                    assign wblookpd = block.settings[wblookpd]
+                    assign wblookpd = all_products[wblookpd]
+                  -%}
+                {% if wblookpd != blank %}
+                  <div class="wblookbook {% if wblookleft > 55 %}wblbright {% endif %}" style="top: max(calc({{ wblooktop }}% - 24px), 0%); left: max(calc({{ wblookleft }}% - 24px), 0%); --animation-order: {{ forloop.index0 | times: 80 }}ms;">
+                    <div class="lookbookdata">
+                      {%- unless wblookpd == blank -%}
+                        <div class="wblookbleft">
+                          {% if wblookpd.featured_media %}
+                            <div class="wblookimg">
+                              <a href="{{ wblookpd.url }}" title="{{ wblookpd.title | escape }}" class="">
+                                <div class="wblookimglazy">
+                                  <img loading="lazy"
+                                  class="img-fluid mx-auto lazyload"
+                                  srcset="{{ wblookpd.featured_media | image_url: width: 120 }} 120w"
+                                  src="{{ wblookpd.featured_media | image_url: width: 120 }}"
+                                  sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 992px) calc((100vw - 130px) / 4), (min-width: 768px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
+                                  width="120"
+                                  height="{{ 120 | divided_by: wblookpd.featured_media.aspect_ratio | ceil }}">
+                                </div>
+                              </a> 
+                            </div>
+                          {% endif %}
+                          <div class="wblookdesc">
+                            <h3><a href="{{ wblookpd.url }}" title="{{ wblookpd.title | escape }}" class="full-unstyled-link">{{ wblookpd.title }}</a></h3>
+                              {%- render 'price', product: wblookpd, use_variant: false, show_badges: false, from_varies: true -%}
+                          </div>
+                        </div>
+                      {% else %}
+                        <div class="wblookbleft">
+                          <div class="wblookimg"> 
+                            <a role="link" class="full-unstyled-link">
+                              <div class="wblookimglazy">
+                                <div class="dummysvg">{{ 'product-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}</div>
+                              </div>
+                            </a>
+                          </div>
+                          <div class="wblookdesc">
+                            <h3><a role="link" aria-disabled="true" class="full-unstyled-link">{{ 'onboarding.product_title' | t }}</a></h3>
+                            {% render 'price' %}
+                          </div>
+                        </div>
+                      {%- endunless -%}
+                    </div>
+                  </div>
+                {% endif %}
+                  
+                {%- endfor -%}
+              </div>
+            </div>
+            {%- when 'feature_text' -%}
+              <div class="{% unless forloop.first %}product_res {% endunless %}grid__item{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}" {% if settings.animations_reveal_on_scroll %}
+                  data-cascade style="--animation-order: {{ forloop.index }};"
+                {% endif %}>
+                <div class="lookinner">
+                  <div class="{% unless section.settings.image_height == 'adapt' %} banner__media{% endunless %} global-media-settings media{% if block.settings.image1 == blank and section.settings.image_height == 'adapt' %} wbimgblank_adapt{% endif %}" {% if section.settings.image_height == 'adapt' and block.settings.image1 != blank %} style="padding-bottom: {{ 1 | divided_by: block.settings.image1.aspect_ratio | times: 100 }}%;"{% endif %}>
+                    {%- if block.settings.image1 != blank -%}
+                      {%- liquid
+                        assign image_height = block.settings.image1.width | divided_by: block.settings.image1.aspect_ratio | round
+                        assign sizes = full_width
+                      -%}
+                      {{
+                        block.settings.image1
+                        | image_url: width: 3840
+                        | image_tag:
+                        loading: 'lazy',
+                        width: block.settings.image1.width,
+                        height: image_height,
+                        class: "zoom_effect",
+                        sizes: sizes,
+                        widths: widths }}
+                    {% else %}
+                      {%- assign placeholder_slide = forloop.index | modulo: 2 -%}
+                      {%- if placeholder_slide == 1 -%}
+                        {{ 'hero-apparel-2' | placeholder_svg_tag: 'placeholder-svg' }}
+                      {%- else -%}
+                        {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                      {%- endif -%} 
+                    {%- endif -%}
+                  </div>
+                {%- for i in (1..4) -%}
+                  {%- liquid 
+                    assign wblookftop = 'wblookftop_' | append: i
+                    assign wblookftop = block.settings[wblookftop]
+                    assign wblookfleft = 'wblookfleft_' | append: i
+                    assign wblookfleft = block.settings[wblookfleft]
+                    assign wblookfpd = 'feature_title' | append: i
+                    assign wblookfpd = block.settings[wblookfpd]
+                    assign wblookftxt = 'feature_content' | append: i
+                    assign wblookftxt = block.settings[wblookftxt]
+                  -%}
+                {% if wblookpd != blank %}
+                  <div class="wblookbook {% if wblookfleft > 55 %}wblbright {% endif %}" style="top: max(calc({{ wblookftop }}% - 24px), 0%); left: max(calc({{ wblookfleft }}% - 24px), 0%);--animation-order: {{ forloop.index0 | times: 80 }}ms;">
+                    <div class="lookbookdata">
+                        <div class="wblookfleft">
+                            <h3>{{ wblookfpd }}</h3>
+                            <span>{{ wblookftxt }}</span>
+                        </div>
+                    </div>
+                  </div>
+                {% endif %}
+                {%- endfor -%}
+                </div>
+              </div>
+          {%- endcase -%}
+        {% endfor %}
+        </div>
+        {% else %}
+          {% render 'lookbook-outside', pro_preview_position: section.settings.pro_preview_position %}
+        {% endif %}
+    </div>
+</div>
+
+
+
+{% schema %}
+{
+  "name": "t:sections.lookbook.name",
+  "tag": "section",
+  "max_blocks": 3,
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay"
+    ]
+  },
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "t:sections.video.settings.full_width.label",
+      "default": false
+    },
+    {
+      "type": "inline_richtext",
+      "id": "miniheading",
+      "label": "t:sections.collection-list.settings.miniheading.label"
+    },
+    {
+      "type": "select",
+      "id": "mini_heading_style",
+      "options": [
+        {
+          "value": "button",
+          "label": "t:sections.all.mini_heading_style.options__1.label"
+        },
+        {
+          "value": "outline",
+          "label": "t:sections.all.mini_heading_style.options__2.label"
+        },
+        {
+          "value": "link",
+          "label": "t:sections.all.mini_heading_style.options__3.label"
+        }
+      ],
+      "default": "outline",
+      "label": "t:sections.all.mini_heading_style.label"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "title",
+      "label": "t:sections.multicolumn.settings.title.label",
+      "default": "Title"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "options": [
+        {
+          "value": "h2",
+          "label": "t:sections.all.heading_size.options__1.label"
+        },
+        {
+          "value": "h1",
+          "label": "t:sections.all.heading_size.options__2.label"
+        },
+        {
+          "value": "h0",
+          "label": "t:sections.all.heading_size.options__3.label"
+        }
+      ],
+      "default": "h0",
+      "label": "t:sections.all.heading_size.label"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "t:sections.collapsible_content.settings.heading_alignment.label",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:sections.collapsible_content.settings.heading_alignment.options__1.label"
+        },
+        {
+          "value": "center",
+          "label": "t:sections.collapsible_content.settings.heading_alignment.options__2.label"
+        },
+        {
+          "value": "right",
+          "label": "t:sections.collapsible_content.settings.heading_alignment.options__3.label"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "t:sections.featured-collection.settings.description.label"
+    },
+    {
+      "type": "select",
+      "id": "description_style",
+      "label": "t:sections.featured-collection.settings.description_style.label",
+      "options": [
+        {
+          "value": "body",
+          "label": "t:sections.featured-collection.settings.description_style.options__1.label"
+        },
+        {
+          "value": "subtitle",
+          "label": "t:sections.featured-collection.settings.description_style.options__2.label"
+        },
+        {
+          "value": "uppercase",
+          "label": "t:sections.featured-collection.settings.description_style.options__3.label"
+        }
+      ],
+      "default": "body"
+    },
+    {
+      "type": "select",
+      "id": "image_height",
+      "options": [
+        {
+          "value": "adapt",
+          "label": "t:sections.image-with-text.settings.height.options__1.label"
+        },
+        {
+          "value": "small",
+          "label": "t:sections.image-banner.settings.image_height.options__2.label"
+        },
+        {
+          "value": "medium",
+          "label": "t:sections.image-banner.settings.image_height.options__3.label"
+        },
+        {
+          "value": "large",
+          "label": "t:sections.image-banner.settings.image_height.options__4.label"
+        }
+      ],
+      "default": "adapt",
+      "label": "t:sections.lookbook.settings.image_height.label",
+      "info": "t:sections.lookbook.settings.image_height.info"
+    },
+    {
+      "type": "select",
+      "id": "pro_preview_position",
+      "label": "t:sections.lookbook.settings.pro_preview_position.label",
+      "options": [
+        {
+          "value": "in_side",
+          "label": "t:sections.lookbook.settings.pro_preview_position.options__1.label"
+        },
+        {
+          "value": "out_side",
+          "label": "t:sections.lookbook.settings.pro_preview_position.options__2.label"
+        }
+      ],
+      "default": "in_side"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "background-1"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 60
+    }
+  ],
+  "blocks": [
+    {
+      "type": "text",
+      "name": "t:sections.lookbook.blocks.text.name",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "t:sections.image-banner.settings.image.label"
+        },
+        {
+          "type": "color",
+          "id": "active_color",
+          "label": "t:sections.lookbook.blocks.text.settings.active_color.label",
+          "default": "#F5F5F5"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.featured-product.settings.product.label"
+        },
+        {
+          "type": "range",
+          "id": "wblooktop_1",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "t:sections.lookbook.blocks.text.settings.wblooktop_1.label",
+          "default": 23
+        },
+        {
+          "type": "range",
+          "id": "wblookleft_1",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "t:sections.lookbook.blocks.text.settings.wblookleft_1.label",
+          "default": 20
+        },
+        {
+          "type": "product",
+          "id": "product_1",
+          "label": "t:sections.lookbook.blocks.text.settings.product_1.label"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.featured-product.settings.product.label"
+        },
+        {
+          "type": "range",
+          "id": "wblooktop_2",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "t:sections.lookbook.blocks.text.settings.wblooktop_1.label",
+          "default": 50
+        },
+        {
+          "type": "range",
+          "id": "wblookleft_2",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "t:sections.lookbook.blocks.text.settings.wblookleft_1.label",
+          "default": 30
+        },
+        {
+          "type": "product",
+          "id": "product_2",
+          "label": "t:sections.lookbook.blocks.text.settings.product_1.label"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.featured-product.settings.product.label"
+        },
+        {
+          "type": "range",
+          "id": "wblooktop_3",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "t:sections.lookbook.blocks.text.settings.wblooktop_1.label",
+          "default": 50
+        },
+        {
+          "type": "range",
+          "id": "wblookleft_3",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "t:sections.lookbook.blocks.text.settings.wblookleft_1.label",
+          "default": 30
+        },
+        {
+          "type": "product",
+          "id": "product_3",
+          "label": "t:sections.lookbook.blocks.text.settings.product_1.label"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.featured-product.settings.product.label"
+        },
+        {
+          "type": "range",
+          "id": "wblooktop_4",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "t:sections.lookbook.blocks.text.settings.wblooktop_1.label",
+          "default": 50
+        },
+        {
+          "type": "range",
+          "id": "wblookleft_4",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "t:sections.lookbook.blocks.text.settings.wblookleft_1.label",
+          "default": 30
+        },
+        {
+          "type": "product",
+          "id": "product_4",
+          "label": "t:sections.lookbook.blocks.text.settings.product_1.label"
+        }
+      ]
+    },
+    {
+      "type": "feature_text",
+      "name": "t:sections.lookbook.blocks.feature_text.name",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image1",
+          "label": "t:sections.image-banner.settings.image.label"
+        },
+        {
+          "type": "color",
+          "id": "active_color1",
+          "label": "t:sections.lookbook.blocks.text.settings.active_color.label",
+          "default": "#F5F5F5"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.lookbook.blocks.feature_text.settings.header.content"
+        },
+        {
+          "type": "range",
+          "id": "wblookftop_1",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "t:sections.lookbook.blocks.text.settings.wblooktop_1.label",
+          "default": 23
+        },
+        {
+          "type": "range",
+          "id": "wblookfleft_1",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "t:sections.lookbook.blocks.text.settings.wblookleft_1.label",
+          "default": 20
+        },
+        {
+          "type": "inline_richtext",
+          "id": "feature_title1",
+          "label": "t:sections.multicolumn.settings.title.label",
+          "default": "Feature name"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "feature_content1",
+          "label": "t:sections.main-product.blocks.icon_with_text.settings.content.label",
+          "default": "Share useful information about your product features."
+        },
+        {
+          "type": "header",
+          "content": "t:sections.lookbook.blocks.feature_text.settings.header.content"
+        },
+        {
+          "type": "range",
+          "id": "wblookftop_2",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "t:sections.lookbook.blocks.text.settings.wblooktop_1.label",
+          "default": 35
+        },
+        {
+          "type": "range",
+          "id": "wblookfleft_2",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "t:sections.lookbook.blocks.text.settings.wblookleft_1.label",
+          "default": 25
+        },
+        {
+          "type": "inline_richtext",
+          "id": "feature_title2",
+          "label": "t:sections.multicolumn.settings.title.label",
+          "default": "Feature name"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "feature_content2",
+          "label": "t:sections.main-product.blocks.icon_with_text.settings.content.label",
+          "default": "Share useful information about your product features."
+        },
+        {
+          "type": "header",
+          "content": "t:sections.lookbook.blocks.feature_text.settings.header.content"
+        },
+        {
+          "type": "range",
+          "id": "wblookftop_3",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "t:sections.lookbook.blocks.text.settings.wblooktop_1.label",
+          "default": 62
+        },
+        {
+          "type": "range",
+          "id": "wblookfleft_3",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "t:sections.lookbook.blocks.text.settings.wblookleft_1.label",
+          "default": 40
+        },
+        {
+          "type": "inline_richtext",
+          "id": "feature_title3",
+          "label": "t:sections.multicolumn.settings.title.label",
+          "default": "Feature name"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "feature_content3",
+          "label": "t:sections.main-product.blocks.icon_with_text.settings.content.label",
+          "default": "Share useful information about your product features."
+        },
+        {
+          "type": "header",
+          "content": "t:sections.lookbook.blocks.feature_text.settings.header.content"
+        },
+        {
+          "type": "range",
+          "id": "wblookftop_4",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "t:sections.lookbook.blocks.text.settings.wblooktop_1.label",
+          "default": 45
+        },
+        {
+          "type": "range",
+          "id": "wblookfleft_4",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "t:sections.lookbook.blocks.text.settings.wblookleft_1.label",
+          "default": 60
+        },
+        {
+          "type": "inline_richtext",
+          "id": "feature_title4",
+          "label": "t:sections.multicolumn.settings.title.label",
+          "default": "Feature name"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "feature_content4",
+          "label": "t:sections.main-product.blocks.icon_with_text.settings.content.label",
+          "default": "Share useful information about your product features."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.lookbook.name",
+      "blocks": [
+        {
+          "type": "text"
+        },
+        {
+          "type": "text"
+        },
+        {
+          "type": "text"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

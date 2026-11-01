@@ -1,0 +1,145 @@
+{%- liquid
+  assign limit = 6
+  assign results_count = search.results_count
+  assign product_results = search.results -%}
+
+{%- paginate search.results by limit -%}
+  <div class="js-compare-products-modal">
+    <div class="global-settings-popup popup-compare-wrapper">
+      <div class="compare_content">
+        <button type="button" class="close-compare-modal">{% render 'icon-close' %}</button>
+        {%- if results_count > 0 -%}
+          <div class="compare_table">
+            <div class="compare_table--row compare_basic">
+            <div class="compare_table--column compare_intro_column left">
+                <div class="compare_intro_wrapper">
+                  <span class="compare_subtitle">
+                    {{ 'compare.compare_subtitle' | t }}
+                  </span>
+                  <h2 class="compare_heading">
+                    {{ 'compare.compare_heading' | t }}
+                  </h2>
+                  <div class="compare_description">
+                    {{ 'compare.compare_description' | t }}
+                  </div>
+                </div>
+              </div>
+              {%- for product in product_results -%}
+                <div class="compare_table--column compare_id_{{ product.id }} compare_img_part">
+                  {% assign image = product.images[0] | default: placeholder_img -%}
+                  {%- if image != blank %}
+                    <a href="/" rel="nofollow" class="compare_remove_item js-remove-compare-link" data-id="{{ product.id }}">{% render 'icon-close' %}</a>
+                    <a href="{{ product.url }}" class="product-image">
+                      <img src="{{ image | img_url: 'master' }}" alt="{{ image.alt }}" />
+                    </a>
+                  {% endif -%}
+                  <a class="product-title center" href="{{ product.url }}">{{ product.title | escape }}</a>
+                  <div class="product-actions"> 
+                    <a href="{{ product.url }}" class="button">Shop</a>
+                  </div>
+                </div>
+              {%- endfor -%}
+            </div>
+            <div class="compare_table--row compare_price">
+              <div class="compare_table--column label_column">
+                <div class="field_label">
+                 {{ 'compare.compare_label_1' | t }}
+                  </div>
+              </div>
+              {%- for product in product_results -%}
+                <div class="compare_table--column compare_id_{{ product.id }}">
+                  <p>{{ product.description | strip_html | truncate: 70 }}</p>
+                </div>
+              {%- endfor -%}
+            </div>
+
+            <div class="compare_table--row compare_sku">
+              <div class="compare_table--column label_column">
+                <div class="field_label">
+                 {{ 'compare.compare_label_2' | t }}
+                  </div>
+              </div>
+              {%- for product in product_results -%}
+                <div class="compare_table--column compare_id_{{ product.id }}">
+                  {% if product.metafields.custom.compare_data_1 != blank %}
+                    {{ product.metafields.custom.compare_data_1 }}
+                  {% endif %}
+                </div>
+              {%- endfor -%}
+            </div>
+
+            <div class="compare_table--row compare_rating">
+              <div class="compare_table--column label_column">
+                <div class="field_label">
+                 {{ 'compare.compare_label_3' | t }}
+                </div>
+              </div>
+              {%- for product in product_results -%}
+                <div class="compare_table--column compare_id_{{ product.id }}">
+                {% if product.metafields.custom.compare_data_2 != blank %}
+                    {{ product.metafields.custom.compare_data_2 }}
+                  {% endif %}
+                </div>
+              {%- endfor -%}
+            </div>
+
+            <div class="compare_table--row compare_vendor">
+              <div class="compare_table--column label_column">
+                <div class="field_label">
+                  {{ 'compare.compare_label_4' | t }}
+                </div>
+              </div>
+              {%- for product in product_results -%}
+                <div class="compare_table--column compare_id_{{ product.id }}">
+                  {% if product.metafields.custom.compare_data_3 != blank %}
+                    {{ product.metafields.custom.compare_data_3 }}
+                  {% endif %}
+                </div>
+              {%- endfor -%}
+            </div>
+
+            <div class="compare_table--row compare_weight">
+              <div class="compare_table--column label_column">
+                <div class="field_label">
+                 {{ 'compare.compare_label_5' | t }}
+                </div>
+              </div>
+              {%- for product in product_results -%}
+                <div class="compare_table--column compare_id_{{ product.id }}">
+                {% if product.metafields.custom.compare_data_4 != blank %}
+                    {{ product.metafields.custom.compare_data_4 }}
+                  {% endif %}
+                </div>
+              {%- endfor -%}
+            </div>
+          </div>
+          <div class="compare_bottom_bar">
+              <div class="compare_bottom_left">
+                  {{ 'compare.compare_bottom' | t }}
+              </div>
+              {% comment %} <a rel="nofollow" class="js-compare-clear-all compare-clear-all full-unstyled-link button" href="/">{{ 'compare.compare_clear_all' | t }}</a> {% endcomment %}
+              <button
+                type="button"
+                class="js-compare-clear-all compare-clear-all button">
+                {{ 'compare.compare_clear_all' | t }}
+              </button>
+          </div>
+        {%- else -%}
+          <div class="empty_compare_products">
+
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+{%- endpaginate -%}
+
+
+{%- schema -%}
+  {
+    "name": "Product Compare",
+    "class": "section-product-compare-modal",
+    "settings": [
+    ]
+  }
+{% endschema %}

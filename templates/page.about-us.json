@@ -1,0 +1,321 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "disabled": true,
+      "settings": {
+        "padding_top": 0,
+        "padding_bottom": 16
+      }
+    },
+    "image_banner_jtyYyM": {
+      "type": "image-banner",
+      "blocks": {
+        "banner_with_text_rxCjGB": {
+          "type": "banner_with_text",
+          "settings": {
+            "image": "",
+            "image_overlay_opacity": 30,
+            "banner_width": 100,
+            "banner_offer_text": "",
+            "subheading": "",
+            "mini_heading_style": "link",
+            "heading": "OUR STORY",
+            "heading_size": "h0",
+            "text": "<p>We create refined essentials that blend quality craftsmanship with effortless style—designed to move with you through every moment.</p>",
+            "text_style": "body",
+            "button_label_1": "",
+            "button_link_1": "",
+            "link_window": true,
+            "view_all_style": "solid",
+            "show_text_box": true,
+            "container_overlay_opacity": 0,
+            "desktop_content_position": "bottom-center",
+            "desktop_content_alignment": "center",
+            "color_scheme": "accent-1",
+            "image_behavior": "none",
+            "mobile_content_alignment": "center"
+          }
+        }
+      },
+      "block_order": [
+        "banner_with_text_rxCjGB"
+      ],
+      "name": "t:sections.image-banner.presets.name",
+      "settings": {
+        "full_width": true,
+        "enable_sidespace": false,
+        "title": "",
+        "heading_size": "h0",
+        "description": "",
+        "description_style": "body",
+        "heading_alignment": "left",
+        "image_height": "small",
+        "show_gap": true,
+        "section_color_scheme": "",
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+    "rich_text_G3THth": {
+      "type": "rich-text",
+      "blocks": {
+        "heading_cmCqq9": {
+          "type": "heading",
+          "settings": {
+            "heading": "Establishing our first tailoring shop in London in 1910, we’ve been shaping the fashion industry since our humble beginnings. Today, we focus on curating the best collections of 0–16 kids clothing, from classic Stone Island Junior and Moncler staples to statement pieces from Gucci, Kenzo and Burberry. Home to the freshest drops and exclusives.",
+            "heading_size": "h2"
+          }
+        },
+        "text_UfRQ97": {
+          "type": "text",
+          "disabled": true,
+          "settings": {
+            "text": "<p>Share information about your brand with your customers. Describe a product, make announcements, or welcome customers to your store.</p>",
+            "text_style": "body"
+          }
+        },
+        "button_q6CTbm": {
+          "type": "button",
+          "disabled": true,
+          "settings": {
+            "button_label": "Button label",
+            "button_link": "",
+            "button_style_secondary": "solid",
+            "button_label_2": "",
+            "button_link_2": "",
+            "button_style_secondary_2": "solid",
+            "link_window": true
+          }
+        }
+      },
+      "block_order": [
+        "heading_cmCqq9",
+        "text_UfRQ97",
+        "button_q6CTbm"
+      ],
+      "name": "t:sections.rich-text.presets.name",
+      "settings": {
+        "full_width": true,
+        "desktop_content_position": "center",
+        "content_alignment": "center",
+        "color_scheme": "",
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    },
+    "multicolumn_rFHGh4": {
+      "type": "multicolumn",
+      "blocks": {
+        "column_WNixMt": {
+          "type": "column",
+          "settings": {
+            "block_clr": "#ffffff",
+            "enable_txt_clr": true,
+            "block_txt_clr": "#000000",
+            "image": "",
+            "subtitle": "JENNA REILLY",
+            "title": "CEO & Founder",
+            "text": "<p>@chantellewest</p>",
+            "description_style": "body",
+            "link_label": "",
+            "link": "",
+            "button_style": "solid"
+          }
+        },
+        "column_UXjznA": {
+          "type": "column",
+          "settings": {
+            "block_clr": "#ffffff",
+            "enable_txt_clr": true,
+            "block_txt_clr": "#000000",
+            "image": "",
+            "subtitle": "ANNETTE JONES",
+            "title": "Designer & Model",
+            "text": "<p>@chantellewest</p>",
+            "description_style": "body",
+            "link_label": "",
+            "link": "",
+            "button_style": "solid"
+          }
+        },
+        "column_dGYhq8": {
+          "type": "column",
+          "settings": {
+            "block_clr": "#ffffff",
+            "enable_txt_clr": true,
+            "block_txt_clr": "#000000",
+            "image": "",
+            "subtitle": "Chantelle West",
+            "title": "Designer & Model",
+            "text": "<p>@chantellewest</p>",
+            "description_style": "subtitle",
+            "link_label": "",
+            "link": "",
+            "button_style": "solid"
+          }
+        },
+        "column_q6WMq6": {
+          "type": "column",
+          "settings": {
+            "block_clr": "#ffffff",
+            "enable_txt_clr": true,
+            "block_txt_clr": "#000000",
+            "image": "",
+            "subtitle": "JENNA REILLY",
+            "title": "CEO & Founder",
+            "text": "<p>@chantellewest</p>",
+            "description_style": "body",
+            "link_label": "",
+            "link": "",
+            "button_style": "solid"
+          }
+        },
+        "column_NgkcG3": {
+          "type": "column",
+          "settings": {
+            "block_clr": "#ffffff",
+            "enable_txt_clr": true,
+            "block_txt_clr": "#000000",
+            "image": "",
+            "subtitle": "ANNETTE JONES",
+            "title": "Designer & Model",
+            "text": "<p>@chantellewest</p>",
+            "description_style": "body",
+            "link_label": "",
+            "link": "",
+            "button_style": "solid"
+          }
+        },
+        "column_hgtaEB": {
+          "type": "column",
+          "settings": {
+            "block_clr": "#ffffff",
+            "enable_txt_clr": true,
+            "block_txt_clr": "#000000",
+            "image": "",
+            "subtitle": "Chantelle West",
+            "title": "Designer & Model",
+            "text": "<p>@chantellewest</p>",
+            "description_style": "subtitle",
+            "link_label": "",
+            "link": "",
+            "button_style": "solid"
+          }
+        }
+      },
+      "block_order": [
+        "column_WNixMt",
+        "column_UXjznA",
+        "column_dGYhq8",
+        "column_q6WMq6",
+        "column_NgkcG3",
+        "column_hgtaEB"
+      ],
+      "name": "t:sections.multicolumn.presets.name",
+      "settings": {
+        "title": "Meet out team",
+        "heading_size": "h1",
+        "description": "",
+        "description_style": "body",
+        "image_width": "full",
+        "image_ratio": "adapt",
+        "columns_desktop": 3,
+        "enable_desktop_slider": false,
+        "image_content_alignment": "center",
+        "column_alignment": "center",
+        "column_position": "bottom",
+        "button_label": "",
+        "button_link": "",
+        "view_all_style": "link",
+        "color_scheme": "",
+        "columns_mobile": "1",
+        "swipe_on_mobile": true,
+        "padding_top": 0,
+        "padding_bottom": 60
+      }
+    },
+    "image_banner_7bwcBL": {
+      "type": "image-banner",
+      "blocks": {
+        "banner_with_text_dmqiPp": {
+          "type": "banner_with_text",
+          "settings": {
+            "image": "",
+            "image_overlay_opacity": 10,
+            "banner_width": 50,
+            "banner_offer_text": "",
+            "subheading": "",
+            "mini_heading_style": "link",
+            "heading": "Shop Our Latest Collection",
+            "heading_size": "h2",
+            "text": "",
+            "text_style": "body",
+            "button_label_1": "",
+            "button_link_1": "",
+            "link_window": true,
+            "view_all_style": "solid",
+            "show_text_box": false,
+            "container_overlay_opacity": 70,
+            "desktop_content_position": "bottom-left",
+            "desktop_content_alignment": "left",
+            "color_scheme": "accent-1",
+            "image_behavior": "none",
+            "mobile_content_alignment": "center"
+          }
+        },
+        "banner_with_text_VrMxX8": {
+          "type": "banner_with_text",
+          "settings": {
+            "image": "",
+            "image_overlay_opacity": 10,
+            "banner_width": 50,
+            "banner_offer_text": "",
+            "subheading": "",
+            "mini_heading_style": "link",
+            "heading": "Discover Your Signature Look",
+            "heading_size": "h2",
+            "text": "",
+            "text_style": "body",
+            "button_label_1": "",
+            "button_link_1": "",
+            "link_window": true,
+            "view_all_style": "solid",
+            "show_text_box": false,
+            "container_overlay_opacity": 0,
+            "desktop_content_position": "bottom-left",
+            "desktop_content_alignment": "left",
+            "color_scheme": "accent-1",
+            "image_behavior": "none",
+            "mobile_content_alignment": "center"
+          }
+        }
+      },
+      "block_order": [
+        "banner_with_text_dmqiPp",
+        "banner_with_text_VrMxX8"
+      ],
+      "settings": {
+        "full_width": false,
+        "enable_sidespace": true,
+        "title": "",
+        "heading_size": "h0",
+        "description": "",
+        "description_style": "body",
+        "heading_alignment": "left",
+        "image_height": "adapt",
+        "show_gap": true,
+        "section_color_scheme": "",
+        "padding_top": 0,
+        "padding_bottom": 60
+      }
+    }
+  },
+  "order": [
+    "main",
+    "image_banner_jtyYyM",
+    "rich_text_G3THth",
+    "multicolumn_rFHGh4",
+    "image_banner_7bwcBL"
+  ]
+}

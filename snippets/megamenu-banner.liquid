@@ -1,0 +1,51 @@
+{% for block in blocks %}
+  {%- liquid 
+    assign case_title = block.settings.menuname | downcase
+    assign lower_title = title | downcase
+  -%}
+  {% if lower_title == case_title %}
+    {% case block.type %}
+      {% when 'megamenu-singlebanner' %}
+        <div class="megainn_sbnr sbnr-{{ block.id }} banner--{{ block.settings.image_ratio }}">
+            <div class="global-media-settings wbmenugllazy{% if block.settings.bnrimg == blank %} wbimg_placeholder{% endif %} media media--transparent media--{{ block.settings.image_ratio }} media--hover-effect" {% if block.settings.image_ratio == 'adapt' and block.settings.bnrimg != blank %} style="padding-bottom: {{ 1 | divided_by: block.settings.bnrimg.aspect_ratio | times: 100 }}%;"{% endif %}>
+              {% if block.settings.bnrimg %}
+
+                {%- assign height = block.settings.bnrimg.width | divided_by: block.settings.bnrimg.aspect_ratio | round -%}
+                {{ block.settings.bnrimg | image_url: width: 2000 | image_tag: 
+                loading: 'lazy',
+                height: height,
+                sizes: "100vw",
+                widths: '375, 550, 750, 1100, 1500, 1780, 2000, 3000, 3840' }}
+              {% else %}
+
+                {%- assign placeholder_slide = forloop.index | modulo: 2 -%}
+                {%- if placeholder_slide == 1 -%}
+                {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                {%- else -%}
+                {{ 'hero-apparel-2' | placeholder_svg_tag: 'placeholder-svg' }}
+                {%- endif -%}
+              {% endif %}
+            
+            <div class="wbmega_txt">
+            <div class="">
+              {% if block.settings.bnrtext != blank %}
+                <p>{{ block.settings.bnrtext }}</p>
+              {% endif %}
+
+              {% if block.settings.button_label != blank %}
+                  <a {% if block.settings.bnrlink == blank %} role="link" aria-disabled="true" {% else %} href="{{ block.settings.bnrlink }}" {% endif %} 
+                    {% if block.settings.link_window %} target="_blank" {% endif %}
+                class="{% if block.settings.button_style_secondary == 'link' %} link link underlined-link{% elsif block.settings.button_style_secondary == 'solid' %}button{% else %}button button--secondary{% endif %}">{{ block.settings.button_label }}</a>
+              {% endif %}
+            </div>
+            </div>
+            </div>
+        </div>
+        {%- style -%}
+        .sbnr-{{ block.id }} .wbmega_txt p{
+          color: {{ block.settings.single_txtcolor }} !important;
+        }
+        {%- endstyle -%}
+    {% endcase %}
+  {% endif %}
+{% endfor %}

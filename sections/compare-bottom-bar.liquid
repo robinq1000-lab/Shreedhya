@@ -1,0 +1,22 @@
+{%- liquid
+  assign limit = 6
+  assign results_count = search.results_count
+-%}
+
+<div class="js-compare-products-bottom-bar">    
+  {%- paginate search.results by limit -%}
+        <div class="compare-list">
+          <button type="button" class="js-compare-modal button button_primary" {% if results_count == 1 %}disabled{% endif %}>{% render 'icon-sync' %}{{ 'compare.compare' | t }}<span><span class="js-product-count">{{ results_count }}</span></span></button>
+          <button type="button" class="close-compare">{% render 'icon-close' %}</button>
+        </div>
+  {%- endpaginate -%}
+</div>
+
+{% schema %}
+{
+  "name": "Compare popup",
+  "tag": "section",
+  "class": "section-popup-compare",
+  "settings": []
+}
+{% endschema %} 

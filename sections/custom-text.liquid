@@ -1,0 +1,217 @@
+{{ 'custom-text.css' | asset_url | stylesheet_tag }}
+<div class="section-{{ section.id }}-padding wbcustomtxt color-{{ section.settings.color_cmainmenu }} gradient">
+    <div class="page-width">
+        <div class="heading inline-richtext">
+          {%- if section.settings.title != blank -%}
+            <h2 class="{{ section.settings.heading_size }}">{{ section.settings.title }}</h2>
+          {%- endif -%}
+          {%- if section.settings.description -%}
+            <div class="{{ section.settings.description_style }} rte">
+              {{ section.settings.description -}}
+            </div>
+          {%- endif -%}
+        </div>
+        <div class="ctxtinner{% if section.blocks.size == 1 %} ctxt-wrapper{% endif %}">
+          {% for block in section.blocks %}
+            <div class="color-{{ block.settings.color_cmenu }} gradient ctxtinner_sub content-container banner__box">
+              {% if block.settings.storytitle != blank %}
+                <h3>{{ block.settings.storytitle }}</h3>
+              {% endif %}
+              {% if block.settings.storydesc != blank %}
+                <div class="ctxtdesc">{{ block.settings.storydesc }}</div>
+              {% endif %}
+              {% if block.settings.showtext != blank %}
+                <a {% if block.settings.link == blank %} role="link" aria-disabled="true" {% else %} href="{{ block.settings.link }}" {% endif %} {% if block.settings.link_window %} target="_blank" {% endif %}
+                  class="{% if block.settings.view_all_style == 'link' %}link underlined-link{% elsif block.settings.view_all_style == 'solid' %}button{% else %}button button--secondary{% endif %}" {{ block.shopify_attributes }}>
+                  {{ block.settings.showtext }}
+                </a>
+              {% endif %}
+            </div>
+        {% endfor %}
+        </div>
+    </div>
+</div>
+{%- style -%}
+.section-{{ section.id }}-padding {
+  padding-top: {{ section.settings.padding_top }}px;
+  padding-bottom: {{ section.settings.padding_bottom }}px;
+}
+@media screen and (max-width: 991px) {
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.5 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.5 | round: 0 }}px;
+  }
+}
+{%- endstyle -%}
+{% schema %}
+{
+  "name": "t:sections.custom_text.name",
+  "tag": "section",
+  "max_blocks": 4,
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer"
+    ]
+  },
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "title",
+      "default": "Title",
+      "label": "t:sections.featured-collection.settings.title.label"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "options": [
+        {
+          "value": "h2",
+          "label": "t:sections.all.heading_size.options__1.label"
+        },
+        {
+          "value": "h1",
+          "label": "t:sections.all.heading_size.options__2.label"
+        },
+        {
+          "value": "h0",
+          "label": "t:sections.all.heading_size.options__3.label"
+        }
+      ],
+      "default": "h0",
+      "label": "t:sections.all.heading_size.label"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "t:sections.featured-collection.settings.description.label"
+    },
+    {
+      "type": "select",
+      "id": "description_style",
+      "label": "t:sections.featured-collection.settings.description_style.label",
+      "options": [
+        {
+          "value": "body",
+          "label": "t:sections.featured-collection.settings.description_style.options__1.label"
+        },
+        {
+          "value": "subtitle",
+          "label": "t:sections.featured-collection.settings.description_style.options__2.label"
+        },
+        {
+          "value": "uppercase",
+          "label": "t:sections.featured-collection.settings.description_style.options__3.label"
+        }
+      ],
+      "default": "body"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_cmainmenu",
+      "label": "t:sections.all.colors.label",
+      "default": "inverse"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 60
+    }
+  ],
+  "blocks": [
+    {
+      "type": "text",
+      "name": "t:sections.custom_text.blocks.name",
+      "settings": [
+        {
+          "type": "inline_richtext",
+          "id": "storytitle",
+          "label": "t:sections.scrolling-bar.settings.heading.label",
+          "default": "Heading"
+        },
+        {
+          "type": "richtext",
+          "id": "storydesc",
+          "label": "t:sections.image-with-text.blocks.text.settings.text.label",
+          "default": "<p>Add details on availability, style, or even provide a review.</p>"
+        },
+        {
+          "type": "text",
+          "id": "showtext",
+          "label": "t:sections.image-with-text.blocks.button.settings.button_label.label",
+          "default": "Button label"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "t:sections.custom_text.blocks.custom_text.settings.link.label"
+        },
+        {
+          "type": "checkbox",
+          "id": "link_window",
+          "label": "t:sections.slideshow.blocks.slide.settings.link_window.label",
+          "default": true
+        },
+        {
+          "type": "select",
+          "id": "view_all_style",
+          "label": "t:sections.image-with-text.blocks.button.settings.button_style.label",
+          "options": [
+            {
+              "value": "link",
+              "label": "t:sections.featured-collection.settings.view_all_style.options__1.label"
+            },
+            {
+              "value": "outline",
+              "label": "t:sections.featured-collection.settings.view_all_style.options__2.label"
+            },
+            {
+              "value": "solid",
+              "label": "t:sections.featured-collection.settings.view_all_style.options__3.label"
+            }
+          ],
+          "default": "solid"
+        },
+        {
+          "type": "color_scheme",
+          "id": "color_cmenu",
+          "label": "t:sections.all.colors.label",
+          "default": "background-1"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.custom_text.name",
+      "blocks": [
+        {
+          "type": "text"
+        },
+        {
+          "type": "text"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

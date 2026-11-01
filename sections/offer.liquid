@@ -1,0 +1,210 @@
+<link rel="preload" as="style" href="{{ 'sponsored-product.css' | asset_url }}">
+{{ 'sponsored-product.css' | asset_url | stylesheet_tag }}
+{%- style -%}
+.section-{{ section.id }}-padding {
+  padding-top: {{ section.settings.padding_top }}px;
+  padding-bottom: {{ section.settings.padding_bottom }}px;
+} 
+{% if section.settings.sec_background_color != "rgba(0,0,0,0)" %}
+  .section-{{ section.id }}.background-secondary{
+    background: {{ section.settings.sec_background_color }};
+  }
+{% endif %}
+@media screen and (max-width: 991px) {
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.5 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.5 | round: 0 }}px;
+  }
+}
+{%- endstyle -%} 
+
+<div class="section-{{ section.id }} offer-section">
+  <div class="collection section-{{ section.id }}-padding color-{{ section.settings.color_scheme }} gradient">
+      <div class="heading-top{% if section.settings.make_section_full_width %} full-width{% else %} page-width{% endif %}">
+        <div class="heading inline-richtext">
+          {%- if section.settings.miniheading != blank -%}
+            <span class="offer_pills {% if section.settings.mini_heading_style == 'button' %}offer_pills_button {% elsif section.settings.mini_heading_style == 'outline' %}offer_pills_outline {% else section.settings.mini_heading_style == 'link' %}offer_pills_link {% endif %} rte">
+                {{ section.settings.miniheading }}
+            </span>
+          {%- endif %}
+          {%- if section.settings.title != blank -%}
+            <h2 class="{{ section.settings.heading_size }}">{{ section.settings.title }}</h2>
+          {%- endif -%}
+          
+        </div>
+        <div data-date="{{ section.settings.wb_bannerdate }}" class="section-time countd_all date_content">
+          <div class="time main_cdays">
+              <span class="count wb_cdays">00</span>
+              <span class="text">{{ 'wbcustomlabel.wballtext.time_days' | t }}</span>
+          </div>
+          <div class="time main_chours">
+              <span class="count wb_chours">00</span>
+              <span class="text">{{ 'wbcustomlabel.wballtext.time_hour' | t }}</span>
+          </div>
+          <div class="time main_cminutes">
+              <span class="count wb_cminutes">00</span>
+              <span class="text">{{ 'wbcustomlabel.wballtext.time_min' | t }}</span>
+          </div>
+          <div class="time main_cseconds">
+              <span class="count wb_cseconds">00</span>
+              <span class="text">{{ 'wbcustomlabel.wballtext.time_sec' | t }}</span>
+          </div>
+        </div>
+        {%- if section.settings.button_label != blank -%}
+          <a
+            {% if section.settings.button_label == blank %}
+            role="link" aria-disabled="true"
+            {% else %}
+            href="{{ section.settings.button_link }}"
+            {% endif %}
+            class="{% if section.settings.button_style == 'link' %} link link underlined-link{% elsif section.settings.button_style == 'solid' %}button{% else %}button button--secondary{% endif %}">
+            {{- section.settings.button_label | escape -}}
+          </a>
+        {%- endif -%}
+      </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Offer",
+  "tag": "section",
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer"
+    ]
+  },
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "make_section_full_width",
+      "label": "t:sections.video.settings.full_width.label",
+      "default": true
+    },
+    {
+      "type": "inline_richtext",
+      "id": "miniheading",
+      "label": "t:sections.collection-list.settings.miniheading.label"
+    },
+    {
+      "type": "select",
+      "id": "mini_heading_style",
+      "options": [
+        {
+          "value": "button",
+          "label": "t:sections.all.mini_heading_style.options__1.label"
+        },
+        {
+          "value": "outline",
+          "label": "t:sections.all.mini_heading_style.options__2.label"
+        },
+        {
+          "value": "link",
+          "label": "t:sections.all.mini_heading_style.options__3.label"
+        }
+      ],
+      "default": "outline",
+      "label": "t:sections.all.mini_heading_style.label"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "title",
+      "default": "Section Title",
+      "label": "t:sections.featured-collection.settings.title.label"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "options": [
+        {
+          "value": "h2",
+          "label": "t:sections.all.heading_size.options__1.label"
+        },
+        {
+          "value": "h1",
+          "label": "t:sections.all.heading_size.options__2.label"
+        },
+        {
+          "value": "h0",
+          "label": "t:sections.all.heading_size.options__3.label"
+        }
+      ],
+      "default": "h0",
+      "label": "t:sections.all.heading_size.label"
+    },
+    {
+      "type": "text",
+      "id": "wb_bannerdate",
+      "label": "t:sections.featured-collection.settings.Date.enddate.label",
+      "info": "t:sections.featured-collection.settings.Date.enddate.info"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "t:sections.image-banner.blocks.buttons.settings.button_label_1.label",
+      "info": "t:sections.image-banner.blocks.buttons.settings.button_label_1.info"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "t:sections.image-banner.blocks.buttons.settings.button_link_1.label"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "t:sections.image-banner.blocks.buttons.settings.button_style_secondary_1.label",
+      "options": [
+        {
+          "value": "link",
+          "label": "t:sections.featured-collection.settings.view_all_style.options__1.label"
+        },
+        {
+          "value": "outline",
+          "label": "t:sections.featured-collection.settings.view_all_style.options__2.label"
+        },
+        {
+          "value": "solid",
+          "label": "t:sections.featured-collection.settings.view_all_style.options__3.label"
+        }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "inverse"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 60
+    }
+  ],
+  "presets": [
+    {
+      "name": "Offer"
+    }
+  ]
+}
+{% endschema %}

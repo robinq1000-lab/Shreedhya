@@ -1,0 +1,719 @@
+<div class="{% if section.settings.full-width == true %}full-page-width{% else %}container{% endif %}">
+  {% for block in blocks %}
+    {%- liquid 
+      assign case_title = block.settings.menuname | downcase
+      assign lower_title = title | downcase
+    -%}
+    {% if lower_title == case_title %}
+      {% case block.type %}
+        {% when 'megamenu-product' %}
+        {%- assign collection = collections[block.settings.collection] -%}
+        {%- assign product = collections[block.settings.collection.products] -%}
+      <div class="wbmgproduct">
+        <div class="grid">
+            {%- if collection != blank -%}
+            {% for product in collection.products limit: block.settings.products_to_show %}
+              <li class="grid__item">
+                {%- if product and product != empty -%}
+                  {%- liquid
+                    assign ratio = 1
+                    if product.featured_media and block.settings.image_ratio == 'portrait'
+                      assign ratio = 0.8
+                    elsif product.featured_media and block.settings.image_ratio == 'adapt'
+                      assign ratio = product.featured_media.aspect_ratio
+                    endif
+                    if ratio == 0 or ratio == null
+                      assign ratio = 1
+                    endif
+                  -%}
+                  <div class="card-wrapper wbproduct-container product-card-wrapper {% if settings.var_pill_style == 'button' %}background_pill{% endif %}">
+                    <div class=" card card--{{ settings.card_style }}{% if product.featured_media == blank %} blank__image {% endif %}{% if product.featured_media %} card--media{% else %} card--text{% endif %}{% if settings.card_style == 'card' %} color-{{ settings.card_color_scheme }} gradient{% endif %}{% if image_shape and image_shape != 'default' %} card--shape{% endif %}{% if extend_height %} card--extend-height{% endif %}{% if horizontal_class %} card--horizontal{% endif %}" style="--ratio-percent: {{ 1 | divided_by: ratio | times: 100 }}%;">
+                    <div class="card__inner wbimgblock {% if settings.card_style == 'standard' %}color-{{ settings.card_color_scheme }} gradient{% endif %}{% if product.featured_media or settings.card_style == 'standard' %} ratio{% endif %}">
+                      {%- if product.featured_media -%}
+                        <div id="webipro-{{ section.id }}-{{ product.id }}" class="card__media {% if image_shape and image_shape != 'default' %} shape--{{ image_shape }} color-{{ settings.card_color_scheme }} gradient{% endif %}">
+                          {%- assign media = product.selected_or_first_available_variant.featured_media -%}
+                          <div class="product__media-item" data-media-id="{{ section.id }}-{{ product.id }}-{{ media.id }}">
+                              {% comment %}theme-check-disable ImgLazyLoading{% endcomment %}
+                              <a href="{{ product.url | append: '?variant=' | append: product.selected_or_first_available_variant.id | default: '#' }}"
+                                title="{{ product.title | escape }}"
+                                class="media media--transparent media--{{ media_size }} media--hover-effect" {% if media_size == 'adapt' and product.featured_media %} style="padding-bottom: {{ 1 | divided_by: featured_media_aspect_ratio | times: 100 }}%;"{% endif %}>
+                                  <img
+                                          srcset="
+                                  {%- if product.featured_media.width >= 165 -%}{{ product.featured_media | image_url: width: 165 }} 165w,{%- endif -%}
+                                  {%- if product.featured_media.width >= 360 -%}{{ product.featured_media | image_url: width: 360 }} 360w,{%- endif -%}
+                                  {%- if product.featured_media.width >= 533 -%}{{ product.featured_media | image_url: width: 533 }} 533w,{%- endif -%}
+                                  {%- if product.featured_media.width >= 720 -%}{{ product.featured_media | image_url: width: 720 }} 720w,{%- endif -%}
+                                  {%- if product.featured_media.width >= 940 -%}{{ product.featured_media | image_url: width: 940 }} 940w,{%- endif -%}
+                                  {%- if product.featured_media.width >= 1066 -%}{{ product.featured_media | image_url: width: 1066 }} 1066w,{%- endif -%}
+                                  {{ product.featured_media | image_url }} {{ product.featured_media.width }}w
+                                "
+                                  src="{{ product.featured_media | image_url: width: 533 }}"
+                                  sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 992px) calc((100vw - 130px) / 4), (min-width: 768px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
+                                  alt="{{ product.featured_media.alt | escape }}"
+                                  class="motion-reduce"
+                                  {% unless lazy_load == false %}
+                                      loading="lazy"
+                                  {% endunless %}
+                                  width="{{ product.featured_media.width }}"
+                                  height="{{ product.featured_media.height }}"
+                                  >
+                                  {%- if product.media[1] != nil -%}
+                                      <img srcset="{%- if product.media[1].width >= 165 -%}{{ product.media[1] | image_url: width: 165 }} 165w,{%- endif -%}
+                                      {%- if product.media[1].width >= 360 -%}{{ product.media[1] | image_url: width: 360 }} 360w,{%- endif -%}
+                                      {% if product.media[1].width >= 493 %}{{ product.media[1] | image_url: width: 493 }} 493w,{% endif %}
+                                      {% if product.media[1].width >= 600 %}{{ product.media[1] | image_url: width: 600 }} 600w,{% endif %}
+                                      {% if product.media[1].width >= 713 %}{{ product.media[1] | image_url: width: 713 }} 713w,{% endif %}
+                                      {% if product.media[1].width >= 823 %}{{ product.media[1] | image_url: width: 823 }} 823w,{% endif %}
+                                      {% if product.media[1].width >= 992 %}{{ product.media[1] | image_url: width: 992 }} 992w,{% endif %}
+                                      {{ product.media[1] | image_url }} {{ product.media[1].width }}w"
+                                          src="{{ product.media[1] | image_url: width: 370 }}"
+                                          alt="{{ product.media[1].alt | escape }}"
+                                          sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 992px) calc((100vw - 130px) / 4), (min-width: 768px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
+                                          class="motion-reduce img-fluid mx-auto lazyload"
+                                          loading="lazy"
+                                          width="{{ product.media[1].width }}"
+                                          height="{{ product.media[1].height }}">
+                                  {%- endif -%}
+                              </a>
+                          </div>
+
+                          {%- liquid
+                            assign media_to_render = product.featured_media.id
+                            for variant in product.variants
+                              assign media_to_render = media_to_render | append: variant.featured_media.id | append: ' '
+                            endfor
+                          -%}
+                            {%- for media in product.media -%}
+                              {%- if media_to_render contains media.id and media.id != product.selected_or_first_available_variant.featured_media.id -%}
+                                <div class="product__media-item" data-media-id="{{ section.id }}-{{ product.id }}-{{ media.id }}">
+                                  <a href="{{ product.url | append: '?variant=' | append: product.selected_or_first_available_variant.id | default: '#' }}"
+                                    title="{{ product.title | escape }}"
+                                    class="media media--transparent media--{{ media_size }} media--hover-effect" {% if media_size == 'adapt' and product.featured_media %} style="padding-bottom: {{ 1 | divided_by: featured_media_aspect_ratio | times: 100 }}%;"{% endif %}>
+                                      <img class="img-fluid mx-auto lazyload"
+                                          srcset="{%- if media.preview_image.width >= 165 -%}{{ media.preview_image | image_url: width: 165 }} 165w,{%- endif -%}
+                                          {%- if media.preview_image.width >= 360 -%}{{ media.preview_image | image_url: width: 360 }} 360w,{%- endif -%}
+                                          {% if media.preview_image.width >= 493 %}{{ media.preview_image | image_url: width: 493 }} 493w,{% endif %}
+                                          {% if media.preview_image.width >= 600 %}{{ media.preview_image | image_url: width: 600 }} 600w,{% endif %}
+                                          {% if media.preview_image.width >= 713 %}{{ media.preview_image | image_url: width: 713 }} 713w,{% endif %}
+                                          {% if media.preview_image.width >= 823 %}{{ media.preview_image | image_url: width: 823 }} 823w,{% endif %}
+                                          {% if media.preview_image.width >= 992 %}{{ media.preview_image | image_url: width: 992 }} 992w,{% endif %}
+                                          {% if media.preview_image.width >= 1100 %}{{ media.preview_image | image_url: width: 1100 }} 1100w,{% endif %}
+                                          {% if media.preview_image.width >= 1206 %}{{ media.preview_image | image_url: width: 1206 }} 1206w,{% endif %}
+                                          {% if media.preview_image.width >= 1346 %}{{ media.preview_image | image_url: width: 1346 }} 1346w,{% endif %}
+                                          {% if media.preview_image.width >= 1426 %}{{ media.preview_image | image_url: width: 1426 }} 1426w,{% endif %}
+                                          {% if media.preview_image.width >= 1646 %}{{ media.preview_image | image_url: width: 1646 }} 1646w,{% endif %}
+                                          {% if media.preview_image.width >= 1946 %}{{ media.preview_image | image_url: width: 1946 }} 1946w,{% endif %}
+                                          {{ media.preview_image | image_url }} {{ media.preview_image.width }}w"
+                                          src="{{ media.preview_image | image_url: width: 370 }} 370w"
+                                          sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 992px) calc((100vw - 130px) / 4), (min-width: 768px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
+                                          loading="lazy"
+                                          width="{{ media.preview_image.width }}"
+                                          height="{{ media.preview_image.height }}"
+                                          alt="{{ media.preview_image.alt | escape }}">
+                                      {%- if product.media[1] != nil and show_secondary_image -%}
+                                          <img srcset="{%- if product.media[1].width >= 165 -%}{{ product.media[1] | image_url: width: 165 }} 165w,{%- endif -%}
+                                                {%- if product.media[1].width >= 360 -%}{{ product.media[1] | image_url: width: 360 }} 360w,{%- endif -%}
+                                                {% if product.media[1].width >= 493 %}{{ product.media[1] | image_url: width: 493 }} 493w,{% endif %}
+                                                {% if product.media[1].width >= 600 %}{{ product.media[1] | image_url: width: 600 }} 600w,{% endif %}
+                                                {% if product.media[1].width >= 713 %}{{ product.media[1] | image_url: width: 713 }} 713w,{% endif %}
+                                                {% if product.media[1].width >= 823 %}{{ product.media[1] | image_url: width: 823 }} 823w,{% endif %}
+                                                {% if product.media[1].width >= 992 %}{{ product.media[1] | image_url: width: 992 }} 992w,{% endif %}
+                                                {{ product.media[1] | image_url }} {{ product.media[1].width }}w"
+                                              src="{{ product.media[1] | image_url: width: 370 }}"
+                                              alt="{{ product.media[1].alt | escape }}"
+                                              sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 992px) calc((100vw - 130px) / 4), (min-width: 768px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
+                                              class="motion-reduce img-fluid mx-auto lazyload"
+                                              loading="lazy"
+                                              width="{{ product.media[1].width }}"
+                                              height="{{ product.media[1].height }}">
+                                      {%- endif -%}
+                                  </a>
+                                </div>
+                              {%- endif -%}
+                            {%- endfor -%}
+                        </div>
+                        {% else %}
+                        {{ product.title }}
+                      {%- endif -%}
+                    </div>
+ 
+                    <div class="wbproductdes card__content">
+                        <div class="card__information">
+                          {%- if show_vendor -%}
+                            <div class="product__vendor">
+                                {{ product.vendor }}
+                            </div>
+                          {%- endif -%}
+                          <h3 class="card__heading{% if product.featured_media or settings.card_style == 'standard' %} h5{% endif %}" {% if product.featured_media or settings.card_style == 'card' %} id="title-{{ section_id }}-{{ product.id }}" {% endif %}>
+                              <a href="{{ product.url | default: '#' }}" id="CardLink-{{ section_id }}-{{ product.id }}" class="full-unstyled-link" aria-labelledby="CardLink-{{ section_id }}-{{ product.id }} Badge-{{ section_id }}-{{ product.id }}" >
+                                  {{ product.title | escape }}
+                              </a>
+                          </h3>
+                          <div class="card-information">
+                            <div class="no-js-hidden wbhprice" id="price-{{ section.id }}-{{ product.id }}" role="status" {{ block.shopify_attributes }}>
+                              {%- render 'price', product: product, use_variant: false, show_badges: true -%}
+                            </div>
+                          </div>
+                        </div>               
+                    </div>
+                    </div>
+                  </div>
+                {%- endif -%}
+              </li>
+            {% endfor %}
+            {% else %}
+              {%- for i in (1..5) -%}
+                <li class="grid__item">
+                    {%- assign placeholder_image_index = forloop.index0 | modulo: 3 | plus: 1 -%}
+                    {%- assign placeholder_image = 'product-apparel-' | append: placeholder_image_index -%}
+                    {% render 'product-card-placeholder' placeholder_image: placeholder_image %}
+                  </li>
+              {%- endfor -%}
+           {% endif %}
+          </div>
+        </div>
+        {% when 'megamenu-gallery' %}
+        <div class="wbmenugallery grid{% if section.settings.menu_type_desktop == 'drawer' %} grid--2-col-desktop{% elsif block.settings.wb5_img_show == true %} grid--5-col-desktop{% else %} grid--4-col-desktop{% endif %} grid--2-col-tablet-down">
+          {% for i in (1..5) %}
+            {% capture galleryimg %}wb{{ i }}_img{% endcapture %}
+            {% capture gallerylink %}wb{{ i }}_link{% endcapture %}
+            {% capture gallerytext %}wb{{ i }}_text{% endcapture %}
+            {% capture galleryshow %}wb{{ i }}_img_show{% endcapture %}
+            {% if block.settings[galleryshow] %}
+              {% if galleryimg or block.settings[gallerylink].size > 0 %}
+                <div class="wp_menu_banner grid__item text-center">
+                  {% if block.settings[gallerylink] %}<a href="{{ block.settings[gallerylink] }}" class="focus-inset" title="{{ block.settings[gallerytext] }}">{% endif %}
+                      <div class="global-media-settings wbmenugllazy{% if block.settings[galleryimg] == blank %} wbimg_placeholder{% endif %} media media--transparent media--{{ block.settings.image_ratio }} media--hover-effect" {% if block.settings.image_ratio == 'adapt' and block.settings[galleryimg] != blank %} style="padding-bottom: {{ 1 | divided_by: block.settings[galleryimg].aspect_ratio | times: 100 }}%;"{% endif %}>
+                        {% if block.settings[galleryimg] %}
+
+                          {%- assign height = block.settings[galleryimg].width | divided_by: block.settings[galleryimg].aspect_ratio | round -%}
+                          {{ block.settings[galleryimg] | image_url: width: 350 | image_tag: 
+                          loading: 'lazy',
+                          height: height,
+                          sizes: "100vw",
+                          widths: '375, 550, 750, 1100, 1500, 1780, 2000, 3000, 3840' }}
+                        {% else %}
+
+                          {%- assign placeholder_slide = forloop.index | modulo: 2 -%}
+                          {%- if placeholder_slide == 1 -%}
+                          {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                          {%- else -%}
+                          {{ 'hero-apparel-2' | placeholder_svg_tag: 'placeholder-svg' }}
+                          {%- endif -%}
+                        {% endif %}
+                      </div>
+                      
+                    {% if block.settings[gallerytext].size > 0 %}
+                      <p>{{ block.settings[gallerytext] }}</p>
+                    {% endif %}
+                    {% if block.settings[gallerylink] %}
+                    </a>
+                  {% endif %}
+                </div>
+              {% endif %}
+            {% endif %}
+          {%- endfor -%}
+        </div>
+        {% when 'mega-menu-tabcollections' %}
+          <div class="megamenu_tabcoll mtab-{{ block.id }}">
+            <div class="tabs-collapse mega_content">
+              {%- if block.settings.tab1 != blank -%}
+                <span class="tab_coll_1 tab-button active{% if settings.animations_reveal_on_scroll %} c-scroll-trigger animate--slide-in{% endif %}" tabindex="0" data-id="{{ block.id }}-1">
+                  <div>
+                    <h3>{{ block.settings.tab1 }}</h3>
+                    {{ block.settings.content1 }}
+                  </div>
+                  {% render 'icon-caret' %}
+                </span>
+              {%- endif -%}
+
+              {%- if block.settings.tab2 != blank -%}
+                <span class="tab_coll_2 tab-button {% if block.settings.tab1 == blank %}active{% endif %}{% if settings.animations_reveal_on_scroll %} c-scroll-trigger animate--slide-in{% endif %}" tabindex="0" data-id="{{ block.id }}-2">
+                  <div>
+                    <h3>{{ block.settings.tab2 }}</h3>
+                    {{ block.settings.content2 }}
+                  </div>
+                  {% render 'icon-caret' %}
+                </span>
+              {%- endif -%}
+
+              {%- if block.settings.tab3 != blank -%}
+                <span class="tab_coll_3 tab-button {% if block.settings.tab1 == blank and block.settings.tab2 == blank %}active{% endif %}{% if settings.animations_reveal_on_scroll %} c-scroll-trigger animate--slide-in{% endif %}" tabindex="0" data-id="{{ block.id }}-3">
+                  <div>
+                    <h3>{{ block.settings.tab3 }}</h3>
+                    {{ block.settings.content3 }}
+                  </div>
+                  {% render 'icon-caret' %}
+                </span>
+              {%- endif -%}
+              {%- if block.settings.tab4 != blank -%}
+                <span class="tab_coll_4 tab-button {% if block.settings.tab1 == blank and block.settings.tab2 == blank and block.settings.tab3 == blank %}active{% endif %}{% if settings.animations_reveal_on_scroll %} c-scroll-trigger animate--slide-in{% endif %}" tabindex="0" data-id="{{ block.id }}-4">
+                  <div>
+                    <h3>{{ block.settings.tab4 }}</h3>
+                    {{ block.settings.content4 }}
+                  </div>
+                  {% render 'icon-caret' %}
+                </span>
+              {%- endif -%}
+            </div>
+            <div class="tab-content mega_content">
+              <div class="mega-back-btn menu-drawer__close-button link link--text focus-inset" aria-expanded="true">
+                {% render 'icon-arrow' %}
+              </div>
+              {%- if block.settings.tab1 != blank -%}
+                <div id="{{ block.id }}-1" class="tab-pane-1 tab-pane fade active" tabindex="-1">
+                  <div class="grid grid--1-col-desktop mega_categories">
+                    {%- for collection in block.settings.coll1 -%}
+                      <div class="grid__item collection-list__item {% if settings.animations_reveal_on_scroll %} c-scroll-trigger animate--slide-in{% endif %}" {{ block.shopify_attributes }}>
+                        {%- assign placeholder_image_index = forloop.index0 | modulo: 4 | plus: 1 -%}
+                        {%- assign placeholder_image = 'collection-apparel-' | append: placeholder_image_index -%}
+                        <a {% if collection == blank %} role="link" aria-disabled="true"{% else %} href="{{ collection.url }}"{% endif %} class="full-unstyled-link menu_tab_card" aria-label="{{ collection.title }}">
+                            {% comment %} {%- assign image_alt = collection.featured_image.alt | escape -%} {% endcomment %}
+                            {{ collection.featured_image | image_url: width: 60, height: 60 | image_tag: loading: 'lazy', width: 60, height: 60, class: 'img-fluid lazyload' }}
+                          <div class="mega_card_title h3">
+                            {% if settings.show_collection_title == true %}
+                              {{- collection.title | escape -}}
+                            {%- endif -%}
+                          </div>
+                        </a> 
+                      </div>
+                    {%- else -%}
+                      {% assign limit = 4 %}
+                      {%- for i in (1..limit) -%}
+                        <div class="grid__item collection-list__item menu_tab_card{% if settings.animations_reveal_on_scroll %} c-scroll-trigger animate--slide-in{% endif %}"  {{ block.shopify_attributes }}>
+                          {%- liquid
+                            assign placeholder_image_index = forloop.index0 | modulo: 3 | plus: 1
+                            assign placeholder_image = 'collection-apparel-' | append: placeholder_image_index
+                          -%}
+                          {%- if placeholder_image -%}
+                            {{ placeholder_image | placeholder_svg_tag: 'placeholder-svg' }}
+                          {%- else -%}
+                            {{ 'product-apparel-2' | placeholder_svg_tag: 'placeholder-svg' }}
+                          {%- endif -%}
+                          <div class="mega_card_title h3">
+                            {{ 'onboarding.collection_title' | t }}
+                          </div>
+                        </div>
+                      {%- endfor -%}
+                    {%- endfor -%}
+                  </div>
+                </div>
+              {%- endif -%}
+              {%- if block.settings.tab2 != blank -%}
+                 <div id="{{ block.id }}-2" class="tab-pane-2 tab-pane fade {% if block.settings.tab1 == blank %}active{% endif %}" tabindex="-1">
+                  <div class="grid grid--1-col-desktop mega_categories">
+                    {%- for collection in block.settings.coll2 -%}
+                      <div class="grid__item collection-list__item {% if settings.animations_reveal_on_scroll %} c-scroll-trigger animate--slide-in{% endif %}" {{ block.shopify_attributes }}>
+                        {%- assign placeholder_image_index = forloop.index0 | modulo: 4 | plus: 1 -%}
+                        {%- assign placeholder_image = 'collection-apparel-' | append: placeholder_image_index -%}
+                        <a {% if collection == blank %} role="link" aria-disabled="true"{% else %} href="{{ collection.url }}"{% endif %} class="full-unstyled-link menu_tab_card" aria-label="{{ collection.title }}">
+                            {% comment %} {%- assign image_alt = collection.featured_image.alt | escape -%} {% endcomment %}
+                            {{ collection.featured_image | image_url: width: 60, height: 60 | image_tag: loading: 'lazy', width: 60, height: 60, class: 'img-fluid lazyload' }}
+                          <div class="mega_card_title h3">
+                            {% if settings.show_collection_title == true %}
+                              {{- collection.title | escape -}}
+                            {%- endif -%}
+                          </div>
+                        </a> 
+                      </div>
+                    {%- else -%}
+                      {% assign limit = 4 %}
+                      {%- for i in (1..limit) -%}
+                        <div class="grid__item collection-list__item menu_tab_card{% if settings.animations_reveal_on_scroll %} c-scroll-trigger animate--slide-in{% endif %}"  {{ block.shopify_attributes }}>
+                          {%- liquid
+                            assign placeholder_image_index = forloop.index0 | modulo: 3 | plus: 1
+                            assign placeholder_image = 'collection-apparel-' | append: placeholder_image_index
+                          -%}
+                          {%- if placeholder_image -%}
+                            {{ placeholder_image | placeholder_svg_tag: 'placeholder-svg' }}
+                          {%- else -%}
+                            {{ 'product-apparel-2' | placeholder_svg_tag: 'placeholder-svg' }}
+                          {%- endif -%}
+                          <div class="mega_card_title h3">
+                            {{ 'onboarding.collection_title' | t }}
+                          </div>
+                        </div>
+                      {%- endfor -%}
+                    {%- endfor -%}
+                  </div>
+                </div>
+              {%- endif -%}
+              {%- if block.settings.tab3 != blank -%}
+                 <div id="{{ block.id }}-3" class="tab-pane-3 tab-pane fade {% if block.settings.tab1 == blank and block.settings.tab2 == blank %}active{% endif %}" tabindex="-1">
+                  <div class="grid grid--1-col-desktop mega_categories">
+                    {%- for collection in block.settings.coll3 -%}
+                      <div class="grid__item collection-list__item {% if settings.animations_reveal_on_scroll %} c-scroll-trigger animate--slide-in{% endif %}" {{ block.shopify_attributes }}>
+                        {%- assign placeholder_image_index = forloop.index0 | modulo: 4 | plus: 1 -%}
+                        {%- assign placeholder_image = 'collection-apparel-' | append: placeholder_image_index -%}
+                        <a {% if collection == blank %} role="link" aria-disabled="true"{% else %} href="{{ collection.url }}"{% endif %} class="full-unstyled-link menu_tab_card" aria-label="{{ collection.title }}">
+                            {% comment %} {%- assign image_alt = collection.featured_image.alt | escape -%} {% endcomment %}
+                            {{ collection.featured_image | image_url: width: 60, height: 60 | image_tag: loading: 'lazy', width: 60, height: 60, class: 'img-fluid lazyload' }}
+                          <div class="mega_card_title h3">
+                            {% if settings.show_collection_title == true %}
+                              {{- collection.title | escape -}}
+                            {%- endif -%}
+                          </div>
+                        </a> 
+                      </div>
+                    {%- else -%}
+                      {% assign limit = 4 %}
+                      {%- for i in (1..limit) -%}
+                        <div class="grid__item collection-list__item menu_tab_card{% if settings.animations_reveal_on_scroll %} c-scroll-trigger animate--slide-in{% endif %}"  {{ block.shopify_attributes }}>
+                          {%- liquid
+                            assign placeholder_image_index = forloop.index0 | modulo: 3 | plus: 1
+                            assign placeholder_image = 'collection-apparel-' | append: placeholder_image_index
+                          -%}
+                          {%- if placeholder_image -%}
+                            {{ placeholder_image | placeholder_svg_tag: 'placeholder-svg' }}
+                          {%- else -%}
+                            {{ 'product-apparel-2' | placeholder_svg_tag: 'placeholder-svg' }}
+                          {%- endif -%}
+                          <div class="mega_card_title h3">
+                            {{ 'onboarding.collection_title' | t }}
+                          </div>
+                        </div>
+                      {%- endfor -%}
+                    {%- endfor -%}
+                  </div>
+                </div>
+              {%- endif -%}
+              {%- if block.settings.tab4 != blank -%}
+                 <div id="{{ block.id }}-4" class="tab-pane-4 tab-pane fade {% if block.settings.tab1 == blank and block.settings.tab2 == blank and block.settings.tab3 == blank %}active{% endif %}" tabindex="-1">
+                  <div class="grid grid--1-col-desktop mega_categories">
+                    {%- for collection in block.settings.coll4 -%}
+                      <div class="grid__item collection-list__item {% if settings.animations_reveal_on_scroll %} c-scroll-trigger animate--slide-in{% endif %}" {{ block.shopify_attributes }}>
+                        {%- assign placeholder_image_index = forloop.index0 | modulo: 4 | plus: 1 -%}
+                        {%- assign placeholder_image = 'collection-apparel-' | append: placeholder_image_index -%}
+                        <a {% if collection == blank %} role="link" aria-disabled="true"{% else %} href="{{ collection.url }}"{% endif %} class="full-unstyled-link menu_tab_card" aria-label="{{ collection.title }}">
+                            {% comment %} {%- assign image_alt = collection.featured_image.alt | escape -%} {% endcomment %}
+                            {{ collection.featured_image | image_url: width: 60, height: 60 | image_tag: loading: 'lazy', width: 60, height: 60, class: 'img-fluid lazyload' }}
+                          <div class="mega_card_title h3">
+                            {% if settings.show_collection_title == true %}
+                              {{- collection.title | escape -}}
+                            {%- endif -%}
+                          </div>
+                        </a> 
+                      </div>
+                    {%- else -%}
+                      {% assign limit = 4 %}
+                      {%- for i in (1..limit) -%}
+                        <div class="grid__item collection-list__item menu_tab_card{% if settings.animations_reveal_on_scroll %} c-scroll-trigger animate--slide-in{% endif %}"  {{ block.shopify_attributes }}>
+                          {%- liquid
+                            assign placeholder_image_index = forloop.index0 | modulo: 3 | plus: 1
+                            assign placeholder_image = 'collection-apparel-' | append: placeholder_image_index
+                          -%}
+                          {%- if placeholder_image -%}
+                            {{ placeholder_image | placeholder_svg_tag: 'placeholder-svg' }}
+                          {%- else -%}
+                            {{ 'product-apparel-2' | placeholder_svg_tag: 'placeholder-svg' }}
+                          {%- endif -%}
+                          <div class="mega_card_title h3">
+                            {{ 'onboarding.collection_title' | t }}
+                          </div>
+                        </div>
+                      {%- endfor -%}
+                    {%- endfor -%}
+                  </div>
+                </div>
+              {%- endif -%}
+            </div>
+            <div class="tab-content2 mega_content">
+              {%- if block.settings.tab1 != blank -%}
+                <div id="{{ block.id }}-1" class="tab-banner1 tab-pane fade active" tabindex="-1">
+                  <div class="sbnr-{{ block.id }} banner--{{ block.settings.image_ratio1 }}">
+                    {% if block.settings.bnrtext_link1 != blank %}
+                      <a class="full-image-link" href="{{ block.settings.bnrtext_link1 }}" aria-label="{{ 'accessibility.full_link' | t }}"></a>
+                    {% endif %}
+                    <div class="global-media-settings wbmenugllazy{% if block.settings.bnrimg1 == blank %} wbimg_placeholder{% endif %} media media--transparent media--{{ block.settings.image_ratio }} media--hover-effect" {% if block.settings.image_ratio1 == 'adapt' and block.settings.bnrimg1 != blank %} style="padding-bottom: {{ 1 | divided_by: block.settings.bnrimg1.aspect_ratio | times: 100 }}%;"{% endif %}>
+                      {% if block.settings.bnrimg1 != blank %}
+                        {%- assign height = block.settings.bnrimg1.width | divided_by: block.settings.bnrimg1.aspect_ratio | round -%}
+                        {{ block.settings.bnrimg1 | image_url: width: 2000 | image_tag: 
+                        loading: 'lazy',
+                        height: height,
+                        sizes: "100vw",
+                        widths: '375, 550, 750, 1100, 1500, 1780, 2000, 3000, 3840' }}
+                      {% else %}
+                        {%- assign placeholder_slide = forloop.index | modulo: 2 -%}
+                        {%- if placeholder_slide == 1 -%}
+                        {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                        {%- else -%}
+                        {{ 'hero-apparel-2' | placeholder_svg_tag: 'placeholder-svg' }}
+                        {%- endif -%}
+                      {% endif %}   
+                      <div class="wbmegatab_txt">
+                        {% if block.settings.bnrtext1 != blank %}
+                          <h2>{{ block.settings.bnrtext1 }}</h2>
+                        {% endif %}
+                      </div>               
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+              {%- if block.settings.tab2 != blank -%}
+                <div id="{{ block.id }}-2" class="tab-banner2 tab-pane fade {% if block.settings.tab1 == blank %}active{% endif %}" tabindex="-1">
+                  <div class="sbnr-{{ block.id }} banner--{{ block.settings.image_ratio1 }}">
+                    {% if block.settings.bnrtext_link2 != blank %}
+                      <a class="full-image-link" href="{{ block.settings.bnrtext_link2 }}" aria-label="{{ 'accessibility.full_link' | t }}"></a>
+                    {% endif %}
+                    <div class="global-media-settings wbmenugllazy{% if block.settings.bnrimg2 == blank %} wbimg_placeholder{% endif %} media media--transparent media--{{ block.settings.image_ratio }} media--hover-effect" {% if block.settings.image_ratio1 == 'adapt' and block.settings.bnrimg2 != blank %} style="padding-bottom: {{ 1 | divided_by: block.settings.bnrimg2.aspect_ratio | times: 100 }}%;"{% endif %}>
+                      {% if block.settings.bnrimg2 %}
+                        {%- assign height = block.settings.bnrimg2.width | divided_by: block.settings.bnrimg2.aspect_ratio | round -%}
+                        {{ block.settings.bnrimg2 | image_url: width: 2000 | image_tag: 
+                        loading: 'lazy',
+                        height: height,
+                        sizes: "100vw",
+                        widths: '375, 550, 750, 1100, 1500, 1780, 2000, 3000, 3840' }}
+                      {% else %}
+
+                        {%- assign placeholder_slide = forloop.index | modulo: 2 -%}
+                        {%- if placeholder_slide == 1 -%}
+                        {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                        {%- else -%}
+                        {{ 'hero-apparel-2' | placeholder_svg_tag: 'placeholder-svg' }}
+                        {%- endif -%}
+                      {% endif %}    
+                      <div class="wbmegatab_txt">
+                        {% if block.settings.bnrtext2 != blank %}
+                          <h2>{{ block.settings.bnrtext2 }}</h2>
+                        {% endif %}
+                      </div>              
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+              {%- if block.settings.tab3 != blank -%}
+                <div id="{{ block.id }}-3" class="tab-banner3 tab-pane fade {% if block.settings.tab1 == blank and block.settings.tab2 == blank %}active{% endif %}" tabindex="-1">
+                  <div class="sbnr-{{ block.id }} banner--{{ block.settings.image_ratio1 }}">
+                    {% if block.settings.bnrtext_link3 != blank %}
+                      <a class="full-image-link" href="{{ block.settings.bnrtext_link3 }}" aria-label="{{ 'accessibility.full_link' | t }}"></a>
+                    {% endif %}
+                    <div class="global-media-settings wbmenugllazy{% if block.settings.bnrimg3 == blank %} wbimg_placeholder{% endif %} media media--transparent media--{{ block.settings.image_ratio }} media--hover-effect" {% if block.settings.image_ratio1 == 'adapt' and block.settings.bnrimg3 != blank %} style="padding-bottom: {{ 1 | divided_by: block.settings.bnrimg3.aspect_ratio | times: 100 }}%;"{% endif %}>
+                      {% if block.settings.bnrimg3 %}
+                        {%- assign height = block.settings.bnrimg3.width | divided_by: block.settings.bnrimg3.aspect_ratio | round -%}
+                        {{ block.settings.bnrimg3 | image_url: width: 2000 | image_tag: 
+                        loading: 'lazy',
+                        height: height,
+                        sizes: "100vw",
+                        widths: '375, 550, 750, 1100, 1500, 1780, 2000, 3000, 3840' }}
+                      {% else %}
+
+                        {%- assign placeholder_slide = forloop.index | modulo: 2 -%}
+                        {%- if placeholder_slide == 1 -%}
+                        {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                        {%- else -%}
+                        {{ 'hero-apparel-2' | placeholder_svg_tag: 'placeholder-svg' }}
+                        {%- endif -%}
+                      {% endif %}   
+                      <div class="wbmegatab_txt">
+                        {% if block.settings.bnrtext3 != blank %}
+                          <h2>{{ block.settings.bnrtext3 }}</h2>
+                        {% endif %}
+                      </div>               
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+              {%- if block.settings.tab4 != blank -%}
+                <div id="{{ block.id }}-4" class="tab-banner4 tab-pane fade {% if block.settings.tab1 == blank and block.settings.tab2 == blank and block.settings.tab3 == blank %}active{% endif %}" tabindex="-1">
+                  <div class="sbnr-{{ block.id }} banner--{{ block.settings.image_ratio1 }}">
+                    {% if block.settings.bnrtext_link4 != blank %}
+                      <a class="full-image-link" href="{{ block.settings.bnrtext_link4 }}" aria-label="{{ 'accessibility.full_link' | t }}"></a>
+                    {% endif %}
+                    <div class="global-media-settings wbmenugllazy{% if block.settings.bnrimg4 == blank %} wbimg_placeholder{% endif %} media media--transparent media--{{ block.settings.image_ratio }} media--hover-effect" {% if block.settings.image_ratio1 == 'adapt' and block.settings.bnrimg4 != blank %} style="padding-bottom: {{ 1 | divided_by: block.settings.bnrimg4.aspect_ratio | times: 100 }}%;"{% endif %}>
+                      {% if block.settings.bnrimg4 %}
+                        {%- assign height = block.settings.bnrimg4.width | divided_by: block.settings.bnrimg4.aspect_ratio | round -%}
+                        {{ block.settings.bnrimg4 | image_url: width: 2000 | image_tag: 
+                        loading: 'lazy',
+                        height: height,
+                        sizes: "100vw",
+                        widths: '375, 550, 750, 1100, 1500, 1780, 2000, 3000, 3840' }}
+                      {% else %}
+
+                        {%- assign placeholder_slide = forloop.index | modulo: 2 -%}
+                        {%- if placeholder_slide == 1 -%}
+                        {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                        {%- else -%}
+                        {{ 'hero-apparel-2' | placeholder_svg_tag: 'placeholder-svg' }}
+                        {%- endif -%}
+                      {% endif %}  
+                      <div class="wbmegatab_txt">
+                        {% if block.settings.bnrtext4 != blank %}
+                          <h2>{{ block.settings.bnrtext4 }}</h2>
+                        {% endif %}
+                      </div>                
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+          {%- style -%}
+          .mtab-{{ block.id }} .tab-pane-1 .collection-list__item::before, .mtab-{{ block.id }} span.tab-button.tab_coll_1::before {
+            background: {{ block.settings.activetab_color1 }};
+          }
+          .mtab-{{ block.id }} .tab-pane-2 .collection-list__item::before, .mtab-{{ block.id }} span.tab-button.tab_coll_2::before {
+            background: {{ block.settings.activetab_color2 }};
+          }
+          .mtab-{{ block.id }} .tab-pane-3 .collection-list__item::before, .mtab-{{ block.id }} span.tab-button.tab_coll_3::before {
+            background: {{ block.settings.activetab_color3 }};
+          }
+          .mtab-{{ block.id }} .tab-pane-4 .collection-list__item::before, .mtab-{{ block.id }} span.tab-button.tab_coll_4::before {
+            background: {{ block.settings.activetab_color4 }};
+          }
+          .mtab-{{ block.id }} .tab-banner1 .wbmegatab_txt h2 {
+            color: {{ block.settings.head_txtcolor1 }} !important;
+          }
+          .mtab-{{ block.id }} .tab-banner2 .wbmegatab_txt h2 {
+            color: {{ block.settings.head_txtcolor2 }} !important;
+          }
+          .mtab-{{ block.id }} .tab-banner3 .wbmegatab_txt h2 {
+            color: {{ block.settings.head_txtcolor3 }} !important;
+          }
+          .mtab-{{ block.id }} .tab-banner4 .wbmegatab_txt h2 {
+            color: {{ block.settings.head_txtcolor4 }} !important;
+          }
+
+          {%- endstyle -%}
+          <script>
+            (function () {
+              function initMegaTabs() {
+
+                document.querySelectorAll(".megamenu_tabcoll").forEach((wrapper) => {
+
+                  const tabsWrapper = wrapper.querySelector(".tabs-collapse");
+                  const tabButtons = wrapper.querySelectorAll(".tab-button");
+                  const tabContents = wrapper.querySelectorAll(".tab-pane");
+
+                  if (!tabsWrapper) return;
+
+                  function activateTab(btn) {
+                    const id = btn.getAttribute("data-id");
+                    if (!id) return;
+
+                    const isMobile = window.innerWidth <= 991;
+
+                    tabButtons.forEach((b) => b.classList.remove("active"));
+
+                    btn.classList.add("active");
+
+                    tabContents.forEach((c) => c.classList.remove("active"));
+
+                    const activeContents = wrapper.querySelectorAll("#" + id);
+                    activeContents.forEach((el) => el.classList.add("active"));
+
+                    const backBtn = wrapper.querySelector(".mega-back-btn");
+                    if (backBtn) {
+                      const titleEl = btn.querySelector("h3, a");
+                      const titleText = titleEl ? titleEl.innerText.trim() : "";
+
+                    backBtn.innerHTML = `
+                      ${backBtn.querySelector("svg")?.outerHTML || ""}
+                      <span class="back-text">${titleText}</span>`;
+                    }
+
+                    if (isMobile) {
+                      wrapper.classList.add("mobile-open");
+                    }
+                  }
+
+                  tabsWrapper.addEventListener("click", function (e) {
+                    const btn = e.target.closest(".tab-button");
+                    if (!btn) return;
+                    activateTab(btn);
+                  });
+
+                  tabButtons.forEach((btn) => {
+                    btn.addEventListener("mouseenter", function () {
+                      if (window.innerWidth > 991) {
+                        activateTab(btn);
+                      }
+                    });
+                  });
+
+                  tabsWrapper.addEventListener("keydown", function (e) {
+                    if (e.key === "Enter") {
+                      const btn = e.target.closest(".tab-button");
+                      if (btn) activateTab(btn);
+                    }
+                  });
+
+                  wrapper.querySelectorAll(".mega-back-btn").forEach((backBtn) => {
+                    backBtn.addEventListener("click", function () {
+                      wrapper.classList.remove("mobile-open");
+                    });
+                  });
+                });
+              }
+
+              document.addEventListener("DOMContentLoaded", initMegaTabs);
+              document.addEventListener("shopify:section:load", initMegaTabs);
+            })();
+          </script>
+
+        {% when 'megamenu-blog' %}
+        <div class="wbmgblgtop grid">
+          {%- if block.settings.blog != blank -%}
+            {% for article in blogs[block.settings.blog].articles limit: block.settings.blog_to_show %}
+              <div class="wbhblog">
+                <div class="blog_img">
+                  <a
+                    href="{{ article.url }}"
+                    title="{{ article.title }}"
+                    class="focus-inset">
+                    <img loading="lazy"
+                      class="lazyload img-fluid mx-auto"
+                      srcset="{%- if article.image.src.width >= 375 -%}{{ article.image.src | image_url: width: 375 }} 375w,{%- endif -%}
+                    {%- if article.image.src.width >= 550 -%}{{ article.image.src | image_url: width: 550 }} 550w,{%- endif -%}
+                    {%- if article.image.src.width >= 750 -%}{{ article.image.src | image_url: width: 750 }} 750w,{%- endif -%}
+                    {%- if article.image.src.width >= 1100 -%}{{ article.image.src | image_url: width: 1100 }} 1100w,{%- endif -%}
+                    {%- if article.image.src.width >= 1500 -%}{{ article.image.src | image_url: width: 1500 }} 1500w,{%- endif -%}
+                    {%- if article.image.src.width >= 1780 -%}{{ article.image.src | image_url: width: 1780 }} 1780w,{%- endif -%}
+                    {%- if article.image.src.width >= 2000 -%}{{ article.image.src | image_url: width: 2000 }} 2000w,{%- endif -%}
+                    {%- if article.image.src.width >= 3000 -%}{{ article.image.src | image_url: width: 3000 }} 3000w,{%- endif -%}
+                    {%- if article.image.src.width >= 3840 -%}{{ article.image.src | image_url: width: 3840 }} 3840w,{%- endif -%}
+                    {{ article.image.src | image_url }} {{ article.image.src.width }}w"
+                    src="{{ article.image.src | image_url: width: 1000, crop: 'center' }}"
+                    alt="{{ article.image.alt }}"
+                    width="{{ article.image.src.width }}"
+                    height="{{ article.image.src.height }}">
+                  </a>
+                </div>
+                <div class="blog_info">
+                  <div>
+                    <span>{{ article.author }}</span>
+                    <b>{{ article.published_at | time_tag: format: 'date' }}</b>
+                  </div>
+                  <div class="blog_title">
+                    <a href="{{ article.url }}" class="focus-inset">{{ article.title }}</a>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          {%- else -%}
+          
+            <div class="wbmgblgtop grid">
+              {% assign blog_to_show = block.settings.blog_to_show %}
+              {% for i in (1..blog_to_show) %}
+                  <div class="wbhblog">
+                    <div class="blog_img">
+                      {%- assign placeholder_image_index = forloop.index0 | modulo: 3 | plus: 1 -%}
+                      {%- assign placeholder_image = 'blog-apparel-' | append: placeholder_image_index -%}
+                      <div class="dummysvg" style="width: 100%;">{{ placeholder_image | placeholder_svg_tag: 'placeholder-svg' }}</div>
+                    </div>
+                    <div class="blog_info">
+                      <div class="blog_title">
+                        <a href="#" class="focus-inset">{{ 'onboarding.main_blog_title' | t }} {{ i }}</a>
+                      </div>
+                      <p class="blog_date">
+                        <span class="article_day">{% render 'icon-calendar' %} {{ 'onboarding.main_blog_date' | t }}</span>
+                      </p>
+                    </div>
+                  </div>
+            {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+      {% endcase %}
+    {% endif %}
+  {% endfor %}
+</div>

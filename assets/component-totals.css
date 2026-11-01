@@ -1,0 +1,32 @@
+.totals {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+}
+
+.totals > * {
+  font-size: calc(var(--font-body-scale) * 16px);
+  margin: 0;
+}
+.totals .totals__subtotal,
+.totals > h2 {
+  font-size: calc(var(--font-body-scale) * 16px);
+  font-weight: var(--font-body-weight-bold)
+}
+
+.totals * {
+  line-height: 1;
+}
+
+.totals > * + * {
+  margin-left: 2rem;
+}
+
+.totals__subtotal-value {
+  font-size: calc(var(--font-body-scale) * 18px);
+  font-weight: var(--font-body-weight-bold)
+}
+
+.cart__ctas + .totals {
+  margin-top: 2rem;
+}
